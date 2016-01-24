@@ -4,17 +4,26 @@
 
 #define ENTER_KEY_CODE 0x1C
 
-extern unsigned char keyboard_map[128];
+extern int8_t keyboard_map[128];
 extern void keyboard_handler(void);
 
 #include "idt.h"
 #include "keydef.h"
+
+char stack[128];
+int sptr=0;
+
+void push(char x) {	stack[sptr++] = x; }
+char pop() { return stack[sptr--]; }
+char peek() { return stack[sptr]; }
+void flush() { sptr=0; }
 
 
 void kb_init(void)
 {
 	/* 0xFD is 11111101 - enables only IRQ1 (keyboard)*/
 	write_port(0x21 , 0xFD);
+	for(int i=0;i<128;i++) stack[i] = ' ';
 }
 
 inline void newline(void)
@@ -30,7 +39,7 @@ inline void backspace()
 }
 inline void tab()
 {
-	print("     ");
+	print("	");
 }
 inline void undef_char()
 {
@@ -39,7 +48,7 @@ inline void undef_char()
 
 void keyboard_driver(void)
 {
-	unsigned char status;
+	int8_t status;
 	char keycode;
 
 	/* write EOI */
@@ -49,7 +58,7 @@ void keyboard_driver(void)
 	/* Lowest bit of status will be set if buffer is not empty */
 	if (status & 0x01) {
 		keycode = read_port(KEYBOARD_DATA_PORT);
-		unsigned char key = keyboard_map[(char) keycode];
+		int8_t key = keyboard_map[(char) keycode];
 		if(keycode < 0) return;
 		if(key > 128) return;
 
@@ -58,10 +67,11 @@ void keyboard_driver(void)
 		case '\n': newline(); break;
 		case '\b': backspace(); break;
 		case '\t': tab(); break;
-		case '0': undef_char(); break;
-		default: vram_over();
-			    vram_this(key);
-			    vram_next(this_color);
+		case '0':  undef_char(); break;
+		default: 	 push(key);
+			      vram_over();
+				 vram_this(key);
+				 vram_next(0x07);
 			    break;
 		}
 	}

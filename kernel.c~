@@ -45,6 +45,10 @@ void kmain(void)
 	
 	while(1)
 	{
+		char c = peek();
+		vram_this(c);
+		vram_next(0x07);
+		vram_over();
 	}
 	
 	return;

@@ -27,7 +27,7 @@
 #define RARROW	149
 #define END	150
 
-unsigned char shifted_map[128] =
+int8_t shifted_map[128] =
 {
 	 0,   27, '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', 0,
 	'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', '|',
@@ -35,7 +35,7 @@ unsigned char shifted_map[128] =
 	'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?',
 };
 
-unsigned char keyboard_map[128] =
+int8_t keyboard_map[128] =
 {
     0,  27, '1', '2', '3', '4', '5', '6', '7', '8',	/* 9 */
   '9', '0', '-', '=', '\b',	/* Backspace */

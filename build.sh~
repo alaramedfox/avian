@@ -8,7 +8,7 @@ gcc -m32 -c kernel.c -o obj/kernel.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
 
 echo 'Linking...'
 #gcc -m32 -T linker.ld -o bin/kernel.bin -ffreestanding -O2 -nostdlib obj/boot.o obj/kernel.o -lgcc
-ld -m elf_i386 -T linker.ld -o bin/kernel.bin obj/boot.o obj/kernel.o
+ld -m elf_i386 -T linker.ld -o bin/kernel obj/boot.o obj/kernel.o
 
 echo 'Creating bootable filesystem...'
 cp bin/kernel.bin CD_root/kernel.bin
