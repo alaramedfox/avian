@@ -27,7 +27,7 @@ inline void backspace()
 }
 inline void tab()
 {
-	//stdin_push("     ");
+	stdin_push("     ");
 }
 inline void undef_char()
 {
@@ -36,7 +36,7 @@ inline void undef_char()
 
 void keyboard_driver(void)
 {
-	int8_t status;
+	int8_t status = read_port(KEYBOARD_STATUS_PORT);
 	char keycode;
 	
 	//STDIN_FLAG = 1;
@@ -44,7 +44,6 @@ void keyboard_driver(void)
 	/* write EOI */
 	write_port(0x20, 0x20);
 
-	status = read_port(KEYBOARD_STATUS_PORT);
 	/* Lowest bit of status will be set if buffer is not empty */
 	if (status & 0x01) {
 		keycode = read_port(KEYBOARD_DATA_PORT);

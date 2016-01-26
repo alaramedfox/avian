@@ -18,25 +18,24 @@
 #define CHAR_NEWLINE 0xA				//Define the newline char '\n'
 #define CHAR_TAB	 0x9				//Define the tab char '\t'
 
-#define THIS_COL	vptr%(VRAM_C)		//Current column in VRAM
-#define THIS_ROW	vptr/(VRAM_C)		//Current row in VRAM
+#define THIS_COL	vptr%(VGA_C)		//Current column in VRAM
+#define THIS_ROW	vptr/(VGA_C)		//Current row in VRAM
 
 char *vram = (char*)VRAM_START;		//Access to system video RAM
 int16_t vptr = 0;					//pointer to current vram spot
 color_t this_color = 0x07;			//Register for current color
 
-void move_vptr(unsigned int);			//Safely move the vram pointer.
+void move_vptr(int16_t);				//Safely move the vram pointer.
 
-void print(const char *str);			//Prints a string starting at vpt
+void print(const char str[]);			//Prints a string starting at vpt
 void clear(void);					//Clears the screen
 void move(int,int);					//Moves to 2D location in VRAM
 void newline(void);					//Increment to start of next row
 void setcolor(color_t,color_t);		//Change the screen color
 void scroll(void);					//Scrolling screen support
 void vram_char(char);				//Safely write to vram[vptr]
-void vram_color(color_t);				//Safely write to vram[vptr+1]
-void vram_over();					//Iterate to next char in vram
-void vram_over(){vptr+=2;}
+void vram_color(color_t);			//Safely write to vram[vptr+1]
+
 
 void clear(void)
 {
@@ -54,13 +53,8 @@ void clear(void)
 
 void move(int row, int col)
 {
-	vptr = (col + VGA_C * row)-2;
+	vptr = (col + VGA_C * row)-1;
 	if(vptr >= VRAM_CHARS) { scroll(); }
-}
-void vmove(int v)
-{
-	if(v >= VRAM_LENGTH) { scroll(); vptr = v - VRAM_C; }
-	else { vptr = v; }
 }
 
 void setcolor(color_t fg, color_t bg)
@@ -92,7 +86,7 @@ void scroll(void)
 	move(23,0);
 	for(int i=0;i<80; i++)
 	{
-		vram_over();
+		vptr++;
 		vram_char(' ');
 		vram_color(this_color);
 	}

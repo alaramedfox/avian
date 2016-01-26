@@ -39,16 +39,13 @@ void kmain(void)
 {
 	boot();
 	move(4,0);
-	
-	//const char* blinker = "_";
+	//stdin_clear();
 	while(1)
 	{
 		move(4,0);
-		print(">");
-		//move(4,2);
-		print("(");
-		//print(stdin);
-		print(")");
+		print("> ");
+		print(std_stream); //Command echo
+		print("_ ");
 		//if(STDIN_FLAG == 1) { print("_"); STDIN_FLAG = 0; }
 		
 	}
