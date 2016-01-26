@@ -18,9 +18,9 @@ void pause(int x)
 /* GLOBAL DEFINITIONS */
 
 #include <stdint.h>
+#include <stddef.h>
 
-
-
+#include "stdio.h"
 #include "vbuffer.h"
 #include "keyboard.h"
 
@@ -38,13 +38,19 @@ void boot(void)
 void kmain(void)
 {
 	boot();
-	int offset = 0;
 	move(4,0);
 	
-	unsigned int last_vptr=0;
-	
+	//const char* blinker = "_";
 	while(1)
 	{
+		move(4,0);
+		print(">");
+		//move(4,2);
+		print("(");
+		//print(stdin);
+		print(")");
+		//if(STDIN_FLAG == 1) { print("_"); STDIN_FLAG = 0; }
+		
 	}
 	
 	return;
