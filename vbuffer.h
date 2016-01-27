@@ -21,6 +21,9 @@
 #define THIS_COL	vptr%(VGA_C)		//Current column in VRAM
 #define THIS_ROW	vptr/(VGA_C)		//Current row in VRAM
 
+extern const char HLINE1;
+extern const char HLINE2;
+
 char *vram = (char*)VRAM_START;		//Access to system video RAM
 int16_t vptr = 0;					//pointer to current vram spot
 color_t this_color = 0x07;			//Register for current color
@@ -113,7 +116,15 @@ void print(const char str[])
 	for(int i=0; str[i] != '\0'; i++)
 	{
 		vptr++;
-		vram_char(str[i]);
+		if(str[i] == '\\')	//Handle escape codes
+		{
+			switch(str[i+1])
+			{
+				case '-': vram_char(HLINE1); break;
+				case '=': vram_char(HLINE2); break;
+			}
+			i++;
+		} else { vram_char(str[i]); }
 		vram_color(this_color);
 	}
 	return;

@@ -3,6 +3,9 @@
    All credits where due
 */
 
+const char HLINE1 = 196;
+const char HLINE2 = 206;
+
 #define CTRL 	128
 #define LSHIFT	129
 #define RSHIFT	130

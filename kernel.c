@@ -33,18 +33,24 @@ void pause(int x)
 void boot(void)
 {
 	clear();
+	setcolor_pair(C_WHITE,C_BLUE);
 	move(0,0);
-	print("Booting POPCORN..."); newline();
-	print("  Initializing IRQ..."); newline();
+	for(int i=0;i<80;i++) { print("\\-"); }
+	for(int i=0;i<80*3;i++) { print(" "); }
+	for(int i=0;i<80;i++) { print("\\-"); }
+	move(1,3);
+	print("Welcome to the Popcorn Kernel v1.0"); newline();
+	move(2,5); print("Initializing IRQ...");
 	idt_init();
-	print("  Initializing keyboard driver..."); newline();
+	move(3,5); print("Initializing keyboard driver...");
+	setcolor_pair(C_WHITE,C_BLACK);
 	kb_init();
 }
 
 void kmain(void)
 {
 	boot();
-	move(4,0);
+	move(5,0);
 	//stdin_clear();
 	while(1)
 	{

@@ -57,6 +57,7 @@ char* stdin(int8_t FLAG)
 
 void stdin_clear(void)
 {
+	VUPDATE = true;
 	std_stream[0] = '\0';
 	stdin_size=0;
 }
