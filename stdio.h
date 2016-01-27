@@ -52,7 +52,6 @@ char* stdin(int8_t FLAG)
 		if(counter > 65534*3) { counter = 0; blink = !blink; }
 		counter++;
 	}
-	stdin_clear();
 	return std_stream;
 }
 

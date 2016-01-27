@@ -50,12 +50,16 @@ void kmain(void)
 	boot();
 	move(5,0);
 	//stdin_clear();
+	
+	int test = 4108;
 	while(1)
 	{
 		print("> ");
-		stdin(ECHO);
-		move(THIS_ROW+1,0);
-		
+		char* input = stdin(ECHO);
+		newline();
+		print("Integer test: ");
+		print(itos(test));
+		newline();
 	}
 	
 	return;
