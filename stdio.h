@@ -14,7 +14,7 @@
 extern void i_listen();			//Declare the listener in the ASM file
 extern void i_ignore();			//Declare the un-listener in ASM
 
-int	 	STDIN_FLAG;
+bool	 	STDIN_FLAG=0;			//0 = no update, 1 = update
 
 char 	std_stream[256];		//The input stream buffer
 size_t	stdin_size=0;			//Size of buffer
@@ -26,22 +26,32 @@ char stdin_peek();
 
 char* stdin(int8_t FLAG)
 {
+	VUPDATE = true;	//Flag for repaint initially
 	stdin_clear();
 	int16_t location = vptr;
-	//i_listen();
+	int32_t counter = 0;
+	bool blink = true;
 	while(stdin_peek() != ENTER_KEY_CODE)
 	{
-		move(4,0);
-		print("> ");
-		if(FLAG == ECHO)
+		vmove(location);
+		
+		if(VUPDATE)	//Only update screen if a key was pressed
 		{
-			//vmove(location);
-			
-			print(std_stream); //Command echo
-			print("_ ");
+			switch(FLAG)
+			{
+				case ECHO: print(std_stream); break;
+				case PASSWD: for(int i=0;i<stdin_size;i++)
+					    { print("*"); } break;
+				case NOECHO: /* Implement */	break;
+				default: print(std_stream); 	break;
+			}
+			VUPDATE = false; //De-flag the update flag
 		}
+		vmove(location+stdin_size);
+		blink?print("_ "):print("  ");
+		if(counter > 65534) { counter = 0; blink = !blink; }
+		counter++;
 	}
-	//i_ignore();
 	return std_stream;
 }
 
@@ -53,6 +63,7 @@ void stdin_clear(void)
 
 void stdin_push(char c)
 {
+	VUPDATE = true;
 	if(stdin_size < STD_MAX)			
 	{
 		std_stream[stdin_size] = c;
@@ -67,6 +78,7 @@ void stdin_push(char c)
 
 char stdin_pop(void)
 {
+	VUPDATE = true;
 	if(stdin_size > 0)
 	{
 		stdin_size--;

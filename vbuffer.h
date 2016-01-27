@@ -25,13 +25,16 @@ char *vram = (char*)VRAM_START;		//Access to system video RAM
 int16_t vptr = 0;					//pointer to current vram spot
 color_t this_color = 0x07;			//Register for current color
 
+bool VUPDATE=false;					//Flag to update something
+
 void vmove(int16_t);				//Safely move the vram pointer.
 
 void print(const char str[]);			//Prints a string starting at vpt
 void clear(void);					//Clears the screen
 void move(int,int);					//Moves to 2D location in VRAM
 void newline(void);					//Increment to start of next row
-void setcolor(color_t,color_t);		//Change the screen color
+void setcolor_pair(color_t,color_t);	//Change the screen color: pairs
+void setcolor(color_t);				//Change the screen color: palette
 void scroll(void);					//Scrolling screen support
 void vram_char(char);				//Safely write to vram[vptr]
 void vram_color(color_t);			//Safely write to vram[vptr+1]
@@ -46,7 +49,7 @@ void clear(void)
 		vram_color(palette(C_WHITE,C_BLACK));
 	}
 	
-	/* Reset video pointer to 0 */
+	
 	vptr = 0;
 	return;
 }
@@ -63,9 +66,13 @@ void vmove(int16_t v)
 	else { vptr = v; }
 }
 
-void setcolor(color_t fg, color_t bg)
+void setcolor_pair(color_t fg, color_t bg)
 {
 	this_color = palette(fg,bg);
+}
+void setcolor(color_t color)
+{
+	this_color = color;
 }
 
 /* Safely write to vram without segfault */
@@ -110,5 +117,12 @@ void print(const char str[])
 		vram_color(this_color);
 	}
 	return;
+}
+void printf(color_t color, const char str[])
+{
+	color_t old_color = this_color;
+	setcolor(color);
+	print(str);
+	setcolor(old_color);
 }
 

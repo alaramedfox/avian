@@ -22,6 +22,9 @@ void pause(int x)
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
+
+#include "math.h"
 
 #include "vbuffer.h"
 #include "stdio.h"
@@ -36,7 +39,6 @@ void boot(void)
 	idt_init();
 	print("  Initializing keyboard driver..."); newline();
 	kb_init();
-	//i_ignore();
 }
 
 void kmain(void)
@@ -46,9 +48,8 @@ void kmain(void)
 	//stdin_clear();
 	while(1)
 	{
-		char* str = stdin(ECHO);
-		newline();
-		//if(STDIN_FLAG == 1) { print("_"); STDIN_FLAG = 0; }
+		stdin(ECHO);
+		newline(); 
 		
 	}
 	
