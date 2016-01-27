@@ -9,6 +9,13 @@
 /* Converts an integer into a char array */
 char* itos(int i)
 {
+	bool NEGATIVE_FLAG = false;
+	if(i < 0) 
+	{
+		i = i*-1;
+		NEGATIVE_FLAG = true;
+	}
+	
 	char temp[7];
 	static char str[7];
 	size_t str_size = 0;
@@ -19,6 +26,10 @@ char* itos(int i)
 		i = i/10;
 		str_size++;
 		if(str_size == 6) break;
+	}
+	if(NEGATIVE_FLAG)
+	{
+		temp[str_size++] = '-';
 	}
 	for(size_t j=0; j<str_size; j++)
 	{

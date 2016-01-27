@@ -58,7 +58,7 @@ void kmain(void)
 		char* input = stdin(ECHO);
 		newline();
 		print("Integer test: ");
-		print(itos(test));
+		print(itos(-889));
 		newline();
 	}
 	
