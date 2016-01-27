@@ -40,7 +40,7 @@ char* stdin(int8_t FLAG)
 			switch(FLAG)
 			{
 				case ECHO: print(std_stream); break;
-				case PASSWD: for(int i=0;i<stdin_size;i++)
+				case PASSWD: for(size_t i=0;i<stdin_size;i++)
 					    { print("*"); } break;
 				case NOECHO: /* Implement */	break;
 				default: print(std_stream); 	break;

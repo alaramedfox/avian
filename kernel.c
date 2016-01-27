@@ -35,9 +35,9 @@ void boot(void)
 	clear();
 	setcolor_pair(C_WHITE,C_BLUE);
 	move(0,0);
-	for(int i=0;i<80;i++) { print("\\-"); }
+	for(int i=0;i<80;i++) { print("&h2"); }
 	for(int i=0;i<80*3;i++) { print(" "); }
-	for(int i=0;i<80;i++) { print("\\-"); }
+	for(int i=0;i<80;i++) { print("&h1"); }
 	move(1,3);
 	print("Welcome to the Popcorn Kernel v1.0"); newline();
 	move(2,5); print("Initializing IRQ...");

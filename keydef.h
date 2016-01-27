@@ -4,7 +4,14 @@
 */
 
 const char HLINE1 = 196;
-const char HLINE2 = 206;
+const char HLINE2 = 205;
+const char HLINE3 = 240;
+const char VLINE1 = 179;
+const char VLINE2 = 186;
+const char BLOCK1 = 176;
+const char BLOCK2 = 177;
+const char BLOCK3 = 178;
+const char BLOCK4 = 219;
 
 #define CTRL 	128
 #define LSHIFT	129

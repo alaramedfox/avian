@@ -21,8 +21,9 @@
 #define THIS_COL	vptr%(VGA_C)		//Current column in VRAM
 #define THIS_ROW	vptr/(VGA_C)		//Current row in VRAM
 
-extern const char HLINE1;
-extern const char HLINE2;
+extern const char HLINE1, HLINE2, HLINE3;
+extern const char VLINE1, VLINE2;
+extern const char BLOCK1, BLOCK2, BLOCK3, BLOCK4;
 
 char *vram = (char*)VRAM_START;		//Access to system video RAM
 int16_t vptr = 0;					//pointer to current vram spot
@@ -116,12 +117,18 @@ void print(const char str[])
 	for(int i=0; str[i] != '\0'; i++)
 	{
 		vptr++;
-		if(str[i] == '\\')	//Handle escape codes
+		if(str[i] == '&')	//Handle escape codes
 		{
-			switch(str[i+1])
+			if(str[i+1] == 'h')
 			{
-				case '-': vram_char(HLINE1); break;
-				case '=': vram_char(HLINE2); break;
+				switch(str[i+2])
+				{
+					case '1': vram_char(HLINE1); break;
+					case '2': vram_char(HLINE2); break;
+					case '3': vram_char(HLINE3); break;
+					default: break;
+				}
+				i++;
 			}
 			i++;
 		} else { vram_char(str[i]); }
