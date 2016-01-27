@@ -25,7 +25,7 @@ char *vram = (char*)VRAM_START;		//Access to system video RAM
 int16_t vptr = 0;					//pointer to current vram spot
 color_t this_color = 0x07;			//Register for current color
 
-void move_vptr(int16_t);				//Safely move the vram pointer.
+void vmove(int16_t);				//Safely move the vram pointer.
 
 void print(const char str[]);			//Prints a string starting at vpt
 void clear(void);					//Clears the screen
@@ -55,6 +55,12 @@ void move(int row, int col)
 {
 	vptr = (col + VGA_C * row)-1;
 	if(vptr >= VRAM_CHARS) { scroll(); }
+}
+
+void vmove(int16_t v)
+{
+	if(v >= VRAM_CHARS) { scroll(); vmove(v-VGA_C); }
+	else { vptr = v; }
 }
 
 void setcolor(color_t fg, color_t bg)

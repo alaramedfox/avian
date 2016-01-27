@@ -11,6 +11,8 @@ global	keyboard_handler	;Other keyboard driver (?)
 global 	load_idt			;hardware interrupts
 global 	read_port			;read hardware data
 global 	write_port		;write hardware data
+global	i_listen			;Start listening for interrupts
+global	i_ignore			;Quit listening for interrupts
 
 extern 	kmain	       	;kmain is the C entry point
 extern	keyboard_driver	;Keyboard driver
@@ -20,6 +22,12 @@ start:
 	mov 	esp, stack_space	;set stack pointer
 	call kmain			;Invoke the C kernel
 	hlt		 			;halt the CPU
+	
+i_listen:
+	sti					;Enable interrupts
+	
+i_ignore:
+	cli					;Disable interrupts
 	
 load_idt:
 	mov	edx, [esp + 4]

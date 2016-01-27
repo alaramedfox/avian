@@ -1,9 +1,6 @@
 #define KEYBOARD_DATA_PORT 0x60
 #define KEYBOARD_STATUS_PORT 0x64
 
-
-#define ENTER_KEY_CODE 0x1C
-
 extern int8_t keyboard_map[128];
 extern void keyboard_handler(void);
 
@@ -27,7 +24,7 @@ inline void backspace()
 }
 inline void tab()
 {
-	stdin_push("     ");
+	stdin_push('~');
 }
 inline void undef_char()
 {

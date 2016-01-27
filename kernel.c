@@ -1,6 +1,9 @@
-/*
-*  kernel.c
-*/
+/* 
+ *	Popcorn Kernel
+ *	  File:		kernel.c
+ *	  Purpose:	Main loop, definitions, and primary entry point.
+ *				This is literally the most important file.
+ */
 
 void pause(int x)
 {
@@ -20,8 +23,8 @@ void pause(int x)
 #include <stdint.h>
 #include <stddef.h>
 
-#include "stdio.h"
 #include "vbuffer.h"
+#include "stdio.h"
 #include "keyboard.h"
 
 void boot(void)
@@ -33,6 +36,7 @@ void boot(void)
 	idt_init();
 	print("  Initializing keyboard driver..."); newline();
 	kb_init();
+	//i_ignore();
 }
 
 void kmain(void)
@@ -42,10 +46,8 @@ void kmain(void)
 	//stdin_clear();
 	while(1)
 	{
-		move(4,0);
-		print("> ");
-		print(std_stream); //Command echo
-		print("_ ");
+		char* str = stdin(ECHO);
+		newline();
 		//if(STDIN_FLAG == 1) { print("_"); STDIN_FLAG = 0; }
 		
 	}
