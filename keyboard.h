@@ -13,19 +13,22 @@ void kb_init(void)
 	write_port(0x21 , 0xFD);
 }
 
-inline void newline(void)
+
+inline void enter(void)
 {
-	move(THIS_ROW+1,0);
+	stdin_push('\n');
 }
 
 inline void backspace()
 {
 	stdin_pop();
 }
+
 inline void tab()
 {
-	stdin_push('~');
+	for(int i=0;i<5;i++) stdin_push(' ');
 }
+
 inline void undef_char()
 {
 	stdin_push('?');
@@ -49,7 +52,7 @@ void keyboard_driver(void)
 
 		switch(key)
 		{
-		case '\n': newline(); break;
+		case '\n': enter(); break;
 		case '\b': backspace(); break;
 		case '\t': tab(); break;
 		case '0':  undef_char(); break;

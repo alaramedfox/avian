@@ -53,9 +53,12 @@ void clear(void)
 		vram_color(palette(C_WHITE,C_BLACK));
 	}
 	
-	
 	vptr = 0;
-	return;
+}
+
+void newline(void)
+{
+	move(THIS_ROW+1,0);
 }
 
 void move(int row, int col)

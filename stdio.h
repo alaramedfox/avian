@@ -31,7 +31,7 @@ char* stdin(int8_t FLAG)
 	int16_t location = vptr;
 	int32_t counter = 0;
 	bool blink = true;
-	while(stdin_peek() != ENTER_KEY_CODE)
+	while(stdin_peek() != '\n')
 	{
 		vmove(location);
 		
@@ -52,6 +52,7 @@ char* stdin(int8_t FLAG)
 		if(counter > 65534*3) { counter = 0; blink = !blink; }
 		counter++;
 	}
+	stdin_clear();
 	return std_stream;
 }
 

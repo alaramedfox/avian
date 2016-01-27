@@ -54,7 +54,7 @@ void kmain(void)
 	{
 		print("> ");
 		stdin(ECHO);
-		newline(); 
+		move(THIS_ROW+1,0);
 		
 	}
 	
