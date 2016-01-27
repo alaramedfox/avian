@@ -128,9 +128,30 @@ void print(const char str[])
 					case '3': vram_char(HLINE3); break;
 					default: break;
 				}
+				i++; //Skip forward to ignore the second escaped char
+			}
+			else if(str[i+1] == 'v')
+			{
+				switch(str[i+2])
+				{
+					case '1': vram_char(VLINE1); break;
+					case '2': vram_char(VLINE2); break;
+					default: break;
+				}
 				i++;
 			}
-			i++;
+			else if(str[i+1] == 'b')
+			{
+				switch(str[i+2])
+				{
+					case '1': vram_char(BLOCK1); break;
+					case '2': vram_char(BLOCK2); break;
+					case '3': vram_char(BLOCK3); break;
+					case '4': vram_char(BLOCK4); break;
+				}
+				i++;
+			}
+			i++; //Skip forward to ignore the first escaped char
 		} else { vram_char(str[i]); }
 		vram_color(this_color);
 	}
