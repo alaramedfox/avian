@@ -49,7 +49,7 @@ char* stdin(int8_t FLAG)
 		}
 		vmove(location+stdin_size);
 		blink?print("_ "):print("  ");
-		if(counter > 65534) { counter = 0; blink = !blink; }
+		if(counter > 65534*3) { counter = 0; blink = !blink; }
 		counter++;
 	}
 	return std_stream;
