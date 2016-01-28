@@ -4,10 +4,57 @@
  *	  Purpose:	Main Popcorn command processor
  */
  
+/* Core commands
+		l 	List items in directory
+		x	Execute program
+		t	transfer file from a -> b
+		c	copy file or folder
+		m	make a file, folder, etc
+		!	throw error
+		?	request value
+		=	set value
+		<	get data from stream
+		>	push data to stream
+		q	list system data
+*/
+			
+ 
 /* Declare functions */
 void process_raw_input(const char*);		//Raw string from keyboard
+void lxtcm_list();
+void lxtcm_exec();
+void lxtcm_tansfer();
+void lxtcm_copy();
+void lxtcm_make();
+void lxtcm_error();
+void lxtcm_getval();
+void lxtcm_setval();
+void lxtcm_getstream();
+void lxtcm_pushstream();
+void lxtcm_quantify();
 
 void process_raw_input(const char input[])
 {
-	
+	char cmd = input[0];
+	switch(cmd) {
+		case 'l': lxtcm_list(); break;
+		case 'x': lxtcm_exec(); break;
+		case 't': lxtcm_transfer(); break;
+		default: break;
+	}
+}
+
+void lxtcm_list()
+{
+	print("LXTCM List function");
+}
+
+void lxtcm_exec()
+{
+	print("LXTCM Execute function");
+}
+
+void lxtcm_transfer()
+{
+	print("LXTCM Transfer function");
 }

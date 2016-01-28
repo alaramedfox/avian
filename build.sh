@@ -12,5 +12,5 @@ echo 'Linking...' &&
 ld -m elf_i386 -T linker.ld -o bin/kernel obj/boot.o obj/kernel.o &&
 
 echo 'Running kernel emulator...' &&
-qemu-system-i386 -kernel bin/kernel.bin -no-kvm &&
+qemu-system-i386 -kernel bin/kernel -no-kvm &&
 echo 'Finished.'
