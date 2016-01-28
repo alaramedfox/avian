@@ -20,7 +20,7 @@
 			
 void lxtcm_list()
 {
-	print("LXTCM List function");
+	print("\nLXTCM List function");
 }
 
 void lxtcm_exec()

@@ -122,7 +122,10 @@ void print(const char str[]) {
 	for(int i=0; str[i] != '\0'; i++) {
 		vptr++;
 		
-		if(str[i] == '&') {
+		if(str[i] == '\n') {
+			newline();
+		}
+		else if(str[i] == '&') {
 			if(str[i+1] == 'h') {
 				switch(str[i+2]) {
 					case '1': vram_char(HLINE1); break;
