@@ -13,33 +13,16 @@ void kb_init(void)
 	write_port(0x21 , 0xFD);
 }
 
-
-inline void enter(void)
-{
-	stdin_push('\n');
-}
-
-inline void backspace()
-{
-	stdin_pop();
-}
-
-inline void tab()
-{
-	for(int i=0;i<5;i++) stdin_push(' ');
-}
-
-inline void undef_char()
-{
-	stdin_push('?');
-}
+/* Special character handlidng */
+inline void enter(void) 	{ stdin_push('\n'); }
+inline void backspace() 	{ stdin_pop(); }
+inline void tab() 		{ for(int i=0;i<5;i++) stdin_push(' '); }
+inline void undef_char() { stdin_push('?'); }
 
 void keyboard_driver(void)
 {
 	int8_t status = read_port(KEYBOARD_STATUS_PORT);
 	char keycode;
-	
-	//STDIN_FLAG = 1;
 
 	/* write EOI */
 	write_port(0x20, 0x20);
@@ -52,12 +35,11 @@ void keyboard_driver(void)
 
 		switch(key)
 		{
-		case '\n': enter(); break;
-		case '\b': backspace(); break;
-		case '\t': tab(); break;
-		case '0':  undef_char(); break;
-		default: 	 stdin_push(key);
-			    break;
+			case '\n': enter(); 		break;
+			case '\b': backspace(); 		break;
+			case '\t': tab(); 			break;
+			case '0':  undef_char(); 	break;
+			default: 	 stdin_push(key); 	break;
 		}
 	}
 }

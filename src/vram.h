@@ -81,13 +81,13 @@ inline void setcolor(color_t color)
 }
 
 /* Safely write to vram without segfault */
-inline void vram_char(char value)
+void vram_char(char value)
 {
 	if(vptr >= VRAM_CHARS) { scroll(); }
 	else { vram[vptr*2] = value; }
 }
 
-inline void vram_color(color_t value)
+void vram_color(color_t value)
 {
 	if(vptr >= VRAM_CHARS) { scroll();  }
 	else { vram[vptr*2+1] = value; }

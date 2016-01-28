@@ -3,6 +3,7 @@
  *	  Purpose:	Define all the color codes
  */
  
+/* Define all possible colors in hex */
 #define C_BLACK  	0x0
 #define C_BLUE  	0x1
 #define C_GREEN  	0x2

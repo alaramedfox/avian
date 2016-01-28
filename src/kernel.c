@@ -5,30 +5,20 @@
  *				This is literally the most important file.
  */
 
-void pause(int x)
-{
-	int l=4;
-	for(int i=x; i>0; i--)
-	{
-		for(int j=x; j>0; j--)
-		{
-			volatile int k = j;
-			l += k;
-		}
-	}
-}
-
 /* GLOBAL DEFINITIONS */
 
-#include <stdint.h>
-#include <stddef.h>
-#include <stdbool.h>
+#include <stdint.h>		//Stable integer sizing. int8_t, int16_t, etc
+#include <stddef.h>	
+#include <stdbool.h>	//Boolean support
 
-#include "math.h"
+/* Low-level headers and utilities */
+#include "math.h"		//Math processing and casting
+#include "vram.h"		//Video output and handling
+#include "stdio.h"		//Keyboard input and some string processing
+#include "keyboard.h"	//Keyboard definition and init
 
-#include "vbuffer.h"
-#include "stdio.h"
-#include "keyboard.h"
+/* Mid-level processing */
+#include "command.h"	//Core command library
 
 void boot(void)
 {
@@ -56,9 +46,6 @@ void kmain(void)
 	{
 		print("> ");
 		char* input = stdin(ECHO);
-		newline();
-		print("Integer test: ");
-		print(itos(-889));
 		newline();
 	}
 	
