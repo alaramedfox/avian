@@ -14,10 +14,10 @@ void kb_init(void)
 }
 
 /* Special character handlidng */
-inline void enter(void) 	{ stdin_push('\n'); }
-inline void backspace() 	{ stdin_pop(); }
-inline void tab() 		{ for(int i=0;i<5;i++) stdin_push(' '); }
-inline void undef_char() { stdin_push('?'); }
+void enter() 			{ stdin_push('\n'); }
+void backspace() 		{ stdin_pop(); }
+void tab() 				{ for(int i=0;i<5;i++) stdin_push(' '); }
+void undef_char() 	{ stdin_push('?'); }
 
 void keyboard_driver(void)
 {
@@ -32,14 +32,15 @@ void keyboard_driver(void)
 		keycode = read_port(KEYBOARD_DATA_PORT);
 		char key = keyboard_map[(char) keycode];
 		if(keycode < 0) return;
-
+		if(MEMORY.FLAGS.stdin == false) return; //Ignore input if kernel isn't polling
+		
 		switch(key)
 		{
 			case '\n': enter(); 		break;
 			case '\b': backspace(); 		break;
 			case '\t': tab(); 			break;
 			case '0':  undef_char(); 	break;
-			default: 	 stdin_push(key); 	break;
+			default:   stdin_push(key); 	break;
 		}
 	}
 }

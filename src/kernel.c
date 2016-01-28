@@ -5,10 +5,6 @@
  *				This is the Popcorn start file.
  */
 
-/* GLOBAL DEFINITIONS */
-
-typedef unsigned char string;
-
 #include <stdint.h>		//Stable integer sizing. int8_t, int16_t, etc
 #include <stddef.h>	
 #include <stdbool.h>		//Boolean support
@@ -20,7 +16,7 @@ typedef unsigned char string;
 #include "keyboard.h"	//Keyboard definition and init
 
 /* Mid-level processing */
-#include "command.h"	//Core command library
+#include "command.h"		//Core command library
 
 void boot(void) {
 	clear();
@@ -42,7 +38,7 @@ void kmain(void) {
 	move(6,0);
 	while(1) {
 		print("\n> ");
-		process_raw_input(stdin(ECHO));
+		scan(ECHO);
 	}
 	return;
 }
