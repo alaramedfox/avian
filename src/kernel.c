@@ -14,6 +14,7 @@ typedef unsigned char string;
 #include <stdbool.h>		//Boolean support
 
 /* Low-level headers and utilities */
+#include "memorymap.h"	//Memory mapping and handling
 #include "math.h"			//Math processing and casting
 #include "stdio.h"		//Keyboard input and some string processing
 #include "keyboard.h"	//Keyboard definition and init
@@ -36,12 +37,11 @@ void boot(void) {
 }
 
 void kmain(void) {
+	memorymap_init();
 	boot();
 	move(6,0);
 	while(1) {
-	
-		newline();
-		print("> ");
+		print("\n> ");
 		process_raw_input(stdin(ECHO));
 	}
 	return;
