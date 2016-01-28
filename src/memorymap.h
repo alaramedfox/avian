@@ -20,8 +20,8 @@
 #define THIS_ROW	MEMORY.INDEX.stdout/(VGA_C)			//Current row in VRAM
 
 struct __STREAM {
-	char*		stdout; 						//Access to system video RAM
 	char 		stdin[256];					//The input stream buffer
+	char*		stdout; 						//Access to system video RAM
 };
 
 struct __INDEX {
@@ -34,12 +34,12 @@ struct __GLOBAL {
 };
 
 struct __FLAGS {
-	bool 		stdin;
-	bool 		stdout;
+	bool 		stdin;	//If set, signal to catch input
+	bool 		stdout;	//If set, signal need to repaint
 };
 
 struct __MEMORY {
-	struct __STREAM	STDIO;
+	struct __STREAM	IO;
 	struct __INDEX		INDEX;
 	struct __FLAGS		FLAGS;
 	struct __GLOBAL	GLOBAL;
@@ -49,7 +49,10 @@ struct __MEMORY MEMORY;
 
 void memorymap_init()
 {
-	MEMORY.STDIO.stdout = (char*)0xb8000;
+	MEMORY.IO.stdout = (char*)0xb8000;
 	MEMORY.GLOBAL.color = 0x07;
 	MEMORY.INDEX.stdout = 0;
+	MEMORY.INDEX.stdin = 0;
+	MEMORY.FLAGS.stdin = false;
+	MEMORY.FLAGS.stdout = false;
 }
