@@ -103,7 +103,7 @@ void vram_color(color_t value) {
 
 void scroll(void) {
 	/* Shift every row up one row */
-	for(int i=0; i<VRAM_LENGTH-VRAM_C; i++) {
+	for(int i=0; i<=VRAM_LENGTH-VRAM_C; i++) {
 		vram[i] = vram[i+VRAM_C];
 	}
 	
@@ -114,7 +114,7 @@ void scroll(void) {
 		vram_color(this_color);
 	}
 	/* Set cursor to start of line */
-	move(23,0);
+	move(23,1);
 }
 
 void print(const char str[]) {

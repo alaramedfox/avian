@@ -7,6 +7,8 @@
 
 /* GLOBAL DEFINITIONS */
 
+typedef unsigned char string;
+
 #include <stdint.h>		//Stable integer sizing. int8_t, int16_t, etc
 #include <stddef.h>	
 #include <stdbool.h>		//Boolean support
@@ -37,9 +39,10 @@ void kmain(void) {
 	boot();
 	move(6,0);
 	while(1) {
+	
+		newline();
 		print("> ");
 		process_raw_input(stdin(ECHO));
-		newline();
 	}
 	return;
 }
