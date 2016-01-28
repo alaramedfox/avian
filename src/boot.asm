@@ -25,9 +25,11 @@ start:
 	
 i_listen:
 	sti					;Enable interrupts
+	ret
 	
 i_ignore:
 	cli					;Disable interrupts
+	ret
 	
 load_idt:
 	mov	edx, [esp + 4]
