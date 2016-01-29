@@ -22,7 +22,7 @@ void undef_char() 	{ stdin_push('?'); }
 void keyboard_driver(void)
 {
 	int8_t status = read_port(KEYBOARD_STATUS_PORT);
-	char keycode;
+	int8_t keycode;
 
 	/* write EOI */
 	write_port(0x20, 0x20);

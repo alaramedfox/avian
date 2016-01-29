@@ -11,6 +11,8 @@
 #define	ECHO		2
 #define	PASSWD	3
 
+
+
 #include "colordef.h"						//Color #DEFINEs and functions
  
 extern const char HLINE1, HLINE2, HLINE3,
@@ -19,22 +21,25 @@ extern const char HLINE1, HLINE2, HLINE3,
 
 void vmove(int16_t);							//Safely move the MEMORY.IO.stdout pointer.
 void print(const char str[]);				//Prints a string starting at vpt
-void clear();									//Clears the screen
+char* scan(void);								//Reads and returns stdin content
+void clear(void);								//Clears the screen
 void move(int,int);							//Moves to 2D location in VRAM
 void newline(void);							//Increment to start of next row
 void setcolor_pair(int8_t,int8_t);		//Change the screen color: pairs
 void setcolor(int8_t);						//Change the screen color: palette
 
 /* -- Standard Output -- */
-void stdout_scroll();						//Scrolling screen support
+void stdout_scroll(void);					//Scrolling screen support
 void stdout_char(char);						//Safely write to MEMORY.IO.stdout[MEMORY.INDEX.stdout]
 void stdout_color(int8_t);					//Safely write to MEMORY.IO.stdout[MEMORY.INDEX.stdout+1]
+int16_t stdout_column(void);				//Safely return the current column of the cursor
+int16_t stdout_row(void);					//Safely return the current row of cursor
 
 /* -- Standard Input --  */
-void stdin_clear();							//Flush the input buffer
+void stdin_clear(void);						//Flush the input buffer
 void stdin_push(char);						//Push character to stdin
-char stdin_pop();								//Remove and return last char in stdin
-char stdin_peek();							//Return but do not remove last char
+char stdin_pop(void);						//Remove and return last char in stdin
+char stdin_peek(void);						//Return but do not remove last char
 
 void clear(void) {
 	for(int i=0; i<VRAM_CHARS; i++) {
@@ -54,6 +59,10 @@ void move(int row, int col) {
 	if(MEMORY.INDEX.stdout >= VRAM_CHARS) { stdout_scroll(); }
 }
 
+int16_t stdout_column(void) {
+	
+}
+
 void vmove(int16_t v) {
 	if(v >= VRAM_CHARS) {
 		stdout_scroll(); 
@@ -64,16 +73,16 @@ void vmove(int16_t v) {
 	}
 }
 
-void setcolor_pair(int8_t fg, int8_t bg) {
+void setcolor_pair(const int8_t fg, int8_t bg) {
 	MEMORY.GLOBAL.color = palette(fg,bg);
 }
 
-void setcolor(int8_t color) {
+void setcolor(const int8_t color) {
 	MEMORY.GLOBAL.color = color;
 }
 
 /* Safely write to MEMORY.IO.stdout without segfault */
-void stdout_char(char value) {
+void stdout_char(const char value) {
 	if(MEMORY.INDEX.stdout >= VRAM_CHARS) { 
 		stdout_scroll(); 
 		stdout_char(value); 
@@ -83,7 +92,7 @@ void stdout_char(char value) {
 	}
 }
 
-void stdout_color(int8_t value) {
+void stdout_color(const int8_t value) {
 	if(MEMORY.INDEX.stdout >= VRAM_CHARS) { 
 		stdout_scroll(); 
 		stdout_color(value); 
@@ -118,7 +127,7 @@ void print(const char str[]) {
 			newline();
 		}
 		else if(str[i] == '\t') {
-			tab();
+			/* tab(); <-- Causes eror. Fix. */
 		}
 		else if(str[i] == '&') {
 			if(str[i+1] == 'h') {
@@ -163,7 +172,7 @@ void printf(int8_t color, const char str[]) {
 	setcolor(old_color);								//Revert to the old color
 }
 
-char* scan(int8_t FLAG) {
+char* scan(void) {
 	MEMORY.FLAGS.stdin = true;						//Set flag to listen for input
 	MEMORY.FLAGS.stdout = true;					//Flag for repaint initially
 	stdin_clear();										//Make sure stdin is empty before reading
@@ -175,12 +184,12 @@ char* scan(int8_t FLAG) {
 		vmove(location);								//Move to initial location
 		
 		if(MEMORY.FLAGS.stdout)	{ //Only update screen if a key was pressed
-			switch(FLAG) {
+			switch(MEMORY.GLOBAL.echostate) {
 				case ECHO: 		print(MEMORY.IO.stdin); 							break;
 				case PASSWD: 	for(size_t i=0;i<MEMORY.INDEX.stdin;i++)
 					    			{ print("*"); } 										break;
 				case NOECHO:	/* IMPLEMENT: Do not increment cursor */ 		break;
-				default: print(MEMORY.IO.stdin); 									break;
+				default: 		print(MEMORY.IO.stdin); 							break;
 			}
 			MEMORY.FLAGS.stdout = false; 			//De-flag the update flag
 		}
@@ -196,9 +205,9 @@ char* scan(int8_t FLAG) {
 }
 
 void stdin_clear(void) {
-	MEMORY.FLAGS.stdout = true;
-	MEMORY.IO.stdout[0] = '\0';
-	MEMORY.INDEX.stdin=0;
+	MEMORY.FLAGS.stdout = true;					//Set repaint flag
+	MEMORY.IO.stdout[0] = '\0';					//Set first char in stdout to null
+	MEMORY.INDEX.stdin=0;							//MOve pointer to start of array
 }
 
 void stdin_push(char c) {

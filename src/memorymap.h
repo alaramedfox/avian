@@ -19,27 +19,28 @@
 #define THIS_COL	MEMORY.INDEX.stdout%(VGA_C)			//Current column in VRAM
 #define THIS_ROW	MEMORY.INDEX.stdout/(VGA_C)			//Current row in VRAM
 
-struct __STREAM {
+struct __IO {
 	char 		stdin[256];					//The input stream buffer
 	char*		stdout; 						//Access to system video RAM
 };
 
 struct __INDEX {
-	int16_t	stdout;
-	size_t	stdin;
+	int16_t	stdout;						//Output stream buffer pointer (vptr)
+	size_t	stdin;						//Input stream size
 };
 
 struct __GLOBAL {
 	int8_t	color;
+	int8_t	echostate;					//Whether or not to echo STDIN
 };
 
 struct __FLAGS {
-	bool 		stdin;	//If set, signal to catch input
-	bool 		stdout;	//If set, signal need to repaint
+	bool 		stdin;						//If set, signal to catch input
+	bool 		stdout;						//If set, signal need to repaint
 };
 
 struct __MEMORY {
-	struct __STREAM	IO;
+	struct __IO			IO;
 	struct __INDEX		INDEX;
 	struct __FLAGS		FLAGS;
 	struct __GLOBAL	GLOBAL;
