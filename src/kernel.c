@@ -35,8 +35,11 @@ void boot(void) {
 void kmain(void) {
 	memorymap_init();
 	boot();
+	
+	move(0,0); print("X");
 	move(6,0);
 	while(1) {
+		//newline();
 		print("\n> ");
 		scan();
 	}

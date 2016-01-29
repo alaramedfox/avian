@@ -40,10 +40,11 @@ char stdin_pop(void);						//Remove and return last char in stdin
 char stdin_peek(void);						//Return but do not remove last char
 
 void clear(void) {
+	MEMORY.INDEX.stdout = 0;
+	setcolor(C_TERMINAL);
 	for(int i=0; i<VRAM_CHARS; i++) {
-		MEMORY.INDEX.stdout = i;
 		stdout_char(' ');
-		stdout_color(palette(C_WHITE,C_BLACK));
+		MEMORY.INDEX.stdout++;
 	}
 	MEMORY.INDEX.stdout = 0;
 }
@@ -53,8 +54,10 @@ void newline(void) {
 }
 
 void move(const int8_t row, const int8_t col) {
-	MEMORY.INDEX.stdout = (col + VGA_C * row)-1;
-	if(MEMORY.INDEX.stdout >= VRAM_CHARS) { stdout_scroll(); }
+	if(row > VGA_R || col > VGA_C) return;
+	
+	MEMORY.INDEX.stdout = row * VGA_C + col;
+	if(MEMORY.INDEX.stdout > VRAM_CHARS-1) { stdout_scroll(); }
 }
 
 void vmove(int16_t v) {
@@ -104,22 +107,22 @@ void stdout_scroll(void) {
 	
 	move(23,0);
 	for(int i=0;i<80; i++) {
-		MEMORY.INDEX.stdout++;
 		stdout_char(' ');
 		stdout_color(MEMORY.GLOBAL.color);
+		MEMORY.INDEX.stdout++;
 	}
 	/* Set cursor to start of line */
-	move(23,1);
+	move(23,0);
 }
 
 void print(const char str[]) {
 	/* Write the string to VRAM starting at MEMORY.INDEX.stdout */
 	for(int i=0; str[i] != '\0'; i++) {
-		MEMORY.INDEX.stdout++;
 		
 		/* Ignore (trailing) newline if kernel is listening to the keyboard */
-		if(str[i] == '\n' && MEMORY.FLAGS.stdin == false) {
+		if(str[i] == '\n') {
 			newline();
+			MEMORY.INDEX.stdout--; //Prevent skipping forward in index for these
 		}
 		else if(str[i] == '\t') {
 			/* tab(); <-- Causes eror. Fix. */
@@ -155,7 +158,9 @@ void print(const char str[]) {
 		} else { 
 			stdout_char(str[i]);
 		}
+		
 		stdout_color(MEMORY.GLOBAL.color);
+		MEMORY.INDEX.stdout++;
 	}
 	return;
 }
@@ -203,12 +208,12 @@ char* scan(void) {
 
 void stdin_clear(void) {
 	MEMORY.FLAGS.stdout = true;					//Set repaint flag
-	MEMORY.IO.stdout[0] = '\0';					//Set first char in stdout to null
+	MEMORY.IO.stdin[0] = '\0';					//Set first char in stdout to null
 	MEMORY.INDEX.stdin  = 0;						//Move pointer to start of array
 }
 
 void stdin_push(char c) {
-	MEMORY.FLAGS.stdout = true;
+	MEMORY.FLAGS.stdout = true;				//Set repaint flag
 	if(MEMORY.INDEX.stdin < STD_MAX) {
 		MEMORY.IO.stdin[MEMORY.INDEX.stdin] = c;
 		MEMORY.IO.stdin[MEMORY.INDEX.stdin+1] = '\0';

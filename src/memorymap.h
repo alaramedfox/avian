@@ -55,11 +55,11 @@ struct __MEMORY MEMORY;
 
 void memorymap_init()
 {
-	MEMORY.IO.stdout = (char*)0xb8000;
-	MEMORY.GLOBAL.color = 0x07;
-	MEMORY.INDEX.stdout = 0;
-	MEMORY.INDEX.stdin = 0;
-	MEMORY.FLAGS.stdin = false;
-	MEMORY.FLAGS.stdout = false;
+	MEMORY.IO.stdout 		= (unsigned char*)0xb8000;
+	MEMORY.GLOBAL.color 	= 0x07;
+	MEMORY.INDEX.stdout 	= 0;
+	MEMORY.INDEX.stdin 	= 0;
+	MEMORY.FLAGS.stdin 	= false;
+	MEMORY.FLAGS.stdout 	= false;
 	MEMORY.GLOBAL.echostate = ECHO;
 }
