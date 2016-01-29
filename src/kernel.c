@@ -20,7 +20,7 @@
 
 void boot(void) {
 	clear();
-	setcolor_pair(C_WHITE,C_BLUE);
+	setcolor(C_BLUESCR);
 	move(0,0);
 	for(int i=0;i<80;i++) 	{ print("&h1"); }
 	for(int i=0;i<80*4;i++) { print(" "); }
@@ -29,7 +29,7 @@ void boot(void) {
 	move(2,5); print("Initializing IRQ..."); 			idt_init();
 	move(3,5); print("Initializing keyboard driver..."); 	kb_init();
 	move(4,5); print("Using the LXTCM command enviornment");
-	setcolor_pair(C_WHITE,C_BLACK);
+	setcolor(C_TERMINAL);
 }
 
 void kmain(void) {

@@ -19,6 +19,10 @@
 #define THIS_COL	MEMORY.INDEX.stdout%(VGA_C)			//Current column in VRAM
 #define THIS_ROW	MEMORY.INDEX.stdout/(VGA_C)			//Current row in VRAM
 
+#define	NOECHO	1
+#define	ECHO		2
+#define	PASSWD	3
+
 struct __IO {
 	char 		stdin[256];					//The input stream buffer
 	char*		stdout; 						//Access to system video RAM
@@ -37,6 +41,7 @@ struct __GLOBAL {
 struct __FLAGS {
 	bool 		stdin;						//If set, signal to catch input
 	bool 		stdout;						//If set, signal need to repaint
+	bool		raw;							//If set, any output is not escaped.
 };
 
 struct __MEMORY {
@@ -56,4 +61,5 @@ void memorymap_init()
 	MEMORY.INDEX.stdin = 0;
 	MEMORY.FLAGS.stdin = false;
 	MEMORY.FLAGS.stdout = false;
+	MEMORY.GLOBAL.echostate = ECHO;
 }

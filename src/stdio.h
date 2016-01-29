@@ -7,9 +7,7 @@
 #define STD_MAX	256			//Maximum characters for input 
 #define ENTER_KEY_CODE 0x1C
 
-#define	NOECHO	1
-#define	ECHO		2
-#define	PASSWD	3
+
 
 
 
@@ -23,7 +21,7 @@ void vmove(int16_t);							//Safely move the MEMORY.IO.stdout pointer.
 void print(const char str[]);				//Prints a string starting at vpt
 char* scan(void);								//Reads and returns stdin content
 void clear(void);								//Clears the screen
-void move(int,int);							//Moves to 2D location in VRAM
+void move(int8_t,int8_t);					//Moves to 2D location in VRAM
 void newline(void);							//Increment to start of next row
 void setcolor_pair(int8_t,int8_t);		//Change the screen color: pairs
 void setcolor(int8_t);						//Change the screen color: palette
@@ -54,13 +52,9 @@ void newline(void) {
 	move(THIS_ROW+1,0);
 }
 
-void move(int row, int col) {
+void move(const int8_t row, const int8_t col) {
 	MEMORY.INDEX.stdout = (col + VGA_C * row)-1;
 	if(MEMORY.INDEX.stdout >= VRAM_CHARS) { stdout_scroll(); }
-}
-
-int16_t stdout_column(void) {
-	
 }
 
 void vmove(int16_t v) {
@@ -73,7 +67,7 @@ void vmove(int16_t v) {
 	}
 }
 
-void setcolor_pair(const int8_t fg, int8_t bg) {
+void setcolor_pair(const int8_t fg, const int8_t bg) {
 	MEMORY.GLOBAL.color = palette(fg,bg);
 }
 
@@ -123,7 +117,8 @@ void print(const char str[]) {
 	for(int i=0; str[i] != '\0'; i++) {
 		MEMORY.INDEX.stdout++;
 		
-		if(str[i] == '\n') {
+		/* Ignore (trailing) newline if kernel is listening to the keyboard */
+		if(str[i] == '\n' && MEMORY.FLAGS.stdin == false) {
 			newline();
 		}
 		else if(str[i] == '\t') {
@@ -189,7 +184,7 @@ char* scan(void) {
 				case PASSWD: 	for(size_t i=0;i<MEMORY.INDEX.stdin;i++)
 					    			{ print("*"); } 										break;
 				case NOECHO:	/* IMPLEMENT: Do not increment cursor */ 		break;
-				default: 		print(MEMORY.IO.stdin); 							break;
+				default: 		/* print(MEMORY.IO.stdin); */						break;
 			}
 			MEMORY.FLAGS.stdout = false; 			//De-flag the update flag
 		}
@@ -198,16 +193,18 @@ char* scan(void) {
 		if(counter > 65534*3) { counter = 0; blink = !blink; }
 		++counter;
 	} /* Loop ends when user presses return */
-	stdin_pop(); //Remove trailing newline
+	MEMORY.FLAGS.stdin = false;					//De-flag input polling
+	stdin_pop(); 										//Remove trailing newline
 	vmove(location+MEMORY.INDEX.stdin);
-	print(" "); //erase leftover blinky thing
+	print(" "); 										//erase leftover blinky thing
+	char* input = MEMORY.IO.stdin;
 	return MEMORY.IO.stdin;
 }
 
 void stdin_clear(void) {
 	MEMORY.FLAGS.stdout = true;					//Set repaint flag
 	MEMORY.IO.stdout[0] = '\0';					//Set first char in stdout to null
-	MEMORY.INDEX.stdin=0;							//MOve pointer to start of array
+	MEMORY.INDEX.stdin  = 0;						//Move pointer to start of array
 }
 
 void stdin_push(char c) {
