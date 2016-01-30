@@ -1,7 +1,6 @@
 #define KEYBOARD_DATA_PORT 0x60
 #define KEYBOARD_STATUS_PORT 0x64
 
-extern int8_t keyboard_map[128];
 extern void keyboard_handler(void);
 
 #include "idt.h"
@@ -22,7 +21,8 @@ void undef_char() 	{ stdin_push('?'); }
 void keyboard_driver(void)
 {
 	int8_t status = read_port(KEYBOARD_STATUS_PORT);
-	int8_t keycode;
+	int16_t keycode;
+	char key;
 
 	/* write EOI */
 	write_port(0x20, 0x20);
@@ -30,17 +30,37 @@ void keyboard_driver(void)
 	/* Lowest bit of status will be set if buffer is not empty */
 	if (status & 0x01) {
 		keycode = read_port(KEYBOARD_DATA_PORT);
-		char key = keyboard_map[(char) keycode];
-		if(keycode < 0) return;
-		if(MEMORY.FLAGS.stdin == false) return; //Ignore input if kernel isn't polling
+		//newline();
+		//print(itos(keycode)); 
 		
-		switch(key)
-		{
-			case '\n': enter(); 		break;
-			case '\b': backspace(); 		break;
-			case '\t': tab(); 			break;
-			case '0':  undef_char(); 	break;
-			default:   stdin_push(key); 	break;
+		/* Consider keycodes */
+		if(keycode == LSHIFT_RELEASE_CODE) {
+			MEMORY.FLAGS.shift = false;
 		}
+		else if(keycode == LSHIFT_PRESS_CODE) {
+			MEMORY.FLAGS.shift = true;
+		}
+		else if(keycode > 0) {
+			if(MEMORY.FLAGS.shift) {
+				key = KEYMAP.uppercase[keycode];
+			}
+			else {
+				key = KEYMAP.lowercase[keycode];
+			}
+		
+			switch(key)
+			{
+				case '\n': enter(); 		break;
+				case '\b': backspace(); 		break;
+				case '\t': tab(); 			break;
+				case '0':  undef_char(); 	break;
+			
+				default:   stdin_push(key); 	break;
+			}
+		}
+		else {
+			
+		} 
+		
 	}
 }
