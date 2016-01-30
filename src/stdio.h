@@ -7,10 +7,6 @@
 #define STD_MAX	256			//Maximum characters for input 
 #define ENTER_KEY_CODE 0x1C
 
-
-
-
-
 #include "colordef.h"						//Color #DEFINEs and functions
  
 extern const char HLINE1, HLINE2, HLINE3,
@@ -18,7 +14,7 @@ extern const char HLINE1, HLINE2, HLINE3,
 						BLOCK1, BLOCK2, BLOCK3, BLOCK4;
 
 void vmove(int16_t);							//Safely move the MEMORY.IO.stdout pointer.
-void print(const char str[]);				//Prints a string starting at vpt
+void print(const char str[]);	//Prints a string starting at vpt
 char* scan(void);								//Reads and returns stdin content
 void clear(void);								//Clears the screen
 void move(int8_t,int8_t);					//Moves to 2D location in VRAM
@@ -202,7 +198,6 @@ char* scan(void) {
 	stdin_pop(); 										//Remove trailing newline
 	vmove(location+MEMORY.INDEX.stdin);
 	print(" "); 										//erase leftover blinky thing
-	char* input = MEMORY.IO.stdin;
 	return MEMORY.IO.stdin;
 }
 
