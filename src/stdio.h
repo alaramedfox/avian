@@ -111,7 +111,8 @@ void stdout_scroll(void) {
 	move(23,0);
 }
 
-void print(const char str[]) {
+void print(const char str[]) 
+{
 	/* Write the string to VRAM starting at MEMORY.INDEX.stdout */
 	for(int i=0; str[i] != '\0'; i++) {
 		
@@ -121,7 +122,7 @@ void print(const char str[]) {
 			MEMORY.INDEX.stdout--; //Prevent skipping forward in index for these
 		}
 		else if(str[i] == '\t') {
-			/* tab(); <-- Causes eror. Fix. */
+			/* Don't know how to handle tabs yet */
 		}
 		else if(str[i] == '&') {
 			if(str[i+1] == 'h') {
@@ -189,14 +190,14 @@ char* scan(void) {
 			}
 			MEMORY.FLAGS.stdout = false; 			//De-flag the update flag
 		}
-		vmove(location+MEMORY.INDEX.stdin); 	//Move to end of string
+		vmove(location + MEMORY.INDEX.stdin); 	//Move to current cursor
 		blink?print("_ "):print("  "); 			//Print the blinking cursor guy
 		if(counter > 65534*3) { counter = 0; blink = !blink; }
 		++counter;
 	} /* Loop ends when user presses return */
 	MEMORY.FLAGS.stdin = false;					//De-flag input polling
 	stdin_pop(); 										//Remove trailing newline
-	vmove(location+MEMORY.INDEX.stdin);
+	vmove(location + MEMORY.INDEX.stdin);		//Move to CURRENT cursor
 	print(" "); 										//erase leftover blinky thing
 	return MEMORY.IO.stdin;
 }

@@ -36,6 +36,7 @@ struct __INDEX {
 struct __GLOBAL {
 	int8_t	color;
 	int8_t	echostate;					//Whether or not to echo STDIN
+	int8_t	tabsize;
 };
 
 struct __FLAGS {
@@ -63,4 +64,5 @@ void memorymap_init()
 	MEMORY.FLAGS.stdin 	= false;
 	MEMORY.FLAGS.stdout 	= false;
 	MEMORY.GLOBAL.echostate = ECHO;
+	MEMORY.GLOBAL.tabsize = 4;
 }

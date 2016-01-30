@@ -23,7 +23,6 @@ void keyboard_driver(void)
 	int8_t status = read_port(KEYBOARD_STATUS_PORT);
 	int16_t keycode;
 	char key;
-
 	/* write EOI */
 	write_port(0x20, 0x20);
 
@@ -50,9 +49,8 @@ void keyboard_driver(void)
 		
 			switch(key)
 			{
-				case '\n': enter(); 		break;
-				case '\b': backspace(); 		break;
-				case '\t': tab(); 			break;
+				case '\n': enter(); 		   break;
+				case '\b': backspace(); 	break;
 				case '0':  undef_char(); 	break;
 			
 				default:   stdin_push(key); 	break;

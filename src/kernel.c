@@ -18,7 +18,8 @@
 /* Mid-level processing */
 #include "command.h"		//Core command library
 
-void boot(void) {
+void boot(void) 
+{
 	clear();
 	setcolor(C_BLUESCR);
 	move(0,0);
@@ -32,7 +33,8 @@ void boot(void) {
 	setcolor(C_TERMINAL);
 }
 
-void kmain(void) {
+void kmain(void) 
+{
 	memorymap_init();
 	boot();
 	
