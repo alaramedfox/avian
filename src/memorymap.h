@@ -42,6 +42,7 @@ struct __FLAGS {
 	bool 		stdin;						//If set, signal to catch input
 	bool 		stdout;						//If set, signal need to repaint
 	bool		raw;							//If set, any output is not escaped.
+	bool		shift;						//Starts at value: has cooldown
 };
 
 struct __MEMORY {
@@ -55,7 +56,7 @@ struct __MEMORY MEMORY;
 
 void memorymap_init()
 {
-	MEMORY.IO.stdout 		= (unsigned char*)0xb8000;
+	MEMORY.IO.stdout 		= (char*)0xb8000;
 	MEMORY.GLOBAL.color 	= 0x07;
 	MEMORY.INDEX.stdout 	= 0;
 	MEMORY.INDEX.stdin 	= 0;
