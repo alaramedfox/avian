@@ -35,11 +35,28 @@ void stdin_push(char);						//Push character to stdin
 char stdin_pop(void);						//Remove and return last char in stdin
 char stdin_peek(void);						//Return but do not remove last char
 
+bool string_compare(const char a[], const char b[])
+{
+   int c=0;
+
+   while(a[c]==b[c])
+   {
+     if(a[c]=='\0'||b[c]=='\0')
+     break;
+     c++;
+   }
+   if(a[c]=='\0' && b[c]=='\0')
+    	return 1;
+   else
+		return 0;
+}
+
 void clear(void) {
 	MEMORY.INDEX.stdout = 0;
 	setcolor(C_TERMINAL);
 	for(int i=0; i<VRAM_CHARS; i++) {
 		stdout_char(' ');
+		stdout_color(C_TERMINAL);
 		MEMORY.INDEX.stdout++;
 	}
 	MEMORY.INDEX.stdout = 0;

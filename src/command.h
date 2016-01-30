@@ -39,12 +39,9 @@ void process_raw_input(const char*);		//Raw string from keyboard
 
 void process_raw_input(const char input[])
 {
-	char cmd = input[0];
-	switch(cmd) {
-		case 'l': lxtcm_list(); break;
-		case 'x': lxtcm_exec(); break;
-		case 't': lxtcm_transfer(); break;
-		default: break;
+	if(string_compare(input,"clear"))
+	{
+		clear();
 	}
 }
 

@@ -43,7 +43,7 @@ void kmain(void)
 	while(1) {
 		//newline();
 		print("\n> ");
-		scan();
+		process_raw_input(scan());
 	}
 	return;
 }
