@@ -7,7 +7,7 @@
 #define sqr(x)		x*x
 
 /* Converts an integer into a char array */
-char* itos(int i)
+char* itos(int32_t i)
 {
 	bool NEGATIVE_FLAG = false;
 	if(i < 0) 
