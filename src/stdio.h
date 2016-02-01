@@ -14,7 +14,7 @@ extern const char HLINE1, HLINE2, HLINE3,
 						BLOCK1, BLOCK2, BLOCK3, BLOCK4;
 
 void vmove(int16_t);							//Safely move the MEMORY.IO.stdout pointer.
-void print(const char str[]);	//Prints a string starting at vpt
+void print(const char str[]);				//Prints a string starting at vpt
 char* scan(void);								//Reads and returns stdin content
 void clear(void);								//Clears the screen
 void move(int8_t,int8_t);					//Moves to 2D location in VRAM
@@ -35,21 +35,7 @@ void stdin_push(char);						//Push character to stdin
 char stdin_pop(void);						//Remove and return last char in stdin
 char stdin_peek(void);						//Return but do not remove last char
 
-bool string_compare(const char a[], const char b[])
-{
-   int c=0;
 
-   while(a[c]==b[c])
-   {
-     if(a[c]=='\0'||b[c]=='\0')
-     break;
-     c++;
-   }
-   if(a[c]=='\0' && b[c]=='\0')
-    	return 1;
-   else
-		return 0;
-}
 
 void clear(void) {
 	MEMORY.INDEX.stdout = 0;
@@ -221,12 +207,12 @@ char* scan(void) {
 
 void stdin_clear(void) {
 	MEMORY.FLAGS.stdout = true;					//Set repaint flag
-	MEMORY.IO.stdin[0] = '\0';					//Set first char in stdout to null
+	MEMORY.IO.stdin[0] = '\0';						//Set first char in stdout to null
 	MEMORY.INDEX.stdin  = 0;						//Move pointer to start of array
 }
 
 void stdin_push(char c) {
-	MEMORY.FLAGS.stdout = true;				//Set repaint flag
+	MEMORY.FLAGS.stdout = true;					//Set repaint flag
 	if(MEMORY.INDEX.stdin < STD_MAX) {
 		MEMORY.IO.stdin[MEMORY.INDEX.stdin] = c;
 		MEMORY.IO.stdin[MEMORY.INDEX.stdin+1] = '\0';

@@ -34,16 +34,18 @@ struct __INDEX {
 };
 
 struct __GLOBAL {
-	int8_t	color;
+	int8_t	color;						//Global standard background color
 	int8_t	echostate;					//Whether or not to echo STDIN
-	int8_t	tabsize;
+	int8_t	tabsize;						//Size of the tabs
 };
 
 struct __FLAGS {
 	bool 		stdin;						//If set, signal to catch input
 	bool 		stdout;						//If set, signal need to repaint
 	bool		raw;							//If set, any output is not escaped.
-	bool		shift;						//Starts at value: has cooldown
+	bool		shift;						//If set, flag for the uppercase charset
+	bool		caps;							//If set, permanant flag for uppercase
+	bool		debugmode;					//For debugging stuff
 };
 
 struct __MEMORY {

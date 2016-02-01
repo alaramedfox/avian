@@ -19,6 +19,11 @@ enum __EXTENDEDKEYS
 #define LSHIFT_PRESS_CODE		42
 #define LSHIFT_RELEASE_CODE	-86 //191
 
+#define RSHIFT_PRESS_CODE		54
+#define RSHIFT_RELEASE_CODE	-74
+
+#define CAPS_PRESS_CODE		11
+
 struct __KEYMAP 
 {
 	unsigned char lowercase[93];

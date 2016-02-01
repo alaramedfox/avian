@@ -10,6 +10,7 @@
 #include <stdbool.h>		//Boolean support
 
 /* Low-level headers and utilities */
+#include "string.h"
 #include "memorymap.h"	//Memory mapping and handling
 #include "math.h"			//Math processing and casting
 #include "stdio.h"		//Keyboard input and some string processing
@@ -37,8 +38,6 @@ void kmain(void)
 {
 	memorymap_init();
 	boot();
-	
-	move(0,0); print("X");
 	move(6,0);
 	while(1) {
 		//newline();

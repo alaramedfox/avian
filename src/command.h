@@ -25,12 +25,12 @@ void lxtcm_list()
 
 void lxtcm_exec()
 {
-	print("LXTCM Execute function");
+	print("\nLXTCM Execute function");
 }
 
 void lxtcm_transfer()
 {
-	print("LXTCM Transfer function");
+	print("\nLXTCM Transfer function");
 }			
 
 /* Declare functions */
@@ -43,6 +43,10 @@ void process_raw_input(const char input[])
 	{
 		clear();
 	}
+	//else if(string_compare(get_word(input,0),"l"))
+	//{
+		
+	//}
 }
 
 

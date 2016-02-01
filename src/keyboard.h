@@ -29,15 +29,20 @@ void keyboard_driver(void)
 	/* Lowest bit of status will be set if buffer is not empty */
 	if (status & 0x01) {
 		keycode = read_port(KEYBOARD_DATA_PORT);
-		//newline();
-		//print(itos(keycode)); 
+		if(MEMORY.FLAGS.debugmode) {
+			newline();
+			print(itos(keycode)); 
+		}
 		
 		/* Consider keycodes */
-		if(keycode == LSHIFT_RELEASE_CODE) {
+		if(keycode == LSHIFT_RELEASE_CODE || keycode == RSHIFT_RELEASE_CODE) {
 			MEMORY.FLAGS.shift = false;
 		}
-		else if(keycode == LSHIFT_PRESS_CODE) {
+		else if(keycode == LSHIFT_PRESS_CODE || keycode == RSHIFT_PRESS_CODE) {
 			MEMORY.FLAGS.shift = true;
+		}
+		else if(keycode == CAPS_PRESS_CODE) {
+			MEMORY.FLAGS.caps = !MEMORY.FLAGS.caps;
 		}
 		else if(keycode > 0) {
 			if(MEMORY.FLAGS.shift) {
