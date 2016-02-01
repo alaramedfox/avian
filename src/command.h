@@ -17,6 +17,11 @@
 		>	push data to stream
 		q	list system data
 */
+
+void lxtcm_unknown()
+{
+	print("\nLXTCM: Unreconized command");
+}
 			
 void lxtcm_list()
 {
@@ -39,14 +44,19 @@ void process_raw_input(const char*);		//Raw string from keyboard
 
 void process_raw_input(const char input[])
 {
-	if(string_compare(input,"clear"))
-	{
+	char *first_word = strword(input,0);
+	print(" (");
+	print(first_word);
+	print(")");
+	if(strcomp(first_word,"clear")) {
 		clear();
 	}
-	//else if(string_compare(get_word(input,0),"l"))
-	//{
-		
-	//}
+	else if(strcomp(first_word,"list")) {
+		lxtcm_list();
+	}
+	else {
+		lxtcm_unknown();
+	}
 }
 
 

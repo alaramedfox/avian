@@ -1,0 +1,155 @@
+# Generic GRUB boot menu, for floppy disk
+# Author: Christian Steinruecken
+# 
+color green/black black/light-gray
+
+title Boot hda  (Hard disk 1, MBR)
+    root (hd0)
+    chainloader +1
+
+title Boot hda1 (Hard disk 1, Primary Partition 1)
+    root (hd0,0)
+    chainloader +1
+
+title Boot hda2 (Hard disk 1, Primary Partition 2)
+    root (hd0,1)
+    chainloader +1
+
+title Boot hda3 (Hard disk 1, Primary Partition 3)
+    root (hd0,2)
+    chainloader +1
+
+title Boot hda4 (Hard disk 1, Primary Partition 4)
+    root (hd0,3)
+    chainloader +1
+
+title Boot hda5 (Hard disk 1, Extended Partition 5)
+    root (hd0,5)
+    chainloader +1
+
+title Boot hda6 (Hard disk 1, Extended Partition 6)
+    root (hd0,6)
+    chainloader +1
+
+title Boot hda7 (Hard disk 1, Extended Partition 7)
+    root (hd0,7)
+    chainloader +1
+
+
+title Boot hdb  (Hard disk 2, MBR)
+    root (hd1)
+    chainloader +1
+
+title Boot hdb1 (Hard disk 2, Primary Partition 1)
+    root (hd1,0)
+    chainloader +1
+
+title Boot hdb2 (Hard disk 2, Primary Partition 2)
+    root (hd1,1)
+    chainloader +1
+
+title Boot hdb3 (Hard disk 2, Primary Partition 3)
+    root (hd1,2)
+    chainloader +1
+
+title Boot hdb4 (Hard disk 2, Primary Partition 4)
+    root (hd1,3)
+    chainloader +1
+
+title Boot hdb5 (Hard disk 2, Extended Partition 5)
+    root (hd1,5)
+    chainloader +1
+
+title Boot hdb6 (Hard disk 2, Extended Partition 6)
+    root (hd1,6)
+    chainloader +1
+
+title Boot hdb7 (Hard disk 2, Extended Partition 7)
+    root (hd1,7)
+    chainloader +1
+
+
+title Boot fd0 (Floppy A)
+    root (fd0)
+    chainloader +1
+
+title Boot fd1 (Floppy B)
+    root (fd1)
+    chainloader +1
+
+title fd0 <-> fd1  (Swap floppy drives)
+    map (fd0) (fd1)
+    map (fd1) (fd0)
+    pause Floppy drives are swapped now!  Press any key to continue.
+
+title hd0 <-> hd1  (Swap 1st and 2nd hard drive)
+    map (hd0) (hd1)
+    map (hd1) (hd0)
+    pause 1st and 2nd hard drives are swapped now!  Press any key to continue.
+
+title Memory Test
+    kernel (fd0)/boot/memtest.bin
+
+title Set QWERTY keyboard layout
+    setkey y y
+    setkey z z
+    setkey w w
+    setkey a a
+    setkey q q
+    setkey m m
+    setkey comma comma
+    setkey period period
+    setkey semicolon semicolon
+    setkey colon colon
+
+title Set QWERTZ keyboard layout
+    setkey z y
+    setkey y z
+    setkey w w
+    setkey a a
+    setkey q q
+    setkey m m
+    setkey comma comma
+    setkey period period
+    setkey semicolon semicolon
+    setkey colon colon
+
+title Set AZERTY keyboard layout
+    setkey a q
+    setkey q a
+    setkey w z
+    setkey z w
+    setkey y y
+    setkey m comma
+    setkey comma semicolon
+    setkey period colon
+    setkey semicolon m
+
+title Change colours: grey
+    color black/light-gray white/blue
+title Change colours: black
+    color green/black black/light-gray
+title Change colours: blue
+    color white/blue yellow/magenta
+title Change colours: cyan
+    color black/cyan yellow/blue
+
+title Install GRUB on floppy A (fd0)
+    pause Insert a floppy disk into drive A, and press any key.   
+    root (fd0)
+    setup (fd0)
+    pause Operation complete.
+
+title Install GRUB on floppy B (fd1)
+    pause Insert a floppy disk into drive B, and press any key.   
+    root (fd1)
+    setup (fd1)
+    pause Operation complete.
+
+
+title Reboot
+    reboot
+
+title Halt / Power
+    halt
+
