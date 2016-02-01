@@ -18,25 +18,13 @@
 		q	list system data
 */
 
-void lxtcm_unknown()
-{
-	print("\nLXTCM: Unreconized command");
-}
-			
-void lxtcm_list()
-{
-	print("\nLXTCM List function");
-}
 
-void lxtcm_exec()
-{
-	print("\nLXTCM Execute function");
-}
 
-void lxtcm_transfer()
-{
-	print("\nLXTCM Transfer function");
-}			
+#include "lxtcm/list.h"			
+#include "lxtcm/exec.h"
+#include "lxtcm/transfer.h"
+#include "lxtcm/help.h"
+
 
 /* Declare functions */
 void process_raw_input(const char*);		//Raw string from keyboard
@@ -45,17 +33,11 @@ void process_raw_input(const char*);		//Raw string from keyboard
 void process_raw_input(const char input[])
 {
 	char *first_word = strword(input,0);
-	print(" (");
-	print(first_word);
-	print(")");
-	if(strcomp(first_word,"clear")) {
-		clear();
-	}
-	else if(strcomp(first_word,"list")) {
-		lxtcm_list();
-	}
+	if(strcomp(first_word,"clear")) 		{ clear(); }
+	else if(strcomp(first_word,"l")) 	{ lxtcm_list(input); }
+	else if(strcomp(first_word,"help")) { lxtcm_help_basic(); }
 	else {
-		lxtcm_unknown();
+		lxtcm_help_unknown(first_word);
 	}
 }
 

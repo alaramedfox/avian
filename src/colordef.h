@@ -24,6 +24,7 @@
 #define C_TERMINAL	0x07
 #define C_BLUESCR		0x9F
 #define C_CRITICAL	0x4F
+#define C_INV			0x70
 
 typedef unsigned char color_t;
 

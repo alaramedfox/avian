@@ -185,7 +185,7 @@ char* scan(void) {
 		
 		if(MEMORY.FLAGS.stdout)	{ //Only update screen if a key was pressed
 			switch(MEMORY.GLOBAL.echostate) {
-				case ECHO: 		print(MEMORY.IO.stdin); 							break;
+				case ECHO: 		print(MEMORY.IO.stdin); print("     ");		break;
 				case PASSWD: 	for(size_t i=0;i<MEMORY.INDEX.stdin;i++)
 					    			{ print("*"); } 										break;
 				case NOECHO:	/* IMPLEMENT: Do not increment cursor */ 		break;
@@ -194,8 +194,8 @@ char* scan(void) {
 			MEMORY.FLAGS.stdout = false; 			//De-flag the update flag
 		}
 		vmove(location + MEMORY.INDEX.stdin); 	//Move to current cursor
-		blink?print("_ "):print("  "); 			//Print the blinking cursor guy
-		if(counter > 65534*3) { counter = 0; blink = !blink; }
+		blink?print("_"):print(" "); 			//Print the blinking cursor guy
+		if(counter > 325768) { counter = 0; blink = !blink; }
 		++counter;
 	} /* Loop ends when user presses return */
 	MEMORY.FLAGS.stdin = false;					//De-flag input polling
