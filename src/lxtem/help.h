@@ -1,12 +1,12 @@
 /*
  *		Popcorn Kernel
- *		LXTCM Shell files
+ *		LXTEM Shell files
  *			help.h -- Help documentation
  */
  
-void lxtcm_help_basic()
+void lxtem_help_basic()
 {
-	print("\n-- LXTCM shell version 0.1 --\n");
+	print("\n-- LXTEM shell version 0.1 --\n");
 	print("  Basic commands:\n");
 	print("  l - list items in current directory\n");
 	print("  x - execute installed binary\n");
@@ -17,9 +17,9 @@ void lxtcm_help_basic()
 	print("   (e.g.) 'l :rh' to restrict listing to only hidden objects.\n");
 }
 
-void lxtcm_help_unknown(const char err[])
+void lxtem_help_unknown(const char err[])
 {
-	print("\nLXTCM: Unreconized command: '");
+	print("\nLXTEM: Unreconized command: '");
 	print(err);
 	print("'.");
 }

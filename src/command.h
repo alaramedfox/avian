@@ -20,10 +20,10 @@
 
 
 
-#include "lxtcm/list.h"			
-#include "lxtcm/exec.h"
-#include "lxtcm/transfer.h"
-#include "lxtcm/help.h"
+#include "lxtem/list.h"			
+#include "lxtem/exec.h"
+#include "lxtem/transfer.h"
+#include "lxtem/help.h"
 
 
 /* Declare functions */
@@ -34,10 +34,12 @@ void process_raw_input(const char input[])
 {
 	char *first_word = strword(input,0);
 	if(strcomp(first_word,"clear")) 		{ clear(); }
-	else if(strcomp(first_word,"l")) 	{ lxtcm_list(input); }
-	else if(strcomp(first_word,"help")) { lxtcm_help_basic(); }
+	else if(strcomp(first_word,"l")) 	{ lxtem_list(input); }
+	else if(strcomp(first_word,"t"))		{ lxtem_transfer(input); }
+	else if(strcomp(first_word,"x"))		{ lxtem_exec(input); }
+	else if(strcomp(first_word,"help")) { lxtem_help_basic(); }
 	else {
-		lxtcm_help_unknown(first_word);
+		lxtem_help_unknown(first_word);
 	}
 }
 

@@ -1,10 +1,10 @@
 /*
  *		Popcorn Kernel
- *		LXTCM Shell files
+ *		LXTEM Shell files
  *			exec.h -- Handles execution of binaries and scripts
  */
 
-void lxtcm_exec()
+void lxtem_exec()
 {
-	print("\nLXTCM Execute function");
+	print("\nLXTEM Execute function");
 }

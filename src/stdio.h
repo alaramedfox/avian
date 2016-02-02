@@ -177,8 +177,6 @@ char* scan(void) {
 	MEMORY.FLAGS.stdout = true;					//Flag for repaint initially
 	stdin_clear();										//Make sure stdin is empty before reading
 	int16_t location = MEMORY.INDEX.stdout;	//Remember starting vptr location
-	int32_t counter = 0;								//Blinking cursor counter
-	bool blink = true;								//Start with blinker on
 	
 	while(stdin_peek() != '\n') {
 		vmove(location);								//Move to initial location
@@ -194,9 +192,8 @@ char* scan(void) {
 			MEMORY.FLAGS.stdout = false; 			//De-flag the update flag
 		}
 		vmove(location + MEMORY.INDEX.stdin); 	//Move to current cursor
-		blink?print("_"):print(" "); 			//Print the blinking cursor guy
-		if(counter > 325768) { counter = 0; blink = !blink; }
-		++counter;
+		printf(C_BLINK," ");							//Print the blinking text cursor
+		
 	} /* Loop ends when user presses return */
 	MEMORY.FLAGS.stdin = false;					//De-flag input polling
 	stdin_pop(); 										//Remove trailing newline

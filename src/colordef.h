@@ -22,9 +22,10 @@
 #define C_WHITE  		0xF
 
 #define C_TERMINAL	0x07
-#define C_BLUESCR		0x9F
+#define C_BLUESCR		0x1F
 #define C_CRITICAL	0x4F
 #define C_INV			0x70
+#define C_BLINK		0x8F
 
 typedef unsigned char color_t;
 

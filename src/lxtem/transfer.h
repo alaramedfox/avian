@@ -1,10 +1,10 @@
 /*
  *		Popcorn Kernel
- *		LXTCM Shell files
+ *		LXTEM Shell files
  *			transfer.h -- Handles transfer of files and stuff in filesystem
  */
  
-void lxtcm_transfer()
+void lxtem_transfer()
 {
-	print("\nLXTCM Transfer function");
+	print("\nLXTEM Transfer function");
 }

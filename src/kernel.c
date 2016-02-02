@@ -27,10 +27,10 @@ void boot(void)
 	for(int i=0;i<80;i++) 	{ print("&h1"); }
 	for(int i=0;i<80*4;i++) { print(" "); }
 	for(int i=0;i<80;i++) 	{ print("&h1"); }
-	move(1,3); print("Welcome to the Popcorn Kernel v1.1");
+	move(1,3); print("Welcome to the Popcorn Kernel v1.2");
 	move(2,5); print("Initializing IRQ..."); 			idt_init();
 	move(3,5); print("Initializing keyboard driver..."); 	kb_init();
-	move(4,5); print("Using the LXTCM command enviornment");
+	move(4,5); print("Using the LXTEM command enviornment");
 	setcolor(C_TERMINAL);
 }
 
