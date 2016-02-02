@@ -38,7 +38,7 @@ void lxtem_list_std()
 	print(" -- Nothing here\n");
 }
  
-void lxtem_list_main(const char options[])
+void lxtem_list_main(const string options)
 {
 	for(int8_t i=0; options[i] != '\0'; i++) {
 		switch(options[i])
@@ -52,12 +52,12 @@ void lxtem_list_main(const char options[])
 	}
 }
  
-void lxtem_list(const char args[])
+void lxtem_list(const string args)
 {
 	print("\n");
 	if(strwordcount(args) > 1) {
 		/* Process arguments */
-		char *arg1 = strword(args,1);
+		string arg1 = strword(args,1);
 		if(arg1[0] == ':') {
 			lxtem_list_main(arg1);
 		}

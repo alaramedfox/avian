@@ -9,6 +9,11 @@
 #include <stddef.h>	
 #include <stdbool.h>		//Boolean support
 
+/* Popcorn-specific types */
+typedef char*  			string;
+typedef unsigned char 	byte;
+typedef unsigned char 	color_t;
+
 /* Low-level headers and utilities */
 #include "string.h"
 #include "memorymap.h"	//Memory mapping and handling
@@ -17,7 +22,7 @@
 #include "keyboard.h"	//Keyboard definition and init
 
 /* Mid-level processing */
-#include "command.h"		//Core command library
+#include "lxtem.h"		//Core command library
 
 void boot(void) 
 {

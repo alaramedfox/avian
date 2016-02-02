@@ -4,7 +4,7 @@
  *			Purpose:	string-related functions
  */
  
-bool strcomp(const char a[], const char b[])
+bool strcomp(const string a, const string b)
 {
 	int i;
 	for(i=0; a[i] == b[i]; i++) {
@@ -19,7 +19,7 @@ bool strcomp(const char a[], const char b[])
 	}
 }
 
-int8_t strwordcount(const char str[])
+int8_t strwordcount(const string str)
 {
 	int8_t count=1;
 	for(int8_t i=0; str[i] != '\0'; i++) {
@@ -28,8 +28,8 @@ int8_t strwordcount(const char str[])
 	return count;
 }
 
-char* strword(const char str[], int8_t index) {
-	static char word[12];
+string strword(const string str, int8_t index) {
+	static string word;
 	int8_t current_index=0;
 	int8_t word_at=0;
 	

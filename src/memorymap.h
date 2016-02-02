@@ -24,8 +24,8 @@
 #define	PASSWD	3
 
 struct __IO {
-	char 		stdin[256];					//The input stream buffer
-	char*		stdout; 						//Access to system video RAM
+	string 	stdin;						//The input stream buffer
+	string	stdout; 						//Access to system video RAM
 };
 
 struct __INDEX {
@@ -42,10 +42,13 @@ struct __GLOBAL {
 struct __FLAGS {
 	bool 		stdin;						//If set, signal to catch input
 	bool 		stdout;						//If set, signal need to repaint
+	bool		captain;						//If set, allow unrestricted access
 	bool		raw;							//If set, any output is not escaped.
 	bool		shift;						//If set, flag for the uppercase charset
 	bool		caps;							//If set, permanant flag for uppercase
 	bool		debugmode;					//For debugging stuff
+	bool		blinkmode;					//If set, BG bright bit will blink
+	bool		general[16];				//General use flags
 };
 
 struct __MEMORY {
@@ -59,12 +62,14 @@ struct __MEMORY MEMORY;
 
 void memorymap_init()
 {
-	MEMORY.IO.stdout 		= (char*)0xb8000;
+	MEMORY.IO.stdout 		= (string)0xb8000;
 	MEMORY.GLOBAL.color 	= 0x07;
 	MEMORY.INDEX.stdout 	= 0;
 	MEMORY.INDEX.stdin 	= 0;
 	MEMORY.FLAGS.stdin 	= false;
 	MEMORY.FLAGS.stdout 	= false;
 	MEMORY.GLOBAL.echostate = ECHO;
+	MEMORY.FLAGS.captain = false;
 	MEMORY.GLOBAL.tabsize = 4;
+	MEMORY.FLAGS.blinkmode = 0;
 }

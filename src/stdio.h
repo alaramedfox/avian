@@ -14,8 +14,8 @@ extern const char HLINE1, HLINE2, HLINE3,
 						BLOCK1, BLOCK2, BLOCK3, BLOCK4;
 
 void vmove(int16_t);							//Safely move the MEMORY.IO.stdout pointer.
-void print(const char str[]);				//Prints a string starting at vpt
-char* scan(void);								//Reads and returns stdin content
+void print(const string);				//Prints a string starting at vpt
+string scan(void);								//Reads and returns stdin content
 void clear(void);								//Clears the screen
 void move(int8_t,int8_t);					//Moves to 2D location in VRAM
 void newline(void);							//Increment to start of next row
@@ -114,7 +114,7 @@ void stdout_scroll(void) {
 	move(23,0);
 }
 
-void print(const char str[]) 
+void print(const string str) 
 {
 	/* Write the string to VRAM starting at MEMORY.INDEX.stdout */
 	for(int i=0; str[i] != '\0'; i++) {
@@ -165,14 +165,14 @@ void print(const char str[])
 	return;
 }
 
-void printf(int8_t color, const char str[]) {
+void printf(int8_t color, const string str) {
 	int8_t old_color = MEMORY.GLOBAL.color;	//Remember previous color
 	setcolor(color);									//Change to new color
 	print(str);											//Call print()
 	setcolor(old_color);								//Revert to the old color
 }
 
-char* scan(void) {
+string scan(void) {
 	MEMORY.FLAGS.stdin = true;						//Set flag to listen for input
 	MEMORY.FLAGS.stdout = true;					//Flag for repaint initially
 	stdin_clear();										//Make sure stdin is empty before reading
@@ -192,7 +192,7 @@ char* scan(void) {
 			MEMORY.FLAGS.stdout = false; 			//De-flag the update flag
 		}
 		vmove(location + MEMORY.INDEX.stdin); 	//Move to current cursor
-		printf(C_BLINK," ");							//Print the blinking text cursor
+		printf(C_BLINK,"_");							//Print the blinking text cursor
 		
 	} /* Loop ends when user presses return */
 	MEMORY.FLAGS.stdin = false;					//De-flag input polling
