@@ -35,7 +35,7 @@ function assemble {
 function compile {
 	printf "[${BADGE}] Compiling...\n"
 	#g++ -m32 -c src/main.c -o obj/kernel.o -ffreestanding -Wall -Wextra -Werror -O1
-	g++ -m32 -c src/main.c -o obj/kernel.o -std=c++11 -ffreestanding -Wfatal-errors 
+	g++ -m32 -c src/main.c -o obj/kernel.o -std=c++03 -ffreestanding -Wfatal-errors -Wall -Wextra -Werror
 }
 
 function linker {

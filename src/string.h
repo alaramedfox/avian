@@ -7,7 +7,7 @@
 class string {
 private:
 	size_t length;
-	char contents[];
+	char* contents;
 
 public:
 	/* Constructors */
@@ -21,6 +21,7 @@ public:
 	string operator=(string);
 	
 	/* Data */
+	void clear();
 	size_t size();
 	string word(size_t);
 	size_t wordcount();
@@ -40,9 +41,14 @@ string::string()
 
 string::string(const char* c)
 {
-	for(int i=0; c[i] != '\0'; i++) {
-		this->push(c[i]);
+	for(count_t i=0; c[i] != '\0'; i++) {
+		push(c[i]);
 	}
+}
+
+void string::clear()
+{
+	length = 0;
 }
 
 void string::push(char c)
@@ -67,7 +73,7 @@ char string::peek()
 string string::operator=(char* c_str)
 {
 	string str;
-	for(int i=0; c_str[i] != '\0'; i++) {
+	for(count_t i=0; c_str[i] != '\0'; i++) {
 		str.push(c_str[i]);
 	}
 	return str;
@@ -76,7 +82,7 @@ string string::operator=(char* c_str)
 string string::operator=(string cpp_str)
 {
 	string str;
-	for(int i=0; i<cpp_str.size(); i++) {
+	for(count_t i=0; i<cpp_str.size(); i++) {
 		str.push(cpp_str[i]);
 	}
 	return str;
@@ -85,7 +91,7 @@ string string::operator=(string cpp_str)
 bool string::operator==(string str)
 {
 	if(str.size() != length) return false;
-	for(int i=0; i<str.size() && i<length; i++)
+	for(count_t i=0; i<str.size() && i<length; i++)
 	{
 		if(str[i] != contents[i]) return false;
 		else continue;
@@ -109,7 +115,7 @@ char string::operator[](size_t index)
 size_t string::wordcount()
 {
 	int count=1;
-	for(int i=0; i < length; i++) {
+	for(count_t i=0; i < length; i++) {
 		if(contents[i] == ' ') { count++; }
 	}
 	return count;

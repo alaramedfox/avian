@@ -37,3 +37,12 @@ string itos(int32_t number)
 	}
 	return str;
 }
+
+int strsum(string str)
+{
+	int sum=0;
+	for(count_t i=0; i<str.size(); i++) {
+		sum += str[i];
+	}
+	return sum;
+}

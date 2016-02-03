@@ -16,21 +16,20 @@
 #define CHAR_NEWLINE 0xA					//Define the newline char '\n'
 #define CHAR_TAB	 0x9						//Define the tab char '\t'
 
-#define THIS_COL	MEMORY.INDEX.stdout%(VGA_C)			//Current column in VRAM
-#define THIS_ROW	MEMORY.INDEX.stdout/(VGA_C)			//Current row in VRAM
+#define THIS_COL	MEMORY.INDEX.vram%(VGA_C)			//Current column in VRAM
+#define THIS_ROW	MEMORY.INDEX.vram/(VGA_C)			//Current row in VRAM
 
 #define	NOECHO	1
 #define	ECHO		2
 #define	PASSWD	3
 
 struct __IO {
-	string 	stdin;						//The input stream buffer
-	byte	   *stdout; 						//Access to system video RAM
+	string 	instream;						//The input stream buffer
+	byte	   *vram; 					//Access to system video RAM
 };
 
 struct __INDEX {
-	int16_t	stdout;						//Output stream buffer pointer (vptr)
-	size_t	stdin;						//Input stream size
+	int16_t	vram;						//Output stream buffer pointer (vptr)
 };
 
 struct __GLOBAL {
@@ -40,36 +39,37 @@ struct __GLOBAL {
 };
 
 struct __FLAGS {
-	bool 		stdin;						//If set, signal to catch input
-	bool 		stdout;						//If set, signal need to repaint
+	bool 		listen;						//If set, signal to catch input
+	bool 		repaint;						//If set, signal need to repaint
 	bool		captain;						//If set, allow unrestricted access
 	bool		raw;							//If set, any output is not escaped.
 	bool		shift;						//If set, flag for the uppercase charset
 	bool		caps;							//If set, permanant flag for uppercase
 	bool		debugmode;					//For debugging stuff
-	bool		blinkmode;					//If set, BG bright bit will blink
 	bool		general[16];				//General use flags
 };
 
-struct __MEMORY {
-	struct __IO			IO;
-	struct __INDEX		INDEX;
-	struct __FLAGS		FLAGS;
-	struct __GLOBAL	GLOBAL;
-};
+class __MEMORY {
+public:
+	__IO			IO;
+	__INDEX		INDEX;
+	__FLAGS		FLAGS;
+	__GLOBAL		GLOBAL;
+	
+	void init();
+	
+	
+} MEMORY;
 
-struct __MEMORY MEMORY;
-
-void memorymap_init()
+void __MEMORY::init()
 {
-	MEMORY.IO.stdout 		= (byte*)0xb8000;
-	MEMORY.GLOBAL.color 	= 0x07;
-	MEMORY.INDEX.stdout 	= 0;
-	MEMORY.INDEX.stdin 	= 0;
-	MEMORY.FLAGS.stdin 	= false;
-	MEMORY.FLAGS.stdout 	= false;
-	MEMORY.GLOBAL.echostate = ECHO;
-	MEMORY.FLAGS.captain = false;
-	MEMORY.GLOBAL.tabsize = 4;
-	MEMORY.FLAGS.blinkmode = 0;
+	IO.vram 			= (byte*)0xb8000;
+	IO.instream		= string();
+	GLOBAL.color 	= 0x07;
+	INDEX.vram	 	= 0;
+	FLAGS.listen 	= false;
+	FLAGS.repaint 	= false;
+	GLOBAL.echostate = ECHO;
+	FLAGS.captain = false;
+	GLOBAL.tabsize = 4;
 }

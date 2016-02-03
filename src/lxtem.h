@@ -27,10 +27,10 @@
 
 
 /* Declare functions */
-void process_raw_input(const string);		//Raw string from keyboard
+void process_raw_input(string);		//Raw string from keyboard
 
 
-void process_raw_input(const string input)
+void process_raw_input(string input)
 {
 	string first_word = input.word(0);
 	

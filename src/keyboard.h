@@ -13,14 +13,16 @@ void kb_init(void)
 }
 
 /* Special character handlidng */
-void enter() 			{ stdin_push('\n'); }
-void backspace() 		{ stdin_pop(); }
-void tab() 				{ for(int i=0;i<5;i++) stdin_push(' '); }
-void undef_char() 	{ stdin_push('?'); }
+void enter() 			{ stdin::push('\n'); }
+void backspace() 		{ stdin::pop(); }
+void tab() 				{ for(count_t i=0;i<5;i++) stdin::push(' '); }
+void undef_char() 	{ stdin::push('?'); }
 
 extern "C" //cdecl export
 void keyboard_driver(void)
 {
+	/* Do not continue if system isn't listening */
+	//if(MEMORY.FLAGS.listen == false) { return; }
 	byte status = __read_port(KEYBOARD_STATUS_PORT);
 	int16_t keycode;
 	char key;
@@ -61,7 +63,7 @@ void keyboard_driver(void)
 				case '\b': backspace(); 	break;
 				case '0':  undef_char(); 	break;
 			
-				default:   stdin_push(key); 	break;
+				default:   stdin::push(key); 	break;
 			}
 		}
 		else {
