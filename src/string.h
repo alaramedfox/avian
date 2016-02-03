@@ -4,6 +4,8 @@
  *			Purpose:	string-related functions
  */
  
+typedef char*  string;
+ 
 bool strcomp(const string a, const string b)
 {
 	int i;

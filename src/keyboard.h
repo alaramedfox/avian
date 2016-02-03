@@ -9,7 +9,7 @@ extern void keyboard_handler(void);
 void kb_init(void)
 {
 	/* 0xFD is 11111101 - enables only IRQ1 (keyboard)*/
-	write_port(0x21 , 0xFD);
+	__write_port(0x21 , 0xFD);
 }
 
 /* Special character handlidng */
@@ -20,18 +20,20 @@ void undef_char() 	{ stdin_push('?'); }
 
 void keyboard_driver(void)
 {
-	int8_t status = read_port(KEYBOARD_STATUS_PORT);
+	int8_t status = __read_port(KEYBOARD_STATUS_PORT);
 	int16_t keycode;
 	char key;
 	/* write EOI */
-	write_port(0x20, 0x20);
+	__write_port(0x20, 0x20);
 
 	/* Lowest bit of status will be set if buffer is not empty */
 	if (status & 0x01) {
-		keycode = read_port(KEYBOARD_DATA_PORT);
+		keycode = __read_port(KEYBOARD_DATA_PORT);
 		if(MEMORY.FLAGS.debugmode) {
-			newline();
+			//clear();
+			print("\n(");
 			print(itos(keycode)); 
+			print(")     ");
 		}
 		
 		/* Consider keycodes */
@@ -44,7 +46,7 @@ void keyboard_driver(void)
 		else if(keycode == CAPS_PRESS_CODE) {
 			MEMORY.FLAGS.caps = !MEMORY.FLAGS.caps;
 		}
-		else if(keycode > 0) {
+		else if(keycode < 127) {
 			if(MEMORY.FLAGS.shift) {
 				key = KEYMAP.uppercase[keycode];
 			}
@@ -63,7 +65,7 @@ void keyboard_driver(void)
 		}
 		else {
 			
-		} 
+		}
 		
 	}
 }

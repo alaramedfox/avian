@@ -5,30 +5,23 @@ RED='\033[0;31m'
 BLK='\033[0m'
 
 BADGE="${GRN} INFO ${BLK}"
-VERSION="Builder v1.4"
+WARN="${RED} WARNING ${BLK}"
+VERSION="Builder v2.1"
 
 
 function build {
 	printf "[${BADGE}] ${VERSION}\n"
-	if assemble && compile && linker && booter; then
+	if assemble && compile && linker && booter && tousb; then
 		printf "[${BADGE}] Running kernel emulator...\n"
 		qemu-system-i386 -fda popcorn.img --no-kvm
-		echo "[${BADGE}] Finished.\n"
+		printf "[${BADGE}] Finished.\n"
 	else
 		printf "[${BADGE}]${RED} Build failed! ${BLK}\n"
 	fi
 }
 
-function ok {
-	printf "\t${GRN} OK ${BLK}\n"
-}
-
-function fail {
-	printf "\t${RED} FAIL ${BLK}\n"
-}
-
 function assemble {
-	printf "[${BADGE}] Assembling..."
+	printf "[${BADGE}] Assembling...\n"
 	nasm -f elf src/boot.asm -o obj/boot.o
 }
 
@@ -48,6 +41,11 @@ function booter {
 	sudo cp bin/kernel /media/floppy/boot/kernel/
 	sudo mv /media/floppy/boot/kernel/kernel /media/floppy/boot/kernel/popcorn-1.2.bin
 	sudo umount /media/floppy
+}
+
+function tousb {
+		printf "[${BADGE}] Writing bootable image to USB drive /dev/sda...\n"
+		sudo dd if=popcorn.img of=/dev/sda
 }
 
 # Call the build process

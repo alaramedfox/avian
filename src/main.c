@@ -4,15 +4,30 @@
  *	  Purpose:	Main loop, definitions, and primary entry point.
  *				This is the Popcorn start file.
  */
+ 
+/* 
+ *		Popcorn Source Naming Conventions
+ *
+ *		1. Memory structures must be in all caps and start with two underscores.
+ *				eg. __STRUCTURE
+ *		2. ASM function calls must start with two underscores
+ *				eg. __write_port
+ *		3. All functions and variables are lowercase, and separate words using
+ *			underscores.
+ *				eg. some_variable, some_function()
+ *		4. Loop indexes are i, j, and k. Avoid anything deeper than O(3)
+ *		5. Related groups of functions are prefixed namespace-like.
+ *				eg. all stdin functions are stdin_foo()
+ *		6. Shell code is in directory /lex/
+ *		7. Drivers are in directory /dev/
+ *
+ */
 
 #include <stdint.h>		//Stable integer sizing. int8_t, int16_t, etc
 #include <stddef.h>	
 #include <stdbool.h>		//Boolean support
-
-/* Popcorn-specific types */
-typedef char*  			string;
-typedef unsigned char 	byte;
-typedef unsigned char 	color_t;
+typedef unsigned char byte;
+extern void __cursor_hide(void);
 
 /* Low-level headers and utilities */
 #include "string.h"
@@ -43,6 +58,7 @@ void kmain(void)
 {
 	memorymap_init();
 	boot();
+	//MEMORY.FLAGS.debugmode = true;
 	move(6,0);
 	while(1) {
 		//newline();

@@ -6,6 +6,8 @@
  
 #define sqr(x)		x*x
 
+//typedef unsigned int8_t byte;
+
 /* Converts an integer into a char array */
 string itos(int32_t i)
 {

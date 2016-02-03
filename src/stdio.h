@@ -8,6 +8,8 @@
 #define ENTER_KEY_CODE 0x1C
 
 #include "colordef.h"						//Color #DEFINEs and functions
+
+extern void __write_port(int16_t,byte);
  
 extern const char HLINE1, HLINE2, HLINE3,
 						VLINE1, VLINE2,
@@ -35,7 +37,20 @@ void stdin_push(char);						//Push character to stdin
 char stdin_pop(void);						//Remove and return last char in stdin
 char stdin_peek(void);						//Return but do not remove last char
 
+/* void update_cursor(int row, int col)
+ * by Dark Fiber
+ */
+void move_cursor(int row, int col)
+{
+	unsigned short position=(row*80) + col;
 
+	// cursor LOW port to vga INDEX register
+	__write_port(0x3D4, 0x0F);
+	__write_port(0x3D5, (byte)(position&0xFF));
+	// cursor HIGH port to vga INDEX register
+	__write_port(0x3D4, 0x0E);
+	__write_port(0x3D5, (byte)((position>>8)&0xFF));
+}
 
 void clear(void) {
 	MEMORY.INDEX.stdout = 0;
@@ -191,8 +206,7 @@ string scan(void) {
 			}
 			MEMORY.FLAGS.stdout = false; 			//De-flag the update flag
 		}
-		vmove(location + MEMORY.INDEX.stdin); 	//Move to current cursor
-		printf(C_BLINK,"_");							//Print the blinking text cursor
+		move_cursor(THIS_ROW,THIS_COL+MEMORY.INDEX.stdin); //Print the blinking text cursor
 		
 	} /* Loop ends when user presses return */
 	MEMORY.FLAGS.stdin = false;					//De-flag input polling

@@ -8,9 +8,9 @@
 #define INTERRUPT_GATE 0x8e
 #define KERNEL_CODE_SEGMENT_OFFSET 0x08
 
-extern char read_port(int16_t port);
-extern void write_port(int16_t port, int8_t data);
-extern void load_idt(int32_t *iptr);
+extern byte __read_port(int16_t port);
+extern void __write_port(int16_t port, byte data);
+extern void __load_idt(int32_t *iptr);
 
 struct IDT_entry {
 	int16_t offset_lowerbits;
@@ -44,34 +44,34 @@ void idt_init(void)
 	*/
 
 	/* ICW1 - begin initialization */
-	write_port(0x20 , 0x11);
-	write_port(0xA0 , 0x11);
+	__write_port(0x20 , 0x11);
+	__write_port(0xA0 , 0x11);
 
 	/* ICW2 - remap offset address of IDT */
 	/*
 	* In x86 protected mode, we have to remap the PICs beyond 0x20 because
 	* Intel have designated the first 32 interrupts as "reserved" for cpu exceptions
 	*/
-	write_port(0x21 , 0x20);
-	write_port(0xA1 , 0x28);
+	__write_port(0x21 , 0x20);
+	__write_port(0xA1 , 0x28);
 
 	/* ICW3 - setup cascading */
-	write_port(0x21 , 0x00);
-	write_port(0xA1 , 0x00);
+	__write_port(0x21 , 0x00);
+	__write_port(0xA1 , 0x00);
 
 	/* ICW4 - environment info */
-	write_port(0x21 , 0x01);
-	write_port(0xA1 , 0x01);
+	__write_port(0x21 , 0x01);
+	__write_port(0xA1 , 0x01);
 	/* Initialization finished */
 
 	/* mask interrupts */
-	write_port(0x21 , 0xff);
-	write_port(0xA1 , 0xff);
+	__write_port(0x21 , 0xff);
+	__write_port(0xA1 , 0xff);
 
 	/* fill the IDT descriptor */
 	iaddr = (int32_t)IDT ;
 	iptr[0] = (sizeof (struct IDT_entry) * IDT_SIZE) + ((iaddr & 0xffff) << 16);
 	iptr[1] = iaddr >> 16 ;
 
-	load_idt(iptr);
+	__load_idt(iptr);
 }
