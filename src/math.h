@@ -9,33 +9,31 @@
 //typedef unsigned int8_t byte;
 
 /* Converts an integer into a char array */
-string itos(int32_t i)
+string itos(int32_t number)
 {
 	bool NEGATIVE_FLAG = false;
-	if(i < 0) 
+	if(number < 0) 
 	{
-		i = i*-1;
+		number = number * -1;
 		NEGATIVE_FLAG = true;
 	}
 	
-	char temp[] = "";
+	string temp;
 	string str;
-	size_t str_size = 0;
-	while(i>0)
+	
+	while(number>0)
 	{
-		int digit = i%10;
-		temp[str_size] = digit+48;
-		i = i/10;
-		str_size++;
-		if(str_size == 6) break;
+		int digit = number%10;
+		temp.push(digit+48);
+		number = number/10;
 	}
 	if(NEGATIVE_FLAG)
 	{
-		temp[str_size++] = '-';
+		temp.push('-');
 	}
-	for(size_t j=0; j<str_size; j++)
+	for(size_t i=0; i<temp.size(); i++)
 	{
-		str[j] = temp[str_size-j-1];
+		str.push( temp.pop() );
 	}
 	return str;
 }

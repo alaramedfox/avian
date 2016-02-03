@@ -6,5 +6,5 @@
  
 void lxtem_transfer()
 {
-	print("\nLXTEM Transfer function");
+	stdout::print("\nLXTEM Transfer function");
 }

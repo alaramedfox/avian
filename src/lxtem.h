@@ -34,7 +34,7 @@ void process_raw_input(const string input)
 {
 	string first_word = input.word(0);
 	
-		  if(first_word == "clear") 	{ clear(); }
+		  if(first_word == "clear") 	{ stdout::clear(); }
 	else if(first_word == "l") 		{ lxtem_list(input); }
 	else if(first_word == "t")			{ lxtem_transfer(); }
 	else if(first_word == "x")			{ lxtem_exec(); }

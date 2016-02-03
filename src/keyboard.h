@@ -32,9 +32,9 @@ void keyboard_driver(void)
 		keycode = __read_port(KEYBOARD_DATA_PORT);
 		if(MEMORY.FLAGS.debugmode) {
 			//clear();
-			print("\n(");
-			print(itos(keycode)); 
-			print(")     ");
+			stdout::print("\n(");
+			stdout::print(itos(keycode)); 
+			stdout::print(")     ");
 		}
 		
 		/* Consider keycodes */

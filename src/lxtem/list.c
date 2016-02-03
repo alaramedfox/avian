@@ -6,39 +6,39 @@
  
 void lxtem_list_help()
 {
-	print("List various objects.\n");
-	print("   Usage: 'l :[options] [arg]'\n");
-	print("Available options:\n");
-	print("   :a - List all objects\n");
-	print("   :d - List only directories\n");
-	print("   :f - List only files\n");
-	print("   :h - Include hidden objects\n");
-	print("   :s - List objects that match search [arg]\n");
+	stdout::print("List various objects.\n");
+	stdout::print("   Usage: 'l :[options] [arg]'\n");
+	stdout::print("Available options:\n");
+	stdout::print("   :a - List all objects\n");
+	stdout::print("   :d - List only directories\n");
+	stdout::print("   :f - List only files\n");
+	stdout::print("   :h - Include hidden objects\n");
+	stdout::print("   :s - List objects that match search [arg]\n");
 	
-	print("   :! - Run as Captain\n");
-	print("   :? - Show this help text\n");
-	print("Note: As of Popcorn 1.2, most commands are not available.");
+	stdout::print("   :! - Run as Captain\n");
+	stdout::print("   :? - Show this help text\n");
+	stdout::print("Note: As of Popcorn 1.2, most commands are not available.");
 }	
  
 void lxtem_list_all()
 {
-	print("Everything:\n");
-	print(" -- Nothing here\n");
+	stdout::print("Everything:\n");
+	stdout::print(" -- Nothing here\n");
 }
 
 void lxtem_list_dir()
 {
-	print("Directories:\n");
-	print(" -- No Directories\n");
+	stdout::print("Directories:\n");
+	stdout::print(" -- No Directories\n");
 }
 
 void lxtem_list_std()
 {
-	print("Default list:\n");
-	print(" -- Nothing here\n");
+	stdout::print("Default list:\n");
+	stdout::print(" -- Nothing here\n");
 }
  
-void lxtem_list_main(const char* options)
+void lxtem_list_main(string options)
 {
 	for(int8_t i=0; options[i] != '\0'; i++) {
 		switch(options[i])
@@ -52,27 +52,27 @@ void lxtem_list_main(const char* options)
 	}
 }
  
-void lxtem_list(const char* args)
+void lxtem_list(string args)
 {
-	print("\n");
-	print("(");
-	print(args);
-	print(")");
-	if(strwordcount(args) > 1) {
+	stdout::print("\n");
+	stdout::print("(");
+	stdout::print(args);
+	stdout::print(")");
+	if(args.wordcount() > 1) {
 		/* Process arguments */
-		char* arg1 = strword(args,1);
+		string arg1 = args.word(1);
 		if(arg1[0] == ':') {
 			lxtem_list_main(arg1);
 		}
 		else {
-			print("\nUnknown argument '");
-			print(arg1);
-			print("'\n");
+			stdout::print("\nUnknown argument '");
+			stdout::print(arg1);
+			stdout::print("'\n");
 		}
 	} else {
-		print("List requires (by default) at least 1 parameter.\n");
-		print("You provided ");
-		print(itos(strwordcount(args)-1));
-		print(".\n");
+		stdout::print("List requires (by default) at least 1 parameter.\n");
+		stdout::print("You provided ");
+		stdout::print(itos(args.wordcount()-1));
+		stdout::print(".\n");
 	}
 }

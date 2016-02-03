@@ -12,11 +12,13 @@ private:
 public:
 	/* Constructors */
 	string();
+	string(const char*);
 	
 	/* Operators */
 	bool operator==(string);
 	char operator[](size_t);
-	string operator=(const char[]);
+	string operator=(char*);
+	string operator=(string);
 	
 	/* Data */
 	size_t size();
@@ -29,6 +31,19 @@ public:
 	char peek();
 	
 };
+
+string::string()
+{
+	length=0;
+	contents[0] = '\0';
+}
+
+string::string(const char* c)
+{
+	for(int i=0; c[i] != '\0'; i++) {
+		this->push(c[i]);
+	}
+}
 
 void string::push(char c)
 {
@@ -47,6 +62,24 @@ char string::pop()
 char string::peek()
 {
 	return contents[length-1];
+}
+
+string string::operator=(char* c_str)
+{
+	string str;
+	for(int i=0; c_str[i] != '\0'; i++) {
+		str.push(c_str[i]);
+	}
+	return str;
+}
+
+string string::operator=(string cpp_str)
+{
+	string str;
+	for(int i=0; i<cpp_str.size(); i++) {
+		str.push(cpp_str[i]);
+	}
+	return str;
 }
  
 bool string::operator==(string str)

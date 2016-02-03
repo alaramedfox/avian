@@ -6,5 +6,5 @@
 
 void lxtem_exec()
 {
-	print("\nLXTEM Execute function");
+	stdout::print("\nLXTEM Execute function");
 }

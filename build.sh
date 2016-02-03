@@ -6,10 +6,17 @@ BLK='\033[0m'
 
 BADGE="${GRN} INFO ${BLK}"
 WARN="${RED} WARNING ${BLK}"
-VERSION="Builder v2.1"
+VERSION="Builder v2.2"
 
+ARG1=$1
+
+# Switches:
+#	-u		Update popcorn.img
+#	-r		Reinstall grub to popcorn.img
+#	-w		Write popcorn.img to /dev/sda
 
 function build {
+	clear
 	printf "[${BADGE}] ${VERSION}\n"
 	if assemble && compile && linker && booter; then
 		printf "[${BADGE}] Running kernel emulator...\n"
@@ -28,7 +35,7 @@ function assemble {
 function compile {
 	printf "[${BADGE}] Compiling...\n"
 	#g++ -m32 -c src/main.c -o obj/kernel.o -ffreestanding -Wall -Wextra -Werror -O1
-	g++ -m32 -c src/main.c -o obj/kernel.o -ffreestanding -Wfatal-errors
+	g++ -m32 -c src/main.c -o obj/kernel.o -std=c++11 -ffreestanding -Wfatal-errors 
 }
 
 function linker {
