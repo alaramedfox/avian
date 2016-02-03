@@ -1,7 +1,7 @@
 #define KEYBOARD_DATA_PORT 0x60
 #define KEYBOARD_STATUS_PORT 0x64
 
-extern void keyboard_handler(void);
+extern "C" void keyboard_handler(void);
 
 #include "idt.h"
 #include "keydef.h"
@@ -18,9 +18,10 @@ void backspace() 		{ stdin_pop(); }
 void tab() 				{ for(int i=0;i<5;i++) stdin_push(' '); }
 void undef_char() 	{ stdin_push('?'); }
 
+extern "C" //cdecl export
 void keyboard_driver(void)
 {
-	int8_t status = __read_port(KEYBOARD_STATUS_PORT);
+	byte status = __read_port(KEYBOARD_STATUS_PORT);
 	int16_t keycode;
 	char key;
 	/* write EOI */

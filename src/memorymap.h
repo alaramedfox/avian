@@ -25,7 +25,7 @@
 
 struct __IO {
 	string 	stdin;						//The input stream buffer
-	string	stdout; 						//Access to system video RAM
+	byte	   *stdout; 						//Access to system video RAM
 };
 
 struct __INDEX {
@@ -34,9 +34,9 @@ struct __INDEX {
 };
 
 struct __GLOBAL {
-	int8_t	color;						//Global standard background color
-	int8_t	echostate;					//Whether or not to echo STDIN
-	int8_t	tabsize;						//Size of the tabs
+	color_t	color;						//Global standard background color
+	byte	   echostate;					//Whether or not to echo STDIN
+	byte	   tabsize;						//Size of the tabs
 };
 
 struct __FLAGS {
@@ -62,7 +62,7 @@ struct __MEMORY MEMORY;
 
 void memorymap_init()
 {
-	MEMORY.IO.stdout 		= (string)0xb8000;
+	MEMORY.IO.stdout 		= (byte*)0xb8000;
 	MEMORY.GLOBAL.color 	= 0x07;
 	MEMORY.INDEX.stdout 	= 0;
 	MEMORY.INDEX.stdin 	= 0;

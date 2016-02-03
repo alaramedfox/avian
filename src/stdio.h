@@ -9,25 +9,26 @@
 
 #include "colordef.h"						//Color #DEFINEs and functions
 
-extern void __write_port(int16_t,byte);
+extern "C" void __write_port(int16_t,byte);
  
 extern const char HLINE1, HLINE2, HLINE3,
 						VLINE1, VLINE2,
 						BLOCK1, BLOCK2, BLOCK3, BLOCK4;
 
 void vmove(int16_t);							//Safely move the MEMORY.IO.stdout pointer.
-void print(const string);				//Prints a string starting at vpt
-string scan(void);								//Reads and returns stdin content
+void print(const char*);				//Prints a char* starting at vpt
+void printf(color_t,const char*);
+char* scan(void);								//Reads and returns stdin content
 void clear(void);								//Clears the screen
-void move(int8_t,int8_t);					//Moves to 2D location in VRAM
+void move(byte,byte);					//Moves to 2D location in VRAM
 void newline(void);							//Increment to start of next row
-void setcolor_pair(int8_t,int8_t);		//Change the screen color: pairs
-void setcolor(int8_t);						//Change the screen color: palette
+void setcolor_pair(color_t,color_t);		//Change the screen color: pairs
+void setcolor(color_t);						//Change the screen color: palette
 
 /* -- Standard Output -- */
 void stdout_scroll(void);					//Scrolling screen support
 void stdout_char(char);						//Safely write to MEMORY.IO.stdout[MEMORY.INDEX.stdout]
-void stdout_color(int8_t);					//Safely write to MEMORY.IO.stdout[MEMORY.INDEX.stdout+1]
+void stdout_color(color_t);					//Safely write to MEMORY.IO.stdout[MEMORY.INDEX.stdout+1]
 int16_t stdout_column(void);				//Safely return the current column of the cursor
 int16_t stdout_row(void);					//Safely return the current row of cursor
 
@@ -67,7 +68,7 @@ void newline(void) {
 	move(THIS_ROW+1,0);
 }
 
-void move(const int8_t row, const int8_t col) {
+void move(const byte row, const byte col) {
 	if(row > VGA_R || col > VGA_C) return;
 	
 	MEMORY.INDEX.stdout = row * VGA_C + col;
@@ -84,14 +85,16 @@ void vmove(int16_t v) {
 	}
 }
 
-void setcolor_pair(const int8_t fg, const int8_t bg) {
+void setcolor_pair(const color_t fg, const color_t bg) {
 	MEMORY.GLOBAL.color = palette(fg,bg);
 }
 
-void setcolor(const int8_t color) {
+void setcolor(const color_t color) {
 	MEMORY.GLOBAL.color = color;
 }
 
+namespace stdout 
+{
 /* Safely write to MEMORY.IO.stdout without segfault */
 void stdout_char(const char value) {
 	if(MEMORY.INDEX.stdout >= VRAM_CHARS) { 
@@ -103,7 +106,7 @@ void stdout_char(const char value) {
 	}
 }
 
-void stdout_color(const int8_t value) {
+void stdout_color(const color_t value) {
 	if(MEMORY.INDEX.stdout >= VRAM_CHARS) { 
 		stdout_scroll(); 
 		stdout_color(value); 
@@ -129,9 +132,9 @@ void stdout_scroll(void) {
 	move(23,0);
 }
 
-void print(const string str) 
+void print(const char str[]) 
 {
-	/* Write the string to VRAM starting at MEMORY.INDEX.stdout */
+	/* Write the char* to VRAM starting at MEMORY.INDEX.stdout */
 	for(int i=0; str[i] != '\0'; i++) {
 		
 		/* Ignore (trailing) newline if kernel is listening to the keyboard */
@@ -141,6 +144,9 @@ void print(const string str)
 		}
 		else if(str[i] == '\t') {
 			/* Don't know how to handle tabs yet */
+		}
+		else if(str[i] == '\0') {
+			printf(C_ERROR,"Severe error in null-terminated string.");
 		}
 		else if(str[i] == '&') {
 			if(str[i+1] == 'h') {
@@ -180,14 +186,15 @@ void print(const string str)
 	return;
 }
 
-void printf(int8_t color, const string str) {
-	int8_t old_color = MEMORY.GLOBAL.color;	//Remember previous color
+void printf(color_t color, const char str[]) {
+	color_t old_color = MEMORY.GLOBAL.color;	//Remember previous color
 	setcolor(color);									//Change to new color
 	print(str);											//Call print()
 	setcolor(old_color);								//Revert to the old color
 }
 
-string scan(void) {
+} // namespace stdout
+char* scan(void) {
 	MEMORY.FLAGS.stdin = true;						//Set flag to listen for input
 	MEMORY.FLAGS.stdout = true;					//Flag for repaint initially
 	stdin_clear();										//Make sure stdin is empty before reading
@@ -198,7 +205,7 @@ string scan(void) {
 		
 		if(MEMORY.FLAGS.stdout)	{ //Only update screen if a key was pressed
 			switch(MEMORY.GLOBAL.echostate) {
-				case ECHO: 		print(MEMORY.IO.stdin); print("     ");		break;
+				case ECHO: 		print(MEMORY.IO.stdin); print(" ");		break;
 				case PASSWD: 	for(size_t i=0;i<MEMORY.INDEX.stdin;i++)
 					    			{ print("*"); } 										break;
 				case NOECHO:	/* IMPLEMENT: Do not increment cursor */ 		break;
@@ -211,9 +218,12 @@ string scan(void) {
 	} /* Loop ends when user presses return */
 	MEMORY.FLAGS.stdin = false;					//De-flag input polling
 	stdin_pop(); 										//Remove trailing newline
-	vmove(location + MEMORY.INDEX.stdin);		//Move to CURRENT cursor
-	print(" "); 										//erase leftover blinky thing
-	return MEMORY.IO.stdin;
+	//vmove(location + MEMORY.INDEX.stdin);		//Move to CURRENT cursor
+	//print(" "); 										//erase leftover blinky thing
+	static char* copy;
+	for(int i=0; MEMORY.IO.stdin[i] != '\0'; i++) { copy[i] = MEMORY.IO.stdin[i]; }
+	stdin_clear();
+	return copy;
 }
 
 void stdin_clear(void) {
@@ -225,21 +235,20 @@ void stdin_clear(void) {
 void stdin_push(char c) {
 	MEMORY.FLAGS.stdout = true;					//Set repaint flag
 	if(MEMORY.INDEX.stdin < STD_MAX) {
-		MEMORY.IO.stdin[MEMORY.INDEX.stdin] = c;
+		MEMORY.IO.stdin[MEMORY.INDEX.stdin++] = c;
 		MEMORY.IO.stdin[MEMORY.INDEX.stdin+1] = '\0';
-		MEMORY.INDEX.stdin++;
 	} 
 	else {
-		stdin_push(STD_MAX-1);
+		stdin_push(STD_MAX-2);
 	}
 }
 
 char stdin_pop(void) {
 	MEMORY.FLAGS.stdout = true;	//Flag for repaint
 	if(MEMORY.INDEX.stdin > 0) {
-		MEMORY.INDEX.stdin--;
+		char c = MEMORY.IO.stdin[MEMORY.INDEX.stdin--];
 		MEMORY.IO.stdin[MEMORY.INDEX.stdin] = '\0';
-		return MEMORY.IO.stdin[MEMORY.INDEX.stdin-1];
+		return c;
 	} else {
 		stdin_clear();
 		return '\0';
@@ -250,6 +259,7 @@ char stdin_peek(void) {
 	if(MEMORY.INDEX.stdin > 0) {
 		return MEMORY.IO.stdin[MEMORY.INDEX.stdin-1];
 	} else {
+		MEMORY.INDEX.stdin = 0;
 		return '\0';
 	}
 }

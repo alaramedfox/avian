@@ -20,7 +20,7 @@ void lxtem_help_basic()
 	print("   (e.g.) use 'e :bc 1 bw' to set blinking to 1 and colors to bw.\n");
 }
 
-void lxtem_help_unknown(const string err)
+void lxtem_help_unknown(const char* err)
 {
 	print("\nLXTEM: Unreconized command: '");
 	print(err);

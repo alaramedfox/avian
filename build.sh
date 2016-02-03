@@ -11,7 +11,7 @@ VERSION="Builder v2.1"
 
 function build {
 	printf "[${BADGE}] ${VERSION}\n"
-	if assemble && compile && linker && booter && tousb; then
+	if assemble && compile && linker && booter; then
 		printf "[${BADGE}] Running kernel emulator...\n"
 		qemu-system-i386 -fda popcorn.img --no-kvm
 		printf "[${BADGE}] Finished.\n"
@@ -27,7 +27,8 @@ function assemble {
 
 function compile {
 	printf "[${BADGE}] Compiling...\n"
-	gcc -m32 -c src/main.c -o obj/kernel.o -std=gnu99 -ffreestanding -Wall -Wextra -Werror -O1
+	#g++ -m32 -c src/main.c -o obj/kernel.o -ffreestanding -Wall -Wextra -Werror -O1
+	g++ -m32 -c src/main.c -o obj/kernel.o -ffreestanding -Wfatal-errors
 }
 
 function linker {
@@ -44,8 +45,12 @@ function booter {
 }
 
 function tousb {
-		printf "[${BADGE}] Writing bootable image to USB drive /dev/sda...\n"
-		sudo dd if=popcorn.img of=/dev/sda
+		sudo mount /dev/sda -o loop /media/USB/
+		if sudo cp bin/kernel /media/USB/boot/kernel/;
+		then printf "[${BADGE}] Writing bootable image to USB drive /dev/sda...\n"
+		else printf "[${INFO}] Failed to write!\n"
+		fi
+		sudo mv /media/USB/boot/kernel/kernel /media/USB/boot/kernel/popcorn-1.2.bin
 }
 
 # Call the build process

@@ -38,7 +38,7 @@ void lxtem_list_std()
 	print(" -- Nothing here\n");
 }
  
-void lxtem_list_main(const string options)
+void lxtem_list_main(const char* options)
 {
 	for(int8_t i=0; options[i] != '\0'; i++) {
 		switch(options[i])
@@ -52,12 +52,15 @@ void lxtem_list_main(const string options)
 	}
 }
  
-void lxtem_list(const string args)
+void lxtem_list(const char* args)
 {
 	print("\n");
+	print("(");
+	print(args);
+	print(")");
 	if(strwordcount(args) > 1) {
 		/* Process arguments */
-		string arg1 = strword(args,1);
+		char* arg1 = strword(args,1);
 		if(arg1[0] == ':') {
 			lxtem_list_main(arg1);
 		}
@@ -66,5 +69,10 @@ void lxtem_list(const string args)
 			print(arg1);
 			print("'\n");
 		}
+	} else {
+		print("List requires (by default) at least 1 parameter.\n");
+		print("You provided ");
+		print(itos(strwordcount(args)-1));
+		print(".\n");
 	}
 }

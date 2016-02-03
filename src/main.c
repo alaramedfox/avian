@@ -27,13 +27,14 @@
 #include <stddef.h>	
 #include <stdbool.h>		//Boolean support
 typedef unsigned char byte;
-extern void __cursor_hide(void);
+typedef unsigned int index_t;
+typedef unsigned char color_t;
 
 /* Low-level headers and utilities */
 #include "string.h"
 #include "memorymap.h"	//Memory mapping and handling
 #include "math.h"			//Math processing and casting
-#include "stdio.h"		//Keyboard input and some string processing
+#include "stdio.h"		//Keyboard input and some char* processing
 #include "keyboard.h"	//Keyboard definition and init
 
 /* Mid-level processing */
@@ -54,6 +55,7 @@ void boot(void)
 	setcolor(C_TERMINAL);
 }
 
+extern "C"	//cdecl export
 void kmain(void) 
 {
 	memorymap_init();
@@ -63,7 +65,9 @@ void kmain(void)
 	while(1) {
 		//newline();
 		print("\n> ");
-		process_raw_input(scan());
+		string input = scan();
+		print("\n: "); print(input);
+		process_raw_input(input);
 	}
 	return;
 }

@@ -1,54 +1,103 @@
 /*
  *		Popcorn Kernel
  *			File:		string.h
- *			Purpose:	string-related functions
+ *			Purpose:	Define a string object
  */
- 
-typedef char*  string;
- 
-bool strcomp(const string a, const string b)
+
+class string {
+private:
+	size_t length;
+	char contents[];
+
+public:
+	/* Constructors */
+	string();
+	
+	/* Operators */
+	bool operator==(string);
+	char operator[](size_t);
+	string operator=(const char[]);
+	
+	/* Data */
+	size_t size();
+	string word(size_t);
+	size_t wordcount();
+	
+	/* Stack functions */
+	void push(char);
+	char pop();
+	char peek();
+	
+};
+
+void string::push(char c)
 {
-	int i;
-	for(i=0; a[i] == b[i]; i++) {
-		if(a[i] == '\0' || b[i] == '\0') break;
-	}
-   
-   if(a[i]=='\0' && b[i]=='\0') {
-    	return true;
-	}
-	else {
-		return false;
-	}
+	contents[length] = c;
+	length++;
 }
 
-int8_t strwordcount(const string str)
+char string::pop()
 {
-	int8_t count=1;
-	for(int8_t i=0; str[i] != '\0'; i++) {
-		if(str[i] == ' ') count++;
+	length--;
+	char c = contents[length];
+	contents[length] = '\0';
+	return c;
+}
+
+char string::peek()
+{
+	return contents[length-1];
+}
+ 
+bool string::operator==(string str)
+{
+	if(str.size() != length) return false;
+	for(int i=0; i<str.size() && i<length; i++)
+	{
+		if(str[i] != contents[i]) return false;
+		else continue;
+	}
+	return true;
+}
+
+size_t string::size()
+{
+	return length;
+}
+
+char string::operator[](size_t index)
+{
+	if(index > length-1) return '\0';
+	else return contents[index];
+}
+
+
+
+size_t string::wordcount()
+{
+	int count=1;
+	for(int i=0; i < length; i++) {
+		if(contents[i] == ' ') { count++; }
 	}
 	return count;
 }
 
-string strword(const string str, int8_t index) {
-	static string word;
-	int8_t current_index=0;
-	int8_t word_at=0;
+string string::word(size_t target_index)
+{
+	string word;
+	size_t word_index=0;
 	
-	for(int8_t i=0; str[i] != '\0'; i++) {
-		if(str[i] == ' ') {	//Start of new word
-			word_at++;
-			i++; //Skip the space so it doesn't appear in the string
+	for(size_t i=0; i < length; i++) {
+		
+		if(contents[i] == ' ') {
+			word_index++;
 		}
-		if(word_at == index) {	//Found target word, start copying into new array
-			word[current_index] = str[i];
-			current_index++;
+		else if(word_index == target_index) {
+			word.push(contents[i]);
 		}
-	
 		
 	}
 	
-	word[current_index] = '\0'; //Null-terminate string
 	return word;
 }
 

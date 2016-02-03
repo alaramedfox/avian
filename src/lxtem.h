@@ -32,13 +32,14 @@ void process_raw_input(const string);		//Raw string from keyboard
 
 void process_raw_input(const string input)
 {
-	string first_word = strword(input,0);
-	if(strcomp(first_word,"clear")) 		{ clear(); }
-	else if(strcomp(first_word,"l")) 	{ lxtem_list(input); }
-	else if(strcomp(first_word,"t"))		{ lxtem_transfer(input); }
-	else if(strcomp(first_word,"x"))		{ lxtem_exec(input); }
-	else if(strcomp(first_word,"e"))		{ lxtem_edit(input); }
-	else if(strcomp(first_word,"help")) { lxtem_help_basic(); }
+	string first_word = input.word(0);
+	
+		  if(first_word == "clear") 	{ clear(); }
+	else if(first_word == "l") 		{ lxtem_list(input); }
+	else if(first_word == "t")			{ lxtem_transfer(); }
+	else if(first_word == "x")			{ lxtem_exec(); }
+	else if(first_word == "e")			{ lxtem_edit(input); }
+	else if(first_word == "help") 	{ lxtem_help_basic(); }
 	else {
 		lxtem_help_unknown(first_word);
 	}

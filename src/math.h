@@ -18,8 +18,8 @@ string itos(int32_t i)
 		NEGATIVE_FLAG = true;
 	}
 	
-	string temp = {""};
-	static string str;
+	char temp[] = "";
+	string str;
 	size_t str_size = 0;
 	while(i>0)
 	{

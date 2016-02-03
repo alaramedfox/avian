@@ -26,8 +26,7 @@
 #define C_CRITICAL	0x4F
 #define C_INV			0x70
 #define C_BLINK		0x8F
-
-typedef unsigned char color_t;
+#define C_ERROR		(color_t)0x4F
 
 color_t palette(color_t,color_t);
 

@@ -8,9 +8,9 @@
 #define INTERRUPT_GATE 0x8e
 #define KERNEL_CODE_SEGMENT_OFFSET 0x08
 
-extern byte __read_port(int16_t port);
-extern void __write_port(int16_t port, byte data);
-extern void __load_idt(int32_t *iptr);
+extern "C" byte __read_port(int16_t port);
+extern "C" void __write_port(int16_t port, byte data);
+extern "C" void __load_idt(int32_t *iptr);
 
 struct IDT_entry {
 	int16_t offset_lowerbits;
