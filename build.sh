@@ -4,62 +4,132 @@ GRN='\033[0;32m'
 RED='\033[0;31m'
 BLK='\033[0m'
 
-BADGE="${GRN} INFO ${BLK}"
+BADGE="${GRN} BUILD ${BLK}"
 WARN="${RED} WARNING ${BLK}"
-VERSION="Builder v2.2"
+R="${RED}*${BLK}"
+VERSION="Popcorn Builder Tool v3.2"
+SWITCH=$1
+TARGET=$2
 
-ARG1=$1
-
-# Switches:
-#	-u		Update popcorn.img
-#	-r		Reinstall grub to popcorn.img
+# Syntax: 'build [-switch] target
+#	Switches: 
+#	-image		Update usb128.img
+#	-reinstall	Reinstall grub to popcorn.img
 #	-w		Write popcorn.img to /dev/sda
+#	-e		Execute emulator
+#	-s		Write to stable binary
 
-function build {
-	clear
-	printf "[${BADGE}] ${VERSION}\n"
-	if assemble && compile && linker && booter; then
-		printf "[${BADGE}] Running kernel emulator...\n"
-		qemu-system-i386 -fda popcorn.img --no-kvm
-		printf "[${BADGE}] Finished.\n"
-	else
-		printf "[${BADGE}]${RED} Build failed! ${BLK}\n"
+function printhelp {
+	printf "\n"
+	printf "$GRN--${VERSION}--$BLK\n"
+	printf "Syntax:  'build [-switch] [target]'\n"
+	printf " -c  --compile     Compile to kernel [target]\n"
+	printf " -i  --image       Update kernel [target] on local image\n"
+	printf "$R-d  --device      Update kernel [target] on device\n"
+	printf "$R-w  --write       Write local image to device\n"
+	printf " -h  --help        Print this text\n"
+	printf " -q  --qemu-img    Run QEMU using image\n"
+	printf "$R-Q  --qemu-dev    Run QEMU using device\n"
+	printf "Valid targets: 'stable', 'beta' (default)\n"
+	printf "Commands with ($R) may require root password\n\n"
+}
+
+function main {
+	if [[ "$SWITCH" = "-c" || "$SWITCH" = "--compile" ]]; then
+		assemble && compile && link
+	fi
+	
+	if [[ "$SWITCH" = "-i" || "$SWITCH" = "--image" ]]; then
+		image
+	fi
+	
+	if [[ "$SWITCH" = "-d" || "$SWITCH" = "--device" ]]; then
+		device
+	fi
+	
+	if [[ "$SWITCH" = "-w" || "$SWITCH" = "--write" ]]; then
+		writeimg
+	fi
+	
+	if [[ "$SWITCH" = "-q" || "$SWITCH" = "--qemu-img" ]]; then
+		qemuimage
+	fi
+	
+	if [[ "$SWITCH" = "-Q" || "$SWITCH" = "--qemu-dev" ]]; then
+		qemudev
+	fi
+	
+	if [[ "$SWITCH" = "-h" || "$SWITCH" = "--help" || "$SWITCH" = "" ]]; then
+		printhelp
 	fi
 }
 
 function assemble {
-	printf "[${BADGE}] Assembling...\n"
+	printf "[${BADGE}] Assembling\n"
 	nasm -f elf src/boot.asm -o obj/boot.o
 }
 
 function compile {
-	printf "[${BADGE}] Compiling...\n"
-	#g++ -m32 -c src/main.c -o obj/kernel.o -ffreestanding -Wall -Wextra -Werror -O1
+	printf "[${BADGE}] Compiling\n"
 	g++ -m32 -c src/main.c -o obj/kernel.o -std=c++03 -ffreestanding -Wfatal-errors -Wall -Wextra -Werror
 }
 
-function linker {
-	printf "[${BADGE}] Linking...\n"
-	ld -m elf_i386 -A i386 -T linker.ld -o bin/kernel obj/boot.o obj/kernel.o
+function link {
+	if [ "$TARGET" = "stable" ] ; then
+		printf "[$BADGE] Linking stable kernel\n"
+		ld -m elf_i386 -A i386 -T linker.ld -o bin/kernel-stable obj/boot.o obj/kernel.o
+	else
+		printf "[$BADGE] Linking beta kernel\n"
+		ld -m elf_i386 -A i386 -T linker.ld -o bin/kernel-beta obj/boot.o obj/kernel.o
+	fi
 }
 
-function booter {
-	printf "[${BADGE}] Creating bootable image...\n"
-	sudo mount popcorn.img -o loop /media/floppy
-	sudo cp bin/kernel /media/floppy/boot/kernel/
-	sudo mv /media/floppy/boot/kernel/kernel /media/floppy/boot/kernel/popcorn-1.2.bin
-	sudo umount /media/floppy
+function device {
+	sudo mount /dev/sda1 /media/usb128/sda
+	if [ "$TARGET" = "stable" ] ; then
+		printf "[$BADGE] Writing stable kernel to USB\n"
+		sudo cp bin/kernel-stable /media/usb128/sda/boot/popcorn-stable
+	else
+		printf "[$BADGE] Writing beta kernel to USB\n"
+		sudo cp bin/kernel-beta /media/usb128/sda/boot/popcorn-beta
+	fi
+	sudo umount /media/usb128/sda
 }
 
-function tousb {
-		sudo mount /dev/sda -o loop /media/USB/
-		if sudo cp bin/kernel /media/USB/boot/kernel/;
-		then printf "[${BADGE}] Writing bootable image to USB drive /dev/sda...\n"
-		else printf "[${INFO}] Failed to write!\n"
-		fi
-		sudo mv /media/USB/boot/kernel/kernel /media/USB/boot/kernel/popcorn-1.2.bin
+function image {
+	sudo mount usb128.img /media/usb128/sda
+	if [ "$TARGET" = "stable" ] ; then
+		printf "[$BADGE] Writing stable kernel to usb128.img\n"
+		sudo cp bin/kernel-stable /media/usb128/sda/boot/popcorn-stable
+	else
+		printf "[$BADGE] Writing beta kernel to usb128.img\n"
+		sudo cp bin/kernel-beta /media/usb128/sda/boot/popcorn-beta
+	fi
+	sudo umount /media/usb128/sda
+}
+
+function writeimg {
+	printf "[$BADGE] Writing local image to /dev/sda. This may take a while.\n"
+	printf "    (Note: This may require a root password)\n"
+	sudo umount /dev/sda
+	sudo umount usb128.img
+	printf "[$BADGE] Backing up...n"
+	sudo dd if=/dev/sda of=usb128.img.backup
+	printf "[$BADGE] Writing...\n"
+	sudo dd if=usb128.img of=/dev/sda
+}
+
+function qemuimage {
+	printf "[$BADGE] Qemu: i386, usb128.img\n"
+	qemu-system-i386 -hda usb128.img --no-kvm
+}
+
+function qemudev {
+	printf "[$BADGE] Qemu: i386, /dev/sda\n"
+	
+	sudo qemu-system-i386 -hda usb128.img --no-kvm
 }
 
 # Call the build process
-build
+main
  

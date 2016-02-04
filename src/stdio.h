@@ -181,8 +181,7 @@ namespace stdin
 		
 			if(MEMORY.FLAGS.repaint)	{ //Only update screen if a key was pressed
 				switch(MEMORY.GLOBAL.echostate) {
-					case ECHO: 		stdout::print(MEMORY.IO.instream); 
-										stdout::print(" ");
+					case ECHO: 		stdout::print(MEMORY.IO.instream);
 										break;
 					case PASSWD: 	for(size_t i=0;i<MEMORY.IO.instream.size();i++)
 							 			{ stdout::print("*"); } 							break;

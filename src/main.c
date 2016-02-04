@@ -46,12 +46,13 @@ void boot(void)
 	idt_init();
 	kb_init();
 	stdout::clear();
+	stdin::clear();
 	stdout::setcolor(C_BLUESCR);
 	
-	for(count_t i=0;i<80;i++) 	 { stdout::print(" "); }
-	for(count_t i=0;i<80*4;i++) { stdout::print(" "); }
-	for(count_t i=0;i<80;i++) 	 { stdout::print(" "); }
-	stdout::move(1,3); stdout::print("Welcome to the Popcorn Kernel v1.2");
+	//for(count_t i=0;i<80;i++) 	 { stdout::print(" "); }
+	//for(count_t i=0;i<80*4;i++) { stdout::print(" "); }
+	//for(count_t i=0;i<80;i++) 	 { stdout::print(" "); }
+	stdout::move(1,3); stdout::print("Welcome to the Popcorn Kernel v1.3");
 	stdout::move(2,5); stdout::print("Initializing IRQ...");
 	stdout::move(3,5); stdout::print("Initializing keyboard driver...");
 	stdout::move(4,5); stdout::print("Using the LXTEM command enviornment");
@@ -67,7 +68,7 @@ void kmain(void)
 		//newline();
 		stdout::print("\n> ");
 		string input = stdin::scan();
-		//stdout::print("\n: "); stdout::print(input);
+		stdout::print("\n: "); stdout::print(input);
 		process_raw_input(input);
 	}
 	return;
