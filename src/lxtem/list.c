@@ -60,7 +60,7 @@ void lxtem_list(string args)
 	stdout::print(")");
 	if(args.wordcount() > 1) {
 		/* Process arguments */
-		string arg1 = args.word(1);
+		string arg1 = args.getword(1);
 		if(arg1[0] == ':') {
 			lxtem_list_main(arg1);
 		}

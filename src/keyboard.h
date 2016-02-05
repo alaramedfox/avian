@@ -22,7 +22,7 @@ extern "C" //cdecl export
 void keyboard_driver(void)
 {
 	/* Do not continue if system isn't listening */
-	//if(MEMORY.FLAGS.listen == false) { return; }
+	if(MEMORY.FLAGS.listen == false) { return; }
 	byte status = __read_port(KEYBOARD_STATUS_PORT);
 	int16_t keycode;
 	char key;

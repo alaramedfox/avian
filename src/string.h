@@ -19,11 +19,13 @@ public:
 	char operator[](size_t);
 	string operator=(char*);
 	string operator=(string);
+	string operator+(string);
+	string operator+(char*);
 	
 	/* Data */
 	void clear();
 	size_t size();
-	string word(size_t);
+	string getword(size_t);
 	size_t wordcount();
 	
 	/* Stack functions */
@@ -59,15 +61,30 @@ void string::push(char c)
 
 char string::pop()
 {
+	char c = contents[length-1];
 	length--;
-	char c = contents[length];
-	contents[length] = '\0';
 	return c;
 }
 
 char string::peek()
 {
 	return contents[length-1];
+}
+
+string string::operator+(string str)
+{
+	for(size_t i=0; i<str.size(); i++) {
+		this->push(str[i]);
+	}
+	return *this;
+}
+
+string string::operator+(char* c_str)
+{
+	for(size_t i=0; c_str[i] != '\0'; i++) {
+		this->push(c_str[i]);
+	}
+	return *this;
 }
 
 string string::operator=(char* c_str)
@@ -121,9 +138,9 @@ size_t string::wordcount()
 	return count;
 }
 
-string string::word(size_t target_index)
+string string::getword(size_t target_index)
 {
-	string word;
+	string w;
 	size_t word_index=0;
 	
 	for(size_t i=0; i < length; i++) {
@@ -131,12 +148,12 @@ string string::word(size_t target_index)
 		if(contents[i] == ' ') {
 			word_index++;
 		}
-		else if(word_index == target_index) {
-			word.push(contents[i]);
+		if(word_index == target_index) {
+			w.push(contents[i]);
 		}
 		
 	}
 	
-	return word;
+	return w;
 }
 

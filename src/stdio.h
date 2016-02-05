@@ -87,7 +87,7 @@ namespace stdout
 		MEMORY.INDEX.vram = 0;
 		setcolor(C_TERMINAL);
 		for(count_t i=0; i<VRAM_CHARS; i++) {
-			write(' ');
+			write('.');
 			MEMORY.INDEX.vram++;
 		}
 		MEMORY.INDEX.vram = 0;
@@ -168,8 +168,9 @@ namespace stdin
 	void push(char);								//Push character to stdin
 	char pop(void);								//Remove and return last char in stdin
 	char peek(void);								//Return but do not remove last char
+	string scan(void);
 	
-	string scan(void) 
+	string scan() 
 	{
 		MEMORY.FLAGS.listen = true;						//Set flag to listen for input
 		MEMORY.FLAGS.repaint = true;					//Flag for repaint initially
@@ -181,7 +182,8 @@ namespace stdin
 		
 			if(MEMORY.FLAGS.repaint)	{ //Only update screen if a key was pressed
 				switch(MEMORY.GLOBAL.echostate) {
-					case ECHO: 		stdout::print(MEMORY.IO.instream);
+					case ECHO:		stdout::print(MEMORY.IO.instream);
+										stdout::write(' ');
 										break;
 					case PASSWD: 	for(size_t i=0;i<MEMORY.IO.instream.size();i++)
 							 			{ stdout::print("*"); } 							break;
@@ -189,8 +191,11 @@ namespace stdin
 					default: 		/* print(MEMORY.IO.stdin); */						break;
 				}
 				MEMORY.FLAGS.repaint = false; 			//De-flag the update flag
+				
+				
 			}
 			move_cursor(THIS_ROW,THIS_COL+MEMORY.IO.instream.size()); //Print the blinking text cursor
+			
 		
 		} /* Loop ends when user presses return */
 		MEMORY.FLAGS.listen = false;					//De-flag input polling
@@ -211,9 +216,6 @@ namespace stdin
 		MEMORY.FLAGS.repaint = true;			//Set repaint flag
 		if(MEMORY.IO.instream.size() < STD_MAX) {
 			MEMORY.IO.instream.push(c);
-		} 
-		else {
-			push(STD_MAX-2);
 		}
 	}
 

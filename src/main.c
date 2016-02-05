@@ -27,6 +27,7 @@
 #include <stddef.h>	
 #include <stdbool.h>		//Boolean support
 typedef unsigned char byte;
+typedef unsigned short word;
 typedef unsigned int count_t;
 typedef unsigned char color_t;
 
@@ -44,7 +45,7 @@ void boot(void)
 {
 	MEMORY.init();
 	idt_init();
-	kb_init()
+	kb_init();
 	stdout::clear();
 	stdin::clear();
 	stdout::setcolor(C_BLUESCR);
@@ -68,8 +69,7 @@ void kmain(void)
 		//newline();
 		stdout::print("\n> ");
 		string input = stdin::scan();
-		stdout::print("\n: "); stdout::print(input);
+		//stdout::print("\n: "); stdout::print(input);
 		process_raw_input(input);
 	}
-	return;
 }

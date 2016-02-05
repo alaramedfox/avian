@@ -32,7 +32,7 @@ void process_raw_input(string);		//Raw string from keyboard
 
 void process_raw_input(string input)
 {
-	string first_word = input.word(0);
+	string first_word = input.getword(0);
 	
 		  if(first_word == "clear") 	{ stdout::clear(); }
 	else if(first_word == "l") 		{ lxtem_list(input); }
