@@ -4,12 +4,13 @@ GRN='\033[0;32m'
 RED='\033[0;31m'
 BLK='\033[0m'
 
-BADGE="${GRN} BUILD ${BLK}"
+BADGE="${GRN} v3.2 ${BLK}"
 WARN="${RED} WARNING ${BLK}"
 R="${RED}*${BLK}"
 VERSION="Popcorn Builder Tool v3.2"
 SWITCH=$1
 TARGET=$2
+FLAG=$3
 
 # Syntax: 'build [-switch] target
 #	Switches: 
@@ -22,7 +23,7 @@ TARGET=$2
 function printhelp {
 	printf "\n"
 	printf "$GRN--${VERSION}--$BLK\n"
-	printf "Syntax:  'build [-switch] [target]'\n"
+	printf "Syntax:  'build [-switch] [target] [-q/-Q]'\n"
 	printf " -c  --compile     Compile to kernel [target]\n"
 	printf " -i  --image       Update kernel [target] on local image\n"
 	printf "$R-d  --device      Update kernel [target] on device\n"
@@ -34,34 +35,47 @@ function printhelp {
 	printf "Commands with ($R) may require root password\n\n"
 }
 
+function fail {
+	printf "[$RED FAIL $BLK] $1\n"
+}
+
 function main {
-	if [[ "$SWITCH" = "-c" || "$SWITCH" = "--compile" ]]; then
-		assemble && compile && link
-	fi
+		if [[ "$SWITCH" = "-c" || "$SWITCH" = "--compile" ]]; then
+			{ assemble && compile && link; } || { fail "Aborting" && exit; }
+		fi
+
+		if [[ "$SWITCH" = "-i" || "$SWITCH" = "--image" ]]; then
+			image
+		fi
+		
+		if [[ "$SWITCH" = "-d" || "$SWITCH" = "--device" ]]; then
+			device
+		fi
 	
-	if [[ "$SWITCH" = "-i" || "$SWITCH" = "--image" ]]; then
-		image
-	fi
+		if [[ "$SWITCH" = "-w" || "$SWITCH" = "--write" ]]; then
+			writeimg
+		fi
 	
-	if [[ "$SWITCH" = "-d" || "$SWITCH" = "--device" ]]; then
-		device
-	fi
+		if [[ "$SWITCH" = "-q" || "$SWITCH" = "--qemu-img" ]]; then
+			qemuimage
+		fi
+		
+		if [[ "$FLAG" = "-q" || "$FLAG" = "--qemu-img" ]]; then
+			qemuimage
+		fi
+		
+		if [[ "$FLAG" = "-Q" || "$FLAG" = "--qemu-dev" ]]; then
+			qemudev
+		fi
 	
-	if [[ "$SWITCH" = "-w" || "$SWITCH" = "--write" ]]; then
-		writeimg
-	fi
+		if [[ "$SWITCH" = "-Q" || "$SWITCH" = "--qemu-dev" ]]; then
+			qemudev
+		fi
 	
-	if [[ "$SWITCH" = "-q" || "$SWITCH" = "--qemu-img" ]]; then
-		qemuimage
-	fi
-	
-	if [[ "$SWITCH" = "-Q" || "$SWITCH" = "--qemu-dev" ]]; then
-		qemudev
-	fi
-	
-	if [[ "$SWITCH" = "-h" || "$SWITCH" = "--help" || "$SWITCH" = "" ]]; then
-		printhelp
-	fi
+		if [[ "$SWITCH" = "-h" || "$SWITCH" = "--help" || "$SWITCH" = "" ]]; then
+			printhelp
+		fi
+		
 }
 
 function assemble {
@@ -71,7 +85,8 @@ function assemble {
 
 function compile {
 	printf "[${BADGE}] Compiling\n"
-	g++ -m32 -c src/main.c -o obj/kernel.o -std=c++03 -ffreestanding -Wfatal-errors -Wall -Wextra -Werror
+	#echo
+	g++ -m32 -c src/main.c -o obj/kernel.o -std=c++03 -ffreestanding -Wall -Wextra
 }
 
 function link {
@@ -79,8 +94,8 @@ function link {
 		printf "[$BADGE] Linking stable kernel\n"
 		ld -m elf_i386 -A i386 -T linker.ld -o bin/kernel-stable obj/boot.o obj/kernel.o
 	else
-		printf "[$BADGE] Linking beta kernel\n"
-		ld -m elf_i386 -A i386 -T linker.ld -o bin/kernel-beta obj/boot.o obj/kernel.o
+		printf "[$BADGE] Linking stable kernel\n"
+		ld -m elf_i386 -A i386 -T linker.ld -o bin/kernel-beta obj/boot.o obj/kernel.o 
 	fi
 }
 
@@ -89,8 +104,7 @@ function device {
 	if [ "$TARGET" = "stable" ] ; then
 		printf "[$BADGE] Writing stable kernel to USB\n"
 		sudo cp bin/kernel-stable /media/usb128/sda/boot/popcorn-stable
-	else
-		printf "[$BADGE] Writing beta kernel to USB\n"
+		printf "[$BADGE] Writing stable kernel to USB\n"
 		sudo cp bin/kernel-beta /media/usb128/sda/boot/popcorn-beta
 	fi
 	sudo umount /media/usb128/sda
@@ -126,10 +140,10 @@ function qemuimage {
 
 function qemudev {
 	printf "[$BADGE] Qemu: i386, /dev/sda\n"
-	
 	sudo qemu-system-i386 -hda usb128.img --no-kvm
 }
 
 # Call the build process
-main
+main |& grep --color -e 'error\|errors\|warning'
+
  

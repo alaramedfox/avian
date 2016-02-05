@@ -44,7 +44,7 @@ void boot(void)
 {
 	MEMORY.init();
 	idt_init();
-	kb_init();
+	kb_init()
 	stdout::clear();
 	stdin::clear();
 	stdout::setcolor(C_BLUESCR);
