@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 GRN='\033[0;32m'
 RED='\033[0;31m'
@@ -7,143 +8,154 @@ BLK='\033[0m'
 BADGE="${GRN} v3.2 ${BLK}"
 WARN="${RED} WARNING ${BLK}"
 R="${RED}*${BLK}"
-VERSION="Popcorn Builder Tool v3.2"
-SWITCH=$1
-TARGET=$2
-FLAG=$3
-
-# Syntax: 'build [-switch] target
-#	Switches: 
-#	-image		Update usb128.img
-#	-reinstall	Reinstall grub to popcorn.img
-#	-w		Write popcorn.img to /dev/sda
-#	-e		Execute emulator
-#	-s		Write to stable binary
+VERSION="Popcorn Builder Tool v4.0"
+OPTIONS=()
+TARGET="beta"
+FLAGS=()
+DEVICE="/dev/sda1"
+IMAGE="popcorn.img"
 
 function printhelp {
 	printf "\n"
 	printf "$GRN--${VERSION}--$BLK\n"
-	printf "Syntax:  'build [-switch] [target] [-q/-Q]'\n"
-	printf " -c  --compile     Compile to kernel [target]\n"
-	printf " -i  --image       Update kernel [target] on local image\n"
-	printf "$R-d  --device      Update kernel [target] on device\n"
-	printf "$R-w  --write       Write local image to device\n"
-	printf " -h  --help        Print this text\n"
-	printf " -q  --qemu-img    Run QEMU using image\n"
-	printf "$R-Q  --qemu-dev    Run QEMU using device\n"
-	printf "Valid targets: 'stable', 'beta' (default)\n"
-	printf "Commands with ($R) may require root password\n\n"
+	printf "Syntax:  'build TARGET [-OPTION] [FLAGS] ...\n"
+	printf "General options:\n"
+	printf " -h, --help        Print this help text and exit\n"
+	printf " -f, --force       Continue despite any errors\n"
+	printf " -i  [image]       Specify local image\n"
+	printf " -d  [device]      Specify device in /dev/\n"
+	printf "Compilation options:\n"
+	printf " -c                Compile kernel to [target]\n"
+	printf "     strict        Turn gcc warnings into errors\n"
+	printf "     warnings      Enable all gcc warnings\n"
+	printf "     fatal         Fail on first error\n"
+	printf "Device options:\n"
+	printf " -w  FLAGS         Update kernel [target] on device\n"
+	printf "     image         Write kernel to an image (usb-grub.img)\n"
+	printf "     device        Write kernel to a physical drive (/dev/sda1)\n"
+	printf "     update        Write local image to physical drive\n"
+	printf "Emulation options:\n"
+	printf " -q  FLAGS         Execute [target] using QEMU\n"
+	printf "     kernel        Run [target] directly, with no bootloader\n"
+	printf "     local         Run QEMU from local image\n"
+	printf "     external      Run QEMU from external device\n"
+	printf "Valid targets: 'stable', 'beta' (default), and 'alpha'\n"
+}
+
+function main {
+	for i in $@; do
+		case "$i" in
+			"-c") OPTIONS+=" -c " ;;
+			"-w") OPTIONS+=" -w " ;;
+			"-h") OPTIONS+=" -h " ;;
+			"-q") OPTIONS+=" -q " ;;
+			"stable") TARGET="stable" ;;
+			"beta") TARGET="beta" ;;
+			"alpha") TARGET="alpha" ;;
+			*) FLAGS+=" $i " ;;
+		esac
+	done
+	
+	for i in $OPTIONS; do
+		case $i in
+			"-c") assemble && compile && link ;;
+			"-w") writeimg ;;
+			"-h") printhelp ;;
+			"-q") runqemu ;;
+			*) printf "Unknown option '$i'\n" ;;
+		esac
+	done
 }
 
 function fail {
 	printf "[$RED FAIL $BLK] $1\n"
 }
 
-function main {
-		if [[ "$SWITCH" = "-c" || "$SWITCH" = "--compile" ]]; then
-			{ assemble && compile && link; } || { fail "Aborting" && exit; }
-		fi
-
-		if [[ "$SWITCH" = "-i" || "$SWITCH" = "--image" ]]; then
-			image
-		fi
-		
-		if [[ "$SWITCH" = "-d" || "$SWITCH" = "--device" ]]; then
-			device
-		fi
-	
-		if [[ "$SWITCH" = "-w" || "$SWITCH" = "--write" ]]; then
-			writeimg
-		fi
-	
-		if [[ "$SWITCH" = "-q" || "$SWITCH" = "--qemu-img" ]]; then
-			qemuimage
-		fi
-		
-		if [[ "$FLAG" = "-q" || "$FLAG" = "--qemu-img" ]]; then
-			qemuimage
-		fi
-		
-		if [[ "$FLAG" = "-Q" || "$FLAG" = "--qemu-dev" ]]; then
-			qemudev
-		fi
-	
-		if [[ "$SWITCH" = "-Q" || "$SWITCH" = "--qemu-dev" ]]; then
-			qemudev
-		fi
-	
-		if [[ "$SWITCH" = "-h" || "$SWITCH" = "--help" || "$SWITCH" = "" ]]; then
-			printhelp
-		fi
-		
-}
-
 function assemble {
 	printf "[${BADGE}] Assembling\n"
-	nasm -f elf src/boot.asm -o obj/boot.o
+	nasm -f elf src/boot.asm -o obj/boot.o || exit
 }
 
 function compile {
 	printf "[${BADGE}] Compiling\n"
-	#echo
-	g++ -m32 -c src/main.c -o obj/kernel.o -std=c++03 -ffreestanding -Wall -Wextra
+	COMPILE=()
+	for i in $FLAGS; do
+		case $i in
+			"strict") 
+				printf "Compiling with strict errors\n"
+				COMPILE+=" -Werror " ;;
+			"warnings") 
+				printf "Compiling with extra errors\n"
+				COMPILE+=" -Wall -Wextra " ;;
+			"fatal") 
+				printf "Compilation will fail on first error\n"
+				COMPILE+=" -Wfatal-errors " ;;
+		esac
+	done
+	colorg++ -m32 -c src/main.c -o obj/kernel.o ${COMPILE[@]} -std=c++03 -ffreestanding || exit
 }
 
 function link {
-	if [ "$TARGET" = "stable" ] ; then
-		printf "[$BADGE] Linking stable kernel\n"
-		ld -m elf_i386 -A i386 -T linker.ld -o bin/kernel-stable obj/boot.o obj/kernel.o
-	else
-		printf "[$BADGE] Linking stable kernel\n"
-		ld -m elf_i386 -A i386 -T linker.ld -o bin/kernel-beta obj/boot.o obj/kernel.o 
-	fi
+	printf "[$BADGE] Linking $TARGET kernel\n"
+	ld -m elf_i386 -A i386 -T linker.ld -o bin/kernel-$TARGET obj/boot.o obj/kernel.o || exit
 }
 
 function device {
-	sudo mount /dev/sda1 /media/usb128/sda
-	if [ "$TARGET" = "stable" ] ; then
-		printf "[$BADGE] Writing stable kernel to USB\n"
-		sudo cp bin/kernel-stable /media/usb128/sda/boot/popcorn-stable
-		printf "[$BADGE] Writing stable kernel to USB\n"
-		sudo cp bin/kernel-beta /media/usb128/sda/boot/popcorn-beta
+	if [ -f $DEVICE ]; then
+		sudo umount $DEVICE
+		sudo mount $DEVICE /media/usb
+		printf "[$BADGE] Writing $TARGET kernel to device\n"
+		sudo cp "bin/kernel-$TARGET" "/media/usb/boot/popcorn-$TARGET"
+		sudo umount /media/usb
+	else
+		printf "[$BADGE] External device is not plugged in\n"
 	fi
-	sudo umount /media/usb128/sda
 }
 
 function image {
-	sudo mount usb128.img /media/usb128/sda
-	if [ "$TARGET" = "stable" ] ; then
-		printf "[$BADGE] Writing stable kernel to usb128.img\n"
-		sudo cp bin/kernel-stable /media/usb128/sda/boot/popcorn-stable
-	else
-		printf "[$BADGE] Writing beta kernel to usb128.img\n"
-		sudo cp bin/kernel-beta /media/usb128/sda/boot/popcorn-beta
-	fi
-	sudo umount /media/usb128/sda
+	printf "[$BADGE] Writing $TARGET kernel to $IMAGE\n"
+	sudo mount $IMAGE /media/usb
+	sudo cp "bin/kernel-$TARGET" "/media/usb/boot/popcorn-$TARGET"
+	sudo umount /media/usb
+}
+
+function update {
+	printf "[$BADGE] Updating external device from image\n"
+	sudo mount $IMAGE /media/usb
+	sudo mount $DEVICE /media/floppy
+	sudo cp "/media/usb/boot/popcorn-$TARGET" "/media/floppy/boot/popcorn-$TARGET"
+	sudo umount /media/usb
+	sudo umount /media/floppy
 }
 
 function writeimg {
-	printf "[$BADGE] Writing local image to /dev/sda. This may take a while.\n"
-	printf "    (Note: This may require a root password)\n"
-	sudo umount /dev/sda
-	sudo umount usb128.img
-	printf "[$BADGE] Backing up...n"
-	sudo dd if=/dev/sda of=usb128.img.backup
-	printf "[$BADGE] Writing...\n"
-	sudo dd if=usb128.img of=/dev/sda
+	for i in $FLAGS; do
+		case $i in
+			"image") image ;;
+			"device") device ;;
+			"update") update ;;
+		esac
+	done
 }
 
-function qemuimage {
-	printf "[$BADGE] Qemu: i386, usb128.img\n"
-	qemu-system-i386 -hda usb128.img --no-kvm
+function runqemu {
+	for i in $FLAGS; do
+		case $i in
+			"kernel") 
+				printf "Running QEMU using bin/kernel-$TARGET\n"
+				qemu-system-i386 -kernel bin/kernel-$TARGET --no-kvm ;;
+			"local") 
+				printf "Running QEMU using local image $IMAGE\n"
+				#qemu-system-i386 -fda qemu.img -hda $IMAGE --no-kvm ;;
+				qemu-system-i386 -fda popcorn.img --no-kvm;;
+			"external")
+				printf "Running QEMU using external device $DEVICE\n"
+				qemu-system-i386 -hda $DEVICE --no-kvm ;;
+		esac
+	done
 }
 
-function qemudev {
-	printf "[$BADGE] Qemu: i386, /dev/sda\n"
-	sudo qemu-system-i386 -hda usb128.img --no-kvm
-}
+main $@
 
-# Call the build process
-main |& grep --color -e 'error\|errors\|warning'
 
  

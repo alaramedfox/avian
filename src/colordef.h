@@ -1,3 +1,6 @@
+#ifndef COLORDEF_H_INCLUDED
+#define COLORDEF_H_INCLUDED
+
 /*	Popcorn Kernel
  *	  File:		colordef.h
  *	  Purpose:	Define all the color codes
@@ -28,8 +31,6 @@
 #define C_BLINK		0x8F
 #define C_ERROR		(color_t)0x4F
 
-color_t palette(color_t,color_t);
-
 color_t palette(color_t fg, color_t bg)
 {
 	bg = bg << 0x4;	//Shift 4 bits to the left
@@ -42,3 +43,5 @@ color_t invert(color_t color)
 	color_t b = (color & 0xf0); //bitwise AND with 11110000 to get upper bits
 	return palette(b,a);
 }
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef STRING_H_INCLUDED
+#define STRING_H_INCLUDED
+
 /*
  *		Popcorn Kernel
  *			File:		string.h
@@ -157,3 +160,4 @@ string string::getword(size_t target_index)
 	return w;
 }
 
+#endif

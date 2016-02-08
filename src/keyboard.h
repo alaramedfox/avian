@@ -13,10 +13,9 @@ void kb_init(void)
 }
 
 /* Special character handlidng */
-void enter() 			{ stdin::push('\n'); }
-void backspace() 		{ stdin::pop(); }
-void tab() 				{ for(count_t i=0;i<5;i++) stdin::push(' '); }
-void undef_char() 	{ stdin::push('?'); }
+void enter() 			{ stdin.push('\n'); }
+void backspace() 		{ stdin.pop(); }
+void undef_char() 	{ stdin.push('?'); }
 
 extern "C" //cdecl export
 void keyboard_driver(void)
@@ -56,8 +55,8 @@ void keyboard_driver(void)
 			{
 				case '\b': backspace(); 	break;
 				case '0':  undef_char(); 	break;
-			
-				default:   MEMORY.IO.cin = key; 	break;
+				case '\0': break;
+				default:   stdin.push(key); 	break;
 			}
 		}
 		else {

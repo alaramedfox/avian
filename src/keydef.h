@@ -1,3 +1,5 @@
+#ifndef KEYDEF_H_INCLUDED
+#define KEYDEF_H_INCLUDED
 
 const char HLINE1 = 196;
 const char HLINE2 = 205;
@@ -23,6 +25,12 @@ enum __EXTENDEDKEYS
 #define RSHIFT_RELEASE_CODE	182
 
 #define CAPS_PRESS_CODE		11
+
+#define NC 0x0		// '\0' Null character
+#define NL 0xA		// "\n" newline
+#define CR 0xD		// "\r" carriage return
+#define BS 0x8		// "\b" backspace
+#define HT 0x9		// "\t" horizontal tab
 
 struct __KEYMAP 
 {
@@ -54,3 +62,4 @@ struct __KEYMAP KEYMAP = {
 		F11, F12, LGUI, RGUI, APPS
 	}
 };
+#endif

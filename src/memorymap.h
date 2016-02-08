@@ -5,10 +5,6 @@
  */
  
 
-#define VRAM_START	0xb8000				//Actual address of system VRAM
-#define VRAM_LENGTH	80*24*2				//Length of VRAM in bytes
-#define VRAM_CHARS	VRAM_LENGTH/2		//Length of VRAM in words
-
 #define CHAR_NEWLINE 0xA					//Define the newline char '\n'
 #define CHAR_TAB	 0x9						//Define the tab char '\t'
 
@@ -19,7 +15,6 @@
 #define	PASSWD	3
 
 struct __GLOBAL {
-	color_t	color;						//Global standard background color
 	byte	   echostate;					//Whether or not to echo STDIN
 	byte	   tabsize;						//Size of the tabs
 };
@@ -37,7 +32,6 @@ struct __FLAGS {
 };
 
 struct __MEMORY {
-	__INDEX		INDEX;
 	__FLAGS		FLAGS;
 	__GLOBAL		GLOBAL;
 	
@@ -47,10 +41,6 @@ struct __MEMORY {
 
 void __MEMORY::init()
 {
-	IO.vram 			= (byte*)0xb8000;
-	IO.instream		= string();
-	GLOBAL.color 	= 0x07;
-	INDEX.vram	 	= 0;
 	FLAGS.listen 	= false;
 	FLAGS.repaint 	= false;
 	FLAGS.keypress = false;

@@ -1,12 +1,12 @@
 ;;kernel.asm
-bits 32					;nasm directive - 32 bit
+bits 32							;nasm directive - 32 bit
 section .text
-	align 4				;multiboot spec
-	dd 	0x1BADB002          ;magic
-	dd 	0x00                ;flags
-	dd - (0x1BADB002 + 0x00) ;checksum. m+f+c should be zero
+	align 4						;multiboot spec
+	dd 	0x1BADB002        ;magic
+	dd 	0x00              ;flags
+	dd - (0x1BADB002 + 0x00);checksum. m+f+c should be zero
 
-global 	start			;kernel entry point
+global 	start					;kernel entry point
 global	keyboard_handler	;Other keyboard driver (?)
 global 	__load_idt			;hardware interrupts
 global 	__read_port			;read hardware data
@@ -15,13 +15,13 @@ global	__i_listen			;Start listening for interrupts
 global	__i_ignore			;Quit listening for interrupts
 global	__shut_down			;Shut down the system
 
-extern 	kmain	       		;kmain is the C entry point
+extern 	main	       		;kmain is the C entry point
 extern	keyboard_driver	;Keyboard driver
 
 start:
 	cli 							;block interrupts
 	mov 	esp, stack_space	;set stack pointer
-	call	kmain					;Invoke the C kernel
+	call	main					;Invoke the C kernel
 	hlt		 					;halt the CPU
 	
 __i_listen:

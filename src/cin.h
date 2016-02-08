@@ -1,3 +1,5 @@
+#ifndef CIN_H_INCLUDED
+#define CIN_H_INCLUDED
 /*
  *		Popcorn Kernel
  *			File:		stdin.c
@@ -6,34 +8,34 @@
 
 #include "string.h"
  
-class __STDIN
+class CIN
 {
 	private:
 	string buffer;
 
 	public:
-	void clear(void);					//Flush the input buffer
-	void push(char);					//Push character to stdin
-	char pop(void);					//Remove and return last char in stdin
-	char peek(void);					//Return but do not remove last char
-	string scan(void);
-}
+	void clear	(void);				//Flush the input buffer
+	void push	(char);				//Push character to stdin
+	char pop		(void);				//Remove and return last char in stdin
+	char peek	(void);				//Return but do not remove last char
+	string scan	(void);				//Pause execution and return a line of input
+	char getch  (void);				//Pause execution and return a single character
+} stdin;
 
 
-string __STDIN::scan() 
+string CIN::scan() 
 {
 	MEMORY.FLAGS.listen = true;			//Set flag to listen for input
 	MEMORY.FLAGS.repaint = true;			//Flag for repaint initially
 	clear();										//Make sure stdin is empty before reading
 	int16_t location = stdout.getloc();	//Remember starting vptr location
-	string buffer;
 	while(buffer.peek() != '\n') {
 		
 		if(MEMORY.FLAGS.repaint) {
 			stdout.move(location);
 			stdout.print(buffer);
 			MEMORY.FLAGS.repaint = false;
-			move_cursor(THIS_ROW,THIS_COL);
+			move_cursor(stdout.getrow(),stdout.getcol());
 		}
 		
 	
@@ -42,25 +44,27 @@ string __STDIN::scan()
 	return buffer;
 }
 
-void __STDIN::clear(void) 
+void CIN::clear(void) 
 {
 	MEMORY.FLAGS.repaint = true;
 	buffer.clear();	//Reset to empty string
 }
 
-void __STDIN::push(char c)
+void CIN::push(char c)
 {
 	MEMORY.FLAGS.repaint = true;			//Set repaint flag
 	buffer.push(c);
 }
 
-char __STDIN::pop(void) 
+char CIN::pop(void) 
 {
 	MEMORY.FLAGS.repaint = true;	//Flag for repaint
 	return buffer.pop();
 }
 
-char __STDIN::peek(void) 
+char CIN::peek(void) 
 {
 	return buffer.peek();
 }
+
+#endif

@@ -7,18 +7,5 @@
 #define STD_MAX	256			//Maximum characters for input 
 #define ENTER_KEY_CODE 0x1C
 
-#include "vga.c"
-#include "cin.c"
-
-#include "colordef.h"						//Color #DEFINEs and functions
-#include "escapes.h"
-
-
-namespace iostream 
-{
-	__STDOUT stdout;
-	__STDIN stdin;
-	
-}
-
-
+#include "vga.h"
+#include "cin.h"

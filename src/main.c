@@ -38,40 +38,42 @@ typedef unsigned char color_t;
 #include "stdio.h"		//Keyboard input and some char* processing
 #include "keyboard.h"	//Keyboard definition and init
 
-using namespace iostream;
-
 /* Mid-level processing */
-#include "lex/lxtem.h"		//Core command library
+//#include "lex/lxtem.h"		//Core command library
 
-void boot(void) 
+void init(void) 
 {
-	MEMORY.init();
-	idt_init();
-	kb_init();
-	stdout.clear();
-	stdin.clear();
-	stdout.setcolor(C_BLUESCR);
-	
-	//for(count_t i=0;i<80;i++) 	 { stdout::print(" "); }
-	//for(count_t i=0;i<80*4;i++) { stdout::print(" "); }
-	//for(count_t i=0;i<80;i++) 	 { stdout::print(" "); }
-	stdout::move(1,3); stdout::print("Welcome to the Popcorn Kernel v1.3");
-	stdout::move(2,5); stdout::print("Initializing IRQ...");
-	stdout::move(3,5); stdout::print("Initializing keyboard driver...");
-	stdout::move(4,5); stdout::print("Using the LXTEM command enviornment");
-	stdout::setcolor(C_TERMINAL);
-	
+	MEMORY.init();		//Init global values
+	stdin = CIN();		//Init standard input stream
+	stdout = VGA();	//Init standard output stream (screen)
+	idt_init();			//Init interrupt controller
+	kb_init();			//Init keyboard driver
+	stdout.clear();	//Fill screen with blank spaces
+	//stdin.clear();		//Make sure input buffer is clear
 }
 
-extern "C"	//cdecl export
-void kmain(void) 
+void bootscreen(void)
 {
-	boot();
+	stdout.setcolor(C_BLUESCR);
+	for(count_t i=0; i<C.cols; i++) { stdout.addch(HLINE1); }
+	for(count_t i=0; i<C.cols*4; i++) { stdout.addch(' '); }
+	for(count_t i=0; i<C.cols; i++) { stdout.addch(HLINE1); }
+	
+	stdout.move(1,0);
+	stdout.print("\tPopcorn Kernel v1.4\n");
+	stdout.print("\tGNU Public Liscense -- Bryan Webb, 2016\n");
+}
+
+extern "C" void main(void) 
+{
+	init();
+	bootscreen();
+	//move_cursor(10,1);
 	while(1) {
-		//stdout::newline();
-		stdout::print("\n> ");
-		stdin::scan();
-		//stdout::print("\n: "); stdout::print(input);
+		//stdout.newline();
+		stdout.print("\n> ");
+		stdin.scan();
+		//stdout.print("\n: "); stdout.print(input);
 		//process_raw_input(input);
 	}
 }
