@@ -31,13 +31,8 @@ void keyboard_driver(void)
 
 	/* Lowest bit of status will be set if buffer is not empty */
 	if (status & 0x01) {
+		MEMORY.FLAGS.keypress = true;
 		keycode = __read_port(KEYBOARD_DATA_PORT);
-		if(MEMORY.FLAGS.debugmode) {
-			//clear();
-			stdout::print("\n(");
-			stdout::print(itos(keycode)); 
-			stdout::print(")     ");
-		}
 		
 		/* Consider keycodes */
 		if(keycode == LSHIFT_RELEASE_CODE || keycode == RSHIFT_RELEASE_CODE) {
@@ -59,11 +54,10 @@ void keyboard_driver(void)
 		
 			switch(key)
 			{
-				case '\n': enter(); 		   break;
 				case '\b': backspace(); 	break;
 				case '0':  undef_char(); 	break;
 			
-				default:   stdin::push(key); 	break;
+				default:   MEMORY.IO.cin = key; 	break;
 			}
 		}
 		else {

@@ -38,7 +38,6 @@ public:
 string::string()
 {
 	length=0;
-	contents[0] = '\0';
 }
 
 string::string(const char* c)
@@ -62,6 +61,7 @@ void string::push(char c)
 char string::pop()
 {
 	char c = contents[length-1];
+	contents[length-1] = '\0';
 	length--;
 	return c;
 }
@@ -123,7 +123,7 @@ size_t string::size()
 
 char string::operator[](size_t index)
 {
-	if(index > length-1) return '\0';
+	if(index > length-1) return '!';
 	else return contents[index];
 }
 

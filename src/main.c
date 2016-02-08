@@ -66,10 +66,10 @@ void kmain(void)
 {
 	boot();
 	while(1) {
-		//newline();
+		//stdout::newline();
 		stdout::print("\n> ");
-		string input = stdin::scan();
+		stdin::scan();
 		//stdout::print("\n: "); stdout::print(input);
-		process_raw_input(input);
+		//process_raw_input(input);
 	}
 }
