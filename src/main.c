@@ -38,17 +38,19 @@ typedef unsigned char color_t;
 #include "stdio.h"		//Keyboard input and some char* processing
 #include "keyboard.h"	//Keyboard definition and init
 
+using namespace iostream;
+
 /* Mid-level processing */
-#include "lxtem.h"		//Core command library
+#include "lex/lxtem.h"		//Core command library
 
 void boot(void) 
 {
 	MEMORY.init();
 	idt_init();
 	kb_init();
-	stdout::clear();
-	stdin::clear();
-	stdout::setcolor(C_BLUESCR);
+	stdout.clear();
+	stdin.clear();
+	stdout.setcolor(C_BLUESCR);
 	
 	//for(count_t i=0;i<80;i++) 	 { stdout::print(" "); }
 	//for(count_t i=0;i<80*4;i++) { stdout::print(" "); }

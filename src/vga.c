@@ -4,6 +4,23 @@
  *			Purpose:	Video output handler
  */
  
+extern "C" void __write_port(int16_t,byte);
+
+/* void update_cursor(int row, int col)
+ * by Dark Fiber
+ */
+void move_cursor(int row, int col)
+{
+	unsigned short position=(row*80) + col;
+
+	// cursor LOW port to vga INDEX register
+	__write_port(0x3D4, 0x0F);
+	__write_port(0x3D5, (byte)(position&0xFF));
+	// cursor HIGH port to vga INDEX register
+	__write_port(0x3D4, 0x0E);
+	__write_port(0x3D5, (byte)((position>>8)&0xFF));
+}
+ 
 #define THIS_COL	MEMORY.INDEX.vram%(VGA_C)			//Current column in VRAM
 #define THIS_ROW	MEMORY.INDEX.vram/(VGA_C)			//Current row in VRAM
  
@@ -29,6 +46,11 @@ class __STDOUT
 	/* Constructors */
 	__STDOUT();
 	
+	/* Setters and getters */
+	size_t getcol	(void);				//Safely return the current column of the cursor
+	size_t getrow	(void);				//Safely return the current row of cursor
+	size_t getloc 	(void);				//Safely return the 1D vptr location
+	
 	/* Screen manipulation */
 	void scroll	(void);				//Scrolling screen support
 	void clear	(void);				//Clear the screen
@@ -40,8 +62,6 @@ class __STDOUT
 	/* Printing */
 	void write	(char);				//Safely write to vram[vptr]
 	void color	(color_t);			//Safely write to vram[vptr+1]
-	byte getcol	(void);				//Safely return the current column of the cursor
-	byte getrow	(void);				//Safely return the current row of cursor
 	void print	(string);			//Prints a string starting at cursor
 	void printf	(color_t,string);	//Print with basic formatting
 
@@ -52,6 +72,21 @@ __STDOUT::__STDOUT()
 	vram = (byte*)0xb8000;
 	vptr = 0;
 	globalcolor = 0x07;
+}
+
+size_t __STDOUT::getcol()
+{
+	return THIS_COL;
+}
+
+size_t __STDOUT::getrow()
+{
+	return THIS_ROW;
+}
+
+size_t __STDOUT::getloc()
+{
+	return vptr;
 }
 
 void __STDOUT::newline(void) 
