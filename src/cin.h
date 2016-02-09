@@ -20,51 +20,59 @@ class CIN
 	char peek	(void);				//Return but do not remove last char
 	string scan	(void);				//Pause execution and return a line of input
 	char getch  (void);				//Pause execution and return a single character
+	
+	string getbuffer(void) { return buffer; }
 } stdin;
 
 
 string CIN::scan() 
 {
+	/*
 	MEMORY.FLAGS.listen = true;			//Set flag to listen for input
-	MEMORY.FLAGS.repaint = true;			//Flag for repaint initially
-	clear();										//Make sure stdin is empty before reading
+	buffer = string();						//Make sure stdin is empty before reading
 	int16_t location = stdout.getloc();	//Remember starting vptr location
-	while(buffer.peek() != '\n') {
+	move_cursor(stdout.getrow(), stdout.getcol());
+	while(true) {
 		
-		if(MEMORY.FLAGS.repaint) {
-			stdout.move(location);
-			stdout.print(buffer);
+		if(buffer.peek() == '\n') {
+			buffer.pop();
 			MEMORY.FLAGS.repaint = false;
+			MEMORY.FLAGS.listen = false;
+			return buffer;
+			break;
+		}
+		if(MEMORY.FLAGS.repaint) {
+			MEMORY.FLAGS.repaint = false;
+			stdout.move(location);
+			stdout.print_raw(buffer);
+			stdout.write(' ');
 			move_cursor(stdout.getrow(),stdout.getcol());
 		}
-		
+			
 	
-	} /* Loop ends when user presses return */
-	MEMORY.FLAGS.listen = false;					//De-flag input polling
-	return buffer;
+	} */ /* Loop ends when user presses return */
 }
 
 void CIN::clear(void) 
 {
-	MEMORY.FLAGS.repaint = true;
-	buffer.clear();	//Reset to empty string
+	buffer = string();	//Reset to empty string
 }
 
 void CIN::push(char c)
 {
 	MEMORY.FLAGS.repaint = true;			//Set repaint flag
-	buffer.push(c);
+	//buffer.push(c);
 }
 
 char CIN::pop(void) 
 {
 	MEMORY.FLAGS.repaint = true;	//Flag for repaint
-	return buffer.pop();
+	//return buffer.pop();
 }
 
 char CIN::peek(void) 
 {
-	return buffer.peek();
+	//return buffer.peek();
 }
 
 #endif

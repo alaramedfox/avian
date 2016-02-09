@@ -10,12 +10,13 @@
 class string {
 private:
 	size_t length;
-	char* contents;
+	char *contents;
 
 public:
 	/* Constructors */
 	string();
 	string(const char*);
+	~string();
 	
 	/* Operators */
 	bool operator==(string);
@@ -26,86 +27,41 @@ public:
 	string operator+(char*);
 	
 	/* Data */
-	void clear();
 	size_t size();
 	string getword(size_t);
 	size_t wordcount();
 	
-	/* Stack functions */
-	void push(char);
-	char pop();
-	char peek();
 	
 };
 
 string::string()
 {
-	length=0;
+	length = 0;
+	contents = (char*)malloc(0);
+}
+
+string::~string()
+{
+	free(contents);
 }
 
 string::string(const char* c)
 {
-	for(count_t i=0; c[i] != '\0'; i++) {
-		push(c[i]);
+	length = strlen(c)-1;
+	contents = (char*)malloc(length);
+	for(count_t i=0; i<strlen(c); i++) {
+		contents[i] = c[i];
 	}
-}
-
-void string::clear()
-{
-	length = 0;
-}
-
-void string::push(char c)
-{
-	contents[length] = c;
-	length++;
-}
-
-char string::pop()
-{
-	char c = contents[length-1];
-	contents[length-1] = '\0';
-	length--;
-	return c;
-}
-
-char string::peek()
-{
-	return contents[length-1];
-}
-
-string string::operator+(string str)
-{
-	for(size_t i=0; i<str.size(); i++) {
-		this->push(str[i]);
-	}
-	return *this;
-}
-
-string string::operator+(char* c_str)
-{
-	for(size_t i=0; c_str[i] != '\0'; i++) {
-		this->push(c_str[i]);
-	}
-	return *this;
 }
 
 string string::operator=(char* c_str)
 {
-	string str;
-	for(count_t i=0; c_str[i] != '\0'; i++) {
-		str.push(c_str[i]);
-	}
-	return str;
+	return string(c_str);
 }
 
 string string::operator=(string cpp_str)
 {
-	string str;
-	for(count_t i=0; i<cpp_str.size(); i++) {
-		str.push(cpp_str[i]);
-	}
-	return str;
+	return string(cpp_str);
 }
  
 bool string::operator==(string str)
@@ -130,8 +86,6 @@ char string::operator[](size_t index)
 	else return contents[index];
 }
 
-
-
 size_t string::wordcount()
 {
 	int count=1;
@@ -152,7 +106,7 @@ string string::getword(size_t target_index)
 			word_index++;
 		}
 		if(word_index == target_index) {
-			w.push(contents[i]);
+			//w.push(contents[i]);
 		}
 		
 	}

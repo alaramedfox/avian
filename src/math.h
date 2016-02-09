@@ -24,16 +24,16 @@ string itos(int32_t number)
 	while(number>0)
 	{
 		int digit = number%10;
-		temp.push(digit+48);
+		//temp.push(digit+48);
 		number = number/10;
 	}
 	if(NEGATIVE_FLAG)
 	{
-		temp.push('-');
+		//temp.push('-');
 	}
 	for(size_t i=0; i<temp.size(); i++)
 	{
-		str.push( temp.pop() );
+		//str.push( temp.pop() );
 	}
 	return str;
 }

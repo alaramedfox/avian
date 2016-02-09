@@ -26,10 +26,12 @@
 #include <stdint.h>		//Stable integer sizing. int8_t, int16_t, etc
 #include <stddef.h>	
 #include <stdbool.h>		//Boolean support
-typedef unsigned char byte;
-typedef unsigned short word;
-typedef unsigned int count_t;
-typedef unsigned char color_t;
+
+
+/* System core */
+#include "types.h"
+#include "util.h"
+#include "memory.h"
 
 /* Low-level headers and utilities */
 #include "string.h"
@@ -49,7 +51,6 @@ void init(void)
 	idt_init();			//Init interrupt controller
 	kb_init();			//Init keyboard driver
 	stdout.clear();	//Fill screen with blank spaces
-	//stdin.clear();		//Make sure input buffer is clear
 }
 
 void bootscreen(void)
@@ -62,18 +63,22 @@ void bootscreen(void)
 	stdout.move(1,0);
 	stdout.print("\tPopcorn Kernel v1.4\n");
 	stdout.print("\tGNU Public Liscense -- Bryan Webb, 2016\n");
+	
+	stdout.setcolor(C_TERMINAL);
 }
 
 extern "C" void main(void) 
 {
 	init();
 	bootscreen();
-	//move_cursor(10,1);
+	stdout.move(6,1);
 	while(1) {
-		//stdout.newline();
+		/*stdout.newline();
 		stdout.print("\n> ");
-		stdin.scan();
-		//stdout.print("\n: "); stdout.print(input);
-		//process_raw_input(input);
+		string input = stdin.scan();
+		stdout.print("(");
+		stdout.print(input);
+		stdout.print(")");
+		*/
 	}
 }

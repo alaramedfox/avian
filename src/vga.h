@@ -72,6 +72,7 @@ class VGA
 	void color	(color_t);			//Safely write to vram[vptr+1]
 	void addch  (char);
 	void print	(string);			//Prints a string starting at cursor
+	void print_raw(string);
 	void printf	(color_t,string);	//Print with basic formatting
 	
 	/* Special characters */
@@ -177,14 +178,25 @@ void VGA::print(string str)
 	/* Write the char* to VRAM starting at MEMORY.INDEX.vram */
 	for(count_t i=0; i<str.size(); i++) {
 	
-		     if(str[i] == NL) { newline(); }
-		else if(str[i] == NC) { ; }
-		else if(str[i] == CR) { creturn(); }
-		else if(str[i] == HT) { tab(); }
+		     if(str[i] == '\n') { newline(); }
+		else if(str[i] == '\0') { ; }
+		else if(str[i] == '\r') { creturn(); }
+		else if(str[i] == '\t') { tab(); }
 		else {
-			write(str[i]);
-			color(globalcolor);
-			vptr++;
+			addch(str[i]);
+		}
+	}
+}
+
+void VGA::print_raw(string str)
+{
+	for(count_t i=0; i<str.size(); i++) {
+		switch(str[i]) {
+			case '\n': print("\\n"); break;
+			case '\0': print("\\0"); break;
+			case '\r': print("\\r"); break;
+			case '\t': print("\\t"); break;
+			default: addch(str[i]); break;
 		}
 	}
 }

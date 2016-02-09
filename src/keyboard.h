@@ -13,12 +13,11 @@ void kb_init(void)
 }
 
 /* Special character handlidng */
-void enter() 			{ stdin.push('\n'); }
+void enter() 			{ stdin.push('\r'); }
 void backspace() 		{ stdin.pop(); }
 void undef_char() 	{ stdin.push('?'); }
 
-extern "C" //cdecl export
-void keyboard_driver(void)
+extern "C" void keyboard_driver(void)
 {
 	/* Do not continue if system isn't listening */
 	if(MEMORY.FLAGS.listen == false) { return; }
