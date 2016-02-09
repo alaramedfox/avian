@@ -92,7 +92,7 @@ function compile {
 				COMPILE+=" -Wfatal-errors " ;;
 		esac
 	done
-	colorg++ -m32 -c src/main.c -o obj/kernel.o ${COMPILE[@]} -std=c++03 -ffreestanding || exit
+	colorg++ -m32 -c src/main.c -o obj/kernel.o ${COMPILE[@]} -fno-rtti -fno-exceptions -O1 -std=c++03 -ffreestanding || exit
 }
 
 function link {

@@ -54,9 +54,9 @@ string::string(const char* c)
 	}
 }
 
-string string::operator=(char* c_str)
+string string::operator=(char* str)
 {
-	return string(c_str);
+	return string(str);
 }
 
 string string::operator=(string cpp_str)

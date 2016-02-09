@@ -26,7 +26,7 @@
 #include <stdint.h>		//Stable integer sizing. int8_t, int16_t, etc
 #include <stddef.h>	
 #include <stdbool.h>		//Boolean support
-
+#include "icxxabi.c"		//Global constructors
 
 /* System core */
 #include "types.h"

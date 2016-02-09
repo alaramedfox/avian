@@ -26,7 +26,7 @@ struct Map {
 
 /* Global memory map variables */
 Map 		*const mmap = (Map*)HEAP_ADDR;	//Declare memory map area at the heap address
-byte 		HEAP_BLOCK[HEAP_SIZE];				//Dummy filler block of bytes
+uint8_t 	HEAP_BLOCK[HEAP_SIZE];				//Dummy filler block of bytes
 size_t 	blocks_allocated=0;					//Keep track of number of allocated blocks
 
 /* Memory handling functions */

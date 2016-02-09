@@ -9,14 +9,12 @@
 /* Types for special uses of int */
 typedef unsigned int count_t;	//For loop counters
 typedef unsigned int index_t;	//Memory indexes
-typedef unsigned int size_t;  //Size of things
 
 /* Types for special uses of 8-bit bytes */
 typedef unsigned char color_t;
 
 /* Types for special types of pointers */
 typedef uintptr_t address_t;	//Integer-casted pointer address
-typedef char* c_str;		//C-style string
 
 /* Types for constant sizes */
 typedef uint8_t	byte;		//8-bit value
