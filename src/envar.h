@@ -1,14 +1,12 @@
 /*
  *		Popcorn Kernel
- *			File:		memorymap.h
- *			Purpose:	Maps and manages the core internal memory
+ *			File:		envar.h
+ *			Purpose:	Contains and handles enviornmental variables
  */
  
 
 #define CHAR_NEWLINE 0xA					//Define the newline char '\n'
 #define CHAR_TAB	 0x9						//Define the tab char '\t'
-
-
 
 #define	NOECHO	1
 #define	ECHO		2
@@ -28,18 +26,19 @@ struct __FLAGS {
 	bool		caps;							//If set, permanant flag for uppercase
 	bool		debugmode;					//For debugging stuff
 	bool		keypress;					//True when key is pressed
+	bool		return_pressed;			//True when enter key is pressed
 	bool		general[16];				//General use flags
 };
 
-struct __MEMORY {
+struct __ENVAR {
 	__FLAGS		FLAGS;
 	__GLOBAL		GLOBAL;
 	
 	void init();
 	
-} MEMORY;
+} ENVAR;
 
-void __MEMORY::init()
+void __ENVAR::init()
 {
 	FLAGS.listen 	= false;
 	FLAGS.repaint 	= false;

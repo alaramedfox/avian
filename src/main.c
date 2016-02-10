@@ -34,8 +34,9 @@
 #include "memory.h"
 
 /* Low-level headers and utilities */
-#include "string.h"
-#include "memorymap.h"	//Memory mapping and handling
+#include "string.h"		//Constant string class
+#include "sstream.h"		//Stack-like string streams
+#include "envar.h"		//Memory mapping and handling
 #include "math.h"			//Math processing and casting
 #include "stdio.h"		//Keyboard input and some char* processing
 #include "keyboard.h"	//Keyboard definition and init
@@ -45,7 +46,7 @@
 
 void init(void) 
 {
-	MEMORY.init();		//Init global values
+	ENVAR.init();		//Init global values
 	stdin = CIN();		//Init standard input stream
 	stdout = VGA();	//Init standard output stream (screen)
 	idt_init();			//Init interrupt controller
@@ -61,7 +62,7 @@ void bootscreen(void)
 	for(count_t i=0; i<C.cols; i++) { stdout.addch(HLINE1); }
 	
 	stdout.move(1,0);
-	stdout.print("\tPopcorn Kernel v1.4\n");
+	stdout.print("\tPopcorn Kernel v1.5\n");
 	stdout.print("\tGNU Public Liscense -- Bryan Webb, 2016\n");
 	
 	stdout.setcolor(C_TERMINAL);
@@ -71,14 +72,14 @@ extern "C" void main(void)
 {
 	init();
 	bootscreen();
-	stdout.move(6,1);
+	
+	stdout.move(6,0);
+
 	while(1) {
-		/*stdout.newline();
 		stdout.print("\n> ");
 		string input = stdin.scan();
 		stdout.print("(");
 		stdout.print(input);
 		stdout.print(")");
-		*/
 	}
 }

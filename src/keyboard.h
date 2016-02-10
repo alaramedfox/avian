@@ -20,7 +20,7 @@ void undef_char() 	{ stdin.push('?'); }
 extern "C" void keyboard_driver(void)
 {
 	/* Do not continue if system isn't listening */
-	if(MEMORY.FLAGS.listen == false) { return; }
+	if(ENVAR.FLAGS.listen == false) { return; }
 	byte status = __read_port(KEYBOARD_STATUS_PORT);
 	int16_t keycode;
 	char key;
@@ -29,21 +29,21 @@ extern "C" void keyboard_driver(void)
 
 	/* Lowest bit of status will be set if buffer is not empty */
 	if (status & 0x01) {
-		MEMORY.FLAGS.keypress = true;
+		ENVAR.FLAGS.keypress = true;
 		keycode = __read_port(KEYBOARD_DATA_PORT);
 		
 		/* Consider keycodes */
 		if(keycode == LSHIFT_RELEASE_CODE || keycode == RSHIFT_RELEASE_CODE) {
-			MEMORY.FLAGS.shift = false;
+			ENVAR.FLAGS.shift = false;
 		}
 		else if(keycode == LSHIFT_PRESS_CODE || keycode == RSHIFT_PRESS_CODE) {
-			MEMORY.FLAGS.shift = true;
+			ENVAR.FLAGS.shift = true;
 		}
 		else if(keycode == CAPS_PRESS_CODE) {
-			MEMORY.FLAGS.caps = !MEMORY.FLAGS.caps;
+			ENVAR.FLAGS.caps = !ENVAR.FLAGS.caps;
 		}
 		else if(keycode < 127) {
-			if(MEMORY.FLAGS.shift) {
+			if(ENVAR.FLAGS.shift) {
 				key = KEYMAP.uppercase[keycode];
 			}
 			else {

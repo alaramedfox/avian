@@ -39,7 +39,6 @@ class VGA
 {
 	private:
 	byte *vram;
-	byte VRAM_ALLOCATOR[4096]; //This is needed to allocate a block of memory for vram
 	
 	size_t vptr;
 	color_t globalcolor;
@@ -100,10 +99,9 @@ void VGA::creturn(void)	{ move(getrow()+1,getcol()); }
 
 void VGA::tab(void) 
 {
-	for(count_t i=0; i<MEMORY.GLOBAL.tabsize; i++) {
+	for(count_t i=0; i<ENVAR.GLOBAL.tabsize; i++) {
 		addch(' ');
 	}
-	
 }
 
 void VGA::move(byte row, byte col) 
@@ -175,7 +173,7 @@ void VGA::scroll(void)
 
 void VGA::print(string str) 
 {
-	/* Write the char* to VRAM starting at MEMORY.INDEX.vram */
+	/* Write the char* to VRAM starting at ENVAR.INDEX.vram */
 	for(count_t i=0; i<str.size(); i++) {
 	
 		     if(str[i] == '\n') { newline(); }

@@ -37,7 +37,7 @@ public:
 string::string()
 {
 	length = 0;
-	contents = (char*)malloc(0);
+	contents = (char*) malloc(0);
 }
 
 string::~string()
@@ -47,8 +47,8 @@ string::~string()
 
 string::string(const char* c)
 {
-	length = strlen(c)-1;
-	contents = (char*)malloc(length);
+	length = strlen(c);
+	contents = (char*) malloc(strlen(c));
 	for(count_t i=0; i<strlen(c); i++) {
 		contents[i] = c[i];
 	}
@@ -82,7 +82,7 @@ size_t string::size()
 
 char string::operator[](size_t index)
 {
-	if(index > length-1) return '!';
+	if(index > length-1) return '\0';
 	else return contents[index];
 }
 

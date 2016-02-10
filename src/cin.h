@@ -8,12 +8,13 @@
 
 #include "string.h"
  
-class CIN
-{
-	private:
-	string buffer;
+class CIN {
+private:
+	stringstream buffer;
 
-	public:
+public:
+	CIN();
+	
 	void clear	(void);				//Flush the input buffer
 	void push	(char);				//Push character to stdin
 	char pop		(void);				//Remove and return last char in stdin
@@ -21,58 +22,59 @@ class CIN
 	string scan	(void);				//Pause execution and return a line of input
 	char getch  (void);				//Pause execution and return a single character
 	
-	string getbuffer(void) { return buffer; }
 } stdin;
 
+CIN::CIN()
+{
+	buffer = stringstream(128);
+}
 
 string CIN::scan() 
 {
-	/*
-	MEMORY.FLAGS.listen = true;			//Set flag to listen for input
-	buffer = string();						//Make sure stdin is empty before reading
+	ENVAR.FLAGS.listen = true;			//Set flag to listen for input
 	int16_t location = stdout.getloc();	//Remember starting vptr location
 	move_cursor(stdout.getrow(), stdout.getcol());
-	while(true) {
-		
-		if(buffer.peek() == '\n') {
-			buffer.pop();
-			MEMORY.FLAGS.repaint = false;
-			MEMORY.FLAGS.listen = false;
-			return buffer;
-			break;
-		}
-		if(MEMORY.FLAGS.repaint) {
-			MEMORY.FLAGS.repaint = false;
+	buffer.clear();
+	
+	while(buffer.peek() != '\n') {
+		//if(buffer.peek() == '\n') break;
+	
+		if(ENVAR.FLAGS.repaint) 
+		{
+			ENVAR.FLAGS.repaint = false;
 			stdout.move(location);
-			stdout.print_raw(buffer);
+			stdout.print(buffer.str());
 			stdout.write(' ');
 			move_cursor(stdout.getrow(),stdout.getcol());
 		}
 			
 	
-	} */ /* Loop ends when user presses return */
+	} /* Loop ends when user presses return */
+	buffer.pop(); //Trim trailing newline
+	
+	return buffer.str();
 }
 
 void CIN::clear(void) 
 {
-	buffer = string();	//Reset to empty string
+	buffer.clear();	//Reset to empty string
 }
 
 void CIN::push(char c)
 {
-	MEMORY.FLAGS.repaint = true;			//Set repaint flag
-	//buffer.push(c);
+	ENVAR.FLAGS.repaint = true;			//Set repaint flag
+	buffer.push(c);
 }
 
 char CIN::pop(void) 
 {
-	MEMORY.FLAGS.repaint = true;	//Flag for repaint
-	//return buffer.pop();
+	ENVAR.FLAGS.repaint = true;	//Flag for repaint
+	return buffer.pop();
 }
 
 char CIN::peek(void) 
 {
-	//return buffer.peek();
+	return buffer.peek();
 }
 
 #endif

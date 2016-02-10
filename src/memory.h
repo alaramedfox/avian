@@ -20,7 +20,7 @@
 
 /* Create object for memory map */
 struct Map {
-	uintptr_t start;
+	address_t start;
 	size_t size;
 };
 
@@ -30,17 +30,18 @@ uint8_t 	HEAP_BLOCK[HEAP_SIZE];				//Dummy filler block of bytes
 size_t 	blocks_allocated=0;					//Keep track of number of allocated blocks
 
 /* Memory handling functions */
-index_t	__mmap_index		(uintptr_t);		//Returns the mmap index of a given memory block
-bool		__is_addr_free		(uintptr_t);		//Returns true if address is not inside allocated block
-size_t 	__max_block_size	(uintptr_t);		//Returns maximum memory block size for given address
-void		__mmap_delete		(index_t);		//Deletes entry in mmap
-void*		malloc				(size_t);		//Allocate memory block, and return pointer to block
-void 		free					(void*);	   	//De-allocate memory block asociated with given pointer
+index_t	__mmap_index(address_t);		//Returns the mmap index of a given memory block
+bool		__is_addr_free(address_t);		//Returns true if address is not inside allocated block
+size_t 	__max_block_size(address_t);	//Returns maximum memory block size for given address
+void		__mmap_delete(index_t);			//Deletes entry in mmap
+void*		malloc(size_t);					//Allocate memory block, and return pointer to block
+void*		malloc(size_t,address_t);		//Allocate memory block at specific address
+void 		free(void*);	   				//De-allocate memory block asociated with given pointer
 
 
 void free(void* ptr)
 {
-	__mmap_delete(__mmap_index((uintptr_t)ptr));
+	__mmap_delete(__mmap_index((address_t)ptr));
 }
 
 void __mmap_delete(const index_t index)
@@ -51,7 +52,7 @@ void __mmap_delete(const index_t index)
 	}
 }
 
-index_t __mmap_index(const uintptr_t ptr)
+index_t __mmap_index(const address_t ptr)
 {
 	/* Find associated entry in mmap */
 	for(index_t i=0; i<blocks_allocated; i++)
@@ -66,7 +67,7 @@ index_t __mmap_index(const uintptr_t ptr)
 void* malloc(const size_t size)
 {
 	/* Loop through memory until a free block is found */
-	for(uintptr_t address = ALLOC_ADDR; address<ALLOC_SIZE; address++) 
+	for(address_t address = ALLOC_ADDR; address<ALLOC_SIZE; address++) 
 	{
 		/* If all addresses are free between [addr] and [addr+size] */
 		if(__max_block_size(address) > size) {
@@ -84,7 +85,7 @@ void* malloc(const size_t size)
 	}
 }
 
-bool __is_addr_free(const uintptr_t ptr)
+bool __is_addr_free(const address_t ptr)
 {
 	for(index_t i=0; i<blocks_allocated; i++)
 	{
@@ -96,7 +97,7 @@ bool __is_addr_free(const uintptr_t ptr)
 	return true;
 }
 
-size_t __max_block_size(const uintptr_t ptr)
+size_t __max_block_size(const address_t ptr)
 {
 	size_t size = 0;
 	while(__is_addr_free(ptr+size)) 
