@@ -1,6 +1,6 @@
 /* 
  *	Popcorn Kernel
- *	  File:		kernel.c
+ *	  File:		main.c
  *	  Purpose:	Main loop, definitions, and primary entry point.
  *				This is the Popcorn start file.
  */
@@ -8,41 +8,30 @@
 /* 
  *		Popcorn Source Naming Conventions
  *
- *		1. Memory structures must be in all caps and start with two underscores.
- *				eg. __STRUCTURE
- *		2. ASM function calls must start with two underscores
- *				eg. __write_port
- *		3. All functions and variables are lowercase, and separate words using
- *			underscores.
- *				eg. some_variable, some_function()
- *		4. Loop indexes are i, j, and k. Avoid anything deeper than O(3)
- *		5. Related groups of functions are prefixed namespace-like.
- *				eg. all stdin functions are stdin_foo()
- *		6. Shell code is in directory /lex/
- *		7. Drivers are in directory /dev/
+ *		1. 	Memory structures must be in all caps and start with two underscores.
+ *					eg. __STRUCTURE
+ *		2. 	ASM function calls must start with two underscores
+ *					eg. __write_port
+ *		3. 	All functions and variables are lowercase, and separate words using
+ *				underscores.
+ *					eg. some_variable, some_function()
+ *		4. 	Loop indexes are i, j, and k. Avoid anything deeper than O(3)
+ *		4.1 	Loops that use a variable as a counter, use type count_t
+ *		4.2	Loops that use a variable as an index, use type index_t
  *
  */
+ 
+#define VERSION "0.5.2"
 
 #include <stdint.h>		//Stable integer sizing. int8_t, int16_t, etc
 #include <stddef.h>	
 #include <stdbool.h>		//Boolean support
-#include "icxxabi.c"		//Global constructors
 
-/* System core */
-#include "types.h"
-#include "util.h"
-#include "memory.h"
-
-/* Low-level headers and utilities */
-#include "string.h"		//Constant string class
-#include "sstream.h"		//Stack-like string streams
-#include "envar.h"		//Memory mapping and handling
-#include "math.h"			//Math processing and casting
-#include "stdio.h"		//Keyboard input and some char* processing
-#include "keyboard.h"	//Keyboard definition and init
-
-/* Mid-level processing */
-//#include "lex/lxtem.h"		//Core command library
+/* Essential headers */
+#include "defines.h"
+#include "core.h"
+#include "stdlib.h"
+#include "devices.h"
 
 void init(void) 
 {
@@ -62,7 +51,7 @@ void bootscreen(void)
 	for(count_t i=0; i<C.cols; i++) { stdout.addch(HLINE1); }
 	
 	stdout.move(1,0);
-	stdout.print("\tPopcorn Kernel v1.5\n");
+	stdout.print("\tPopcorn Kernel v"); stdout.print(VERSION); stdout.print("\n");
 	stdout.print("\tGNU Public Liscense -- Bryan Webb, 2016\n");
 	
 	stdout.setcolor(C_TERMINAL);

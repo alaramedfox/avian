@@ -1,10 +1,15 @@
 #define KEYBOARD_DATA_PORT 0x60
 #define KEYBOARD_STATUS_PORT 0x64
 
-extern "C" void keyboard_handler(void);
 
-#include "idt.h"
-#include "keydef.h"
+
+#ifndef CORE_H_INCLUDED
+#error "Keyboard driver requires system core"
+#endif
+
+#ifndef KEYDEF_H_INCLUDED
+#error "Keyboard driver reuires the keydef.h header"
+#endif
 
 void kb_init(void)
 {

@@ -12,6 +12,8 @@ extern "C" byte __read_port(int16_t port);
 extern "C" void __write_port(int16_t port, byte data);
 extern "C" void __load_idt(int32_t *iptr);
 
+extern "C" void keyboard_handler(void);
+
 struct IDT_entry {
 	int16_t offset_lowerbits;
 	int16_t selector;

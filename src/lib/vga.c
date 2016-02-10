@@ -7,8 +7,13 @@
  */
  
 /* Dependancies */
-#include "colordef.h"
-#include "keydef.h"
+#ifndef COLORDEF_H_INCLUDED
+#error "VGA requires the colordef.h header"
+#endif
+
+#ifndef ESCAPES_H_INCLUDED
+#error "VGA requires the escapes.h header"
+#endif
  
 extern "C" void __write_port(int16_t,byte);
 

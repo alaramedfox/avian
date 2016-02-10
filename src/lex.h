@@ -19,11 +19,11 @@
 
 
 
-#include "lxtem/list.c"			
-#include "lxtem/exec.c"
-#include "lxtem/transfer.c"
-#include "lxtem/help.c"
-#include "lxtem/edit.c"
+#include "lex/list.c"			
+#include "lex/exec.c"
+#include "lex/transfer.c"
+#include "lex/help.c"
+#include "lex/edit.c"
 
 
 /* Declare functions */

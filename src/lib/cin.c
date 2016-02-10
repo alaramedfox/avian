@@ -6,7 +6,9 @@
  *			Purpose:	Abstracts input handler
  */
 
-#include "string.h"
+#ifndef STRING_H_INCLUDED
+#error "CIN requires standard library"
+#endif
  
 class CIN {
 private:
