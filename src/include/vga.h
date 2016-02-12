@@ -24,6 +24,7 @@ typedef struct __VGA
 } vga_t;
 
 void move_cursor(byte,byte);
+void hide_cursor(void);
 
 /* Setters and getters */
 size_t vga_getcol	(void);				//Safely return the current column of the cursor

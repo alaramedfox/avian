@@ -23,6 +23,11 @@ void move_cursor(byte row, byte col)
 	ASM_write_port(0x3D5, (byte)((position>>8)&0xFF));
 }
 
+void hide_cursor(void)
+{
+	move_cursor(25,0);
+}
+
 void vga_increment(void)		{ vga->vptr++; }
 void vga_decrement(void)		{ vga->vptr--; }
 size_t vga_getcol(void) 		{ return vga->vptr % VGA_COL; }

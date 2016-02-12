@@ -10,17 +10,18 @@ const char VERSION[] = "Popcorn Kernel v0.5.2";
 #include <types.h>
 #include <vga.h>
 #include <envar.h>
-//#include <idt.h>
-//#include <keyboard.h>
+#include <idt.h>
+#include <keyboard.h>
 
 void init(void) 
 {
 	ENVAR_init();		//Init global values
 	//stdin = CIN();		//Init standard input stream
 	//stdout = VGA();	//Init standard output stream (screen)
-	//idt_init();			//Init interrupt controller
-	//kb_init();			//Init keyboard driver
+	idt_init();			//Init interrupt controller
+	kb_init();			//Init keyboard driver
 	//stdout.clear();	//Fill screen with blank spaces
+	hide_cursor();
 }
 
 void bootscreen(void)

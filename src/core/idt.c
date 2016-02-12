@@ -25,7 +25,7 @@ void idt_init(void)
 	int32_t iptr[2];
 
 	/* Populate IDT entry of keyboard's interrupt */
-	kaddr = (int32_t)keyboard_handler;
+	kaddr = (int32_t)ASM_kb_driver;
 	idt_table[0x21].lower 		= kaddr & 0xFFFF;
 	idt_table[0x21].selector 	= KERNEL_CODE_SEGMENT_OFFSET;
 	idt_table[0x21].zero			= 0;
