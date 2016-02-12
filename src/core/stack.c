@@ -6,11 +6,25 @@
  *			Purpose:	Create stack of objects
  */
 
+char* to_string(stack* s)
+{
+	return s->data;
+}
 
+void push_str(stack* s, char str[])
+{
+	for(size_t i=0; str[i] != '\0'; i++) {
+		push(s,str[i]);
+	}
+}
 
 stack* new_stack(const size_t size)
 {
-	return (stack*) malloc(size + 2*sizeof(size_t));
+	stack* stk = (stack*)malloc(size);
+	stk->data = (char*)malloc(size);
+	stk->size = 0;
+	stk->max = size;
+	return stk;
 }
 
 void delete_stack(stack *s)
@@ -23,6 +37,7 @@ void push(stack* s, char c)
 	if(s->size < s->max) {
 		s->data[s->size] = c;
 		s->size++;
+		s->data[s->size] = '\0';
 	}
 }
 

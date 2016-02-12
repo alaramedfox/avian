@@ -21,7 +21,7 @@ void init(void)
 	idt_init();			//Init interrupt controller
 	kb_init();			//Init keyboard driver
 	//stdout.clear();	//Fill screen with blank spaces
-	hide_cursor();
+	ENVAR.FLAGS.listen = true;
 }
 
 void bootscreen(void)
@@ -47,14 +47,28 @@ void bootscreen(void)
 	*/
 }
 
+void print(char str[])
+{
+	for(int i=0; str[i] != '\0'; i++) {
+		vga_write(str[i]);
+		vga_increment();
+	}
+}
+
 extern void C_main(void) 
 {
 	init();
 	bootscreen();
 	vga_movexy(0,0);
+	stack* stk = new_stack(50);
+	push_str(stk, "HELLO THERE PERSON");
+	//char* str = stk->data;
+	vga_movexy(1,0);
+	print(to_string(stk));
 	//stdout.move(6,0);
 
 	while(1) {
-	
+		vga_movexy(2,0);
+		print(kb_buffer());
 	}
 }

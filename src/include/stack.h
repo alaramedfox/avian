@@ -19,6 +19,7 @@ typedef struct __STACK
 } stack;
 
 void push(stack*, char);
+void push_str(stack*,char[]);
 char pop(stack*);
 char peek(stack*);
 bool empty(stack*);

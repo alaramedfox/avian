@@ -10,9 +10,13 @@
 #include <envar.h>
 #include <asmfunc.h>
 
-#define KB_DATA_PORT 	0x60
-#define KB_STATUS_PORT 	0x64
+enum __KB_PORTS
+{
+	KB_DATA_PORT=0x60,
+	KB_STATUS_PORT=0x64,
+};
 
+char* kb_buffer(void);
 void kb_init(void);
 void kb_enter(void);
 void kb_backspace(void);

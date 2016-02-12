@@ -37,6 +37,7 @@ function main {
 			"-c-all") OPTIONS+=" -c-all " ;;
 			"-m") OPTIONS+=" -m " ;;
 			"-make") OPTIONS+=" -make " ;;
+			"-run") OPTIONS+=" -run " ;;
 			*) TARGET+=" $i " ;;
 		esac
 	done
@@ -48,6 +49,7 @@ function main {
 			"-h") printhelp ;;
 			"-l") link ;;
 			"-c-all") compile_all;;
+			"-run") run ;;
 			*) printf "$WARN Unknown option '$i'\n" ;;
 		esac
 	done
@@ -91,7 +93,16 @@ function link {
 	printf "\n"
 	for i in $TARGET; do
 		ld -m elf_i386 -A i386 -T linker.ld -o bin/kernel-$i obj/*.o
-		printf "$INFO Generated binary bin/kernel-$i\n"
+		NEWSIZE=$(stat -c%s "bin/kernel-$i")
+		printf "$INFO Generated binary bin/kernel-$i ($NEWSIZE bytes)\n"
+	done
+}
+
+function run {
+	for i in $TARGET; do
+		printf "$INFO Executing kernel-$i with QEMU...\n"
+		qemu-system-i386 -kernel bin/kernel-$i --no-kvm
+		return
 	done
 }
 

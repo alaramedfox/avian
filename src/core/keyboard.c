@@ -7,7 +7,10 @@
  *					and handles input from the keyboard.
  */
  
+/* Create character buffer */
+stack * stdin;
 
+/* Define the keyboard map */ 
 struct __KEYMAP KEYMAP = {
 	.lowercase = {
 		'\0',
@@ -33,17 +36,23 @@ struct __KEYMAP KEYMAP = {
 	}
 };
 
+char* kb_buffer(void)
+{
+	return to_string(stdin);
+}
+
 
 void kb_init(void)
 {
 	/* 0xFD is 11111101 - enables only IRQ1 (keyboard)*/
 	ASM_write_port(0x21 , 0xFD);
+	stdin = new_stack(128);
 }
 
 /* Special character handlidng */
-void enter() 			{ /* push(stdin,'\n'); */	}
-void backspace() 		{ /* pop(stdin); 	*/		}
-void undef_char() 	{ /* push(stdin,'?'); */ 	}
+void enter() 			{ push(stdin,'\n');	}
+void backspace() 		{ pop(stdin); 	}
+void undef_char() 	{ push(stdin,'?');	}
 
 extern void C_kb_driver(void)
 {
@@ -82,13 +91,9 @@ extern void C_kb_driver(void)
 			{
 				case '\b': backspace(); 	break;
 				case '0':  undef_char(); 	break;
-				case '\0': break;
-				default: 	break;
+				case '\0': 						break;
+				default: push(stdin,key);	break;
 			}
 		}
-		else {
-			
-		}
-		
-	}
-}
+	} /* if(status...) */
+} /* extern void C_kb_driver(void) */
