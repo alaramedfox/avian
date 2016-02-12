@@ -13,23 +13,17 @@ enum __COLOR_DEFS
 	BOLD=1, NORMAL=0,
 };
 
-
-typedef struct __COLOR_T 
-{
-	int8_t bg : 4;
-	int8_t fg : 4;
-	
-} color_t;
-
 color_t color_mix(int8_t fg, int8_t bg)
 {
-	color_t color;
-	color.fg = fg;
-	color.bg = bg;
-	return color;
+	return ( (bg << 4) | fg);
 }
 
-color_t color_inv(color_t color)
+color_t color_bg(color_t c)
 {
-	return color_mix(color.bg, color.fg);
+	return ( (c & 0xF0) >> 4 );
+}
+
+color_t color_fg(color_t c)
+{
+	return (c & 0x0F);
 }

@@ -19,6 +19,9 @@ void kb_undef_char(void);
 
 extern void C_kb_driver(void);
 
+/* Declare the global character stack */
+//stack * stdin = new_stack(128);
+
 enum __EXTENDED_CHARS
 {
 	HLINE1=196, HLINE2=205, HLINE3=240,

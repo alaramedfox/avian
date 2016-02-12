@@ -19,7 +19,7 @@ extern	C_kb_driver			;Keyboard driver
 start:
 	cli 							;block interrupts
 	mov 	esp, stack_space	;set stack pointer
-	call	main					;Invoke the C kernel
+	call	C_main					;Invoke the C kernel
 	hlt		 					;halt the CPU
 	
 ASM_load_idt:
@@ -62,7 +62,7 @@ ASM_shut_down:
 	ret
 	
 ASM_kb_driver:                 
-	call	 keyboard_driver	;call the keyboard driver
+	call	 C_kb_driver	;call the keyboard driver
 	iretd
 
 section .bss

@@ -15,9 +15,9 @@ void kb_init(void)
 }
 
 /* Special character handlidng */
-void enter() 			{  }
-void backspace() 		{  }
-void undef_char() 	{  }
+void enter() 			{ /* push(stdin,'\n'); */	}
+void backspace() 		{ /* pop(stdin); 	*/		}
+void undef_char() 	{ /* push(stdin,'?'); */ 	}
 
 extern void C_kb_driver(void)
 {

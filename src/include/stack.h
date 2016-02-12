@@ -11,13 +11,19 @@
 #include <stdint.h>
 #include <mmap.h>
 
-typedef struct __STACK stack;
-void push(char, stack*);
+typedef struct __STACK
+{
+	size_t size;
+	size_t max;
+	char* data;
+} stack;
+
+void push(stack*, char);
 char pop(stack*);
 char peek(stack*);
 bool empty(stack*);
 bool full(stack*);
-stack* new_stack(size_t);
+stack* new_stack(const size_t);
 void delete_stack(stack*);
 char* to_string(stack*);
 

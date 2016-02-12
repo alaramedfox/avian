@@ -8,12 +8,12 @@
  *		Purpose:	Header file for color.c 
  */
  
-enum __COLOR_DEFS;
 
-typedef struct __COLOR_T color_t;
+typedef byte color_t;
 
 color_t color_mix(int8_t, int8_t);
-color_t color_inv(color_t);
+color_t color_bg(color_t);
+color_t color_fg(color_t);
 
 
 #endif

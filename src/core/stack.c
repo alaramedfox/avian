@@ -6,14 +6,9 @@
  *			Purpose:	Create stack of objects
  */
 
-typedef struct __STACK
-{
-	size_t size;
-	size_t max;
-	char* data;
-} stack;
 
-stack* new_stack(size_t size)
+
+stack* new_stack(const size_t size)
 {
 	return (stack*) malloc(size + 2*sizeof(size_t));
 }
@@ -23,7 +18,7 @@ void delete_stack(stack *s)
 	free(s);
 }
 
-void push(char c, stack *s)
+void push(stack* s, char c)
 {
 	if(s->size < s->max) {
 		s->data[s->size] = c;

@@ -1,206 +1,93 @@
-#ifndef VGA_H_INCLUDED
-#define VGA_H_INCLUDED
+#define VGA_C_SOURCE
+#include <vga.h>
 /*
- *		Popcorn Kernel
- *			File:		VGA.h
- *			Purpose:	Video output handler
+ *		Popcorn Kernel - Bryan Webb
+ *		File:		/core/vga.c
+ *		Purpose:	Video output handler
  */
  
-/* Dependancies */
-#ifndef COLORDEF_H_INCLUDED
-#error "VGA requires the colordef.h header"
-#endif
-
-#ifndef ESCAPES_H_INCLUDED
-#error "VGA requires the escapes.h header"
-#endif
- 
-extern "C" void __write_port(int16_t,byte);
+vga_t * const vga = (vga_t*)0xb8000;
 
 /* void update_cursor(int row, int col)
  * by Dark Fiber
  */
-void move_cursor(int row, int col)
+void move_cursor(byte row, byte col)
 {
-	unsigned short position=(row*80) + col;
+	word position = (row*VGA_COL) + col;
 
 	// cursor LOW port to VGA INDEX register
-	__write_port(0x3D4, 0x0F);
-	__write_port(0x3D5, (byte)(position&0xFF));
+	ASM_write_port(0x3D4, 0x0F);
+	ASM_write_port(0x3D5, (byte)(position&0xFF));
 	// cursor HIGH port to VGA INDEX register
-	__write_port(0x3D4, 0x0E);
-	__write_port(0x3D5, (byte)((position>>8)&0xFF));
-}
- 
-const struct bounds
-{
-	size_t size;
-	size_t cols;
-	size_t rows;
-	
-} B = {3840,160,48}, C = {1920,80,24};
- 
-class VGA
-{
-	private:
-	byte *vram;
-	
-	size_t vptr;
-	color_t globalcolor;
-	
-	
-	public:
-	
-	/* Constructors */
-	VGA();
-	
-	/* Setters and getters */
-	size_t getcol	(void);				//Safely return the current column of the cursor
-	size_t getrow	(void);				//Safely return the current row of cursor
-	size_t getloc 	(void);				//Safely return the 1D vptr location
-	void setcolor  (color_t);
-	void setcolor  (color_t, color_t);
-	
-	size_t video_size() { return sizeof(vram); }
-	size_t video_addr() { return (size_t)&vram; }
-	
-	/* Screen manipulation */
-	void scroll	(void);				//Scrolling screen support
-	void clear	(void);				//Clear the screen
-	void move	(byte,byte);		//Move cursor with 2D
-	void move	(word);				//Move cursor with 1D
-
-	
-	/* Printing */
-	void write	(char);				//Safely write to vram[vptr]
-	void color	(color_t);			//Safely write to vram[vptr+1]
-	void addch  (char);
-	void print	(string);			//Prints a string starting at cursor
-	void print_raw(string);
-	void printf	(color_t,string);	//Print with basic formatting
-	
-	/* Special characters */
-	void newline(void);				//Move to next line, starting in first column
-	void creturn(void);				//Move to next line, staying in same column
-	void tab(void);					//Insert 5 spaces
-
-} stdout;
-
-VGA::VGA()
-{
-	vram = (byte*)0xb8000;
-	vptr = 0;
-	globalcolor = 0x07;
+	ASM_write_port(0x3D4, 0x0E);
+	ASM_write_port(0x3D5, (byte)((position>>8)&0xFF));
 }
 
-size_t VGA::getcol() { return vptr % C.cols; }
-size_t VGA::getrow() { return vptr / C.cols; }
-size_t VGA::getloc() { return vptr; }
-void	VGA::setcolor(color_t c) { globalcolor = c; }
-void VGA::setcolor(color_t fg, color_t bg) { globalcolor = palette(fg,bg); }
+void vga_increment(void)		{ vga->vptr++; }
+void vga_decrement(void)		{ vga->vptr--; }
+size_t vga_getcol(void) 		{ return vga->vptr % VGA_COL; }
+size_t vga_getrow(void) 		{ return vga->vptr / VGA_COL; }
+size_t vga_getloc(void) 		{ return vga->vptr; }
+void	vga_setcolor(color_t c) { vga->color = c; }
+void vga_newline(void)			{ vga_movexy(vga_getrow()+1,0); }
+void vga_creturn(void) 			{ vga_movexy(vga_getrow()+1, vga_getcol()); }
 
-void VGA::newline(void) { move(getrow()+1,0); }
-void VGA::creturn(void)	{ move(getrow()+1,getcol()); }
-
-void VGA::tab(void) 
+void vga_movexy(byte row, byte col) 
 {
-	for(count_t i=0; i<ENVAR.GLOBAL.tabsize; i++) {
-		addch(' ');
-	}
-}
-
-void VGA::move(byte row, byte col) 
-{
-	if(row > C.rows || col > C.cols) {
+	if(row > VGA_ROW || col > VGA_COL) {
 		return;
 	}
 	else {
-		move(row * C.cols + col);
+		vga_moveptr(row * VGA_COL + col);
 	}
 }
 
-void VGA::move(word v) 
+void vga_moveptr(word v) 
 {
-	if(v > C.size -1) {
-		scroll();
+	if(v > VGA_LEN -1) {
+		vga_scroll();
 	}
 	else {
-		vptr = v; 
+		vga->vptr = v; 
 	}
 }
 
-void VGA::clear()
+void vga_clear(void)
 {
-	vptr = 0;
-	setcolor(C_TERMINAL);
-	for(count_t i=0; i<C.size; i++) {
-		write(' ');
-		vptr++;
+	vga->vptr = 0;
+	for(size_t i=0; i<VGA_LEN; i++) {
+		vga_write(' ');
+		vga_color(0x07);
+		vga_increment();
 	}
-	vptr = 0;
+	vga->vptr = 0;
 }
 
 /* Safely write a single character to vram without segfault */
-void VGA::write(char value) 
+void vga_write(char value) 
 {
-	vram[vptr*2] = value; 
+	vga->buffer[vga->vptr*2] = value;
 }
 
-void VGA::addch(char value)
+void vga_color(color_t value) 
 {
-	write(value);
-	color(globalcolor);
-	vptr++;
+	vga->buffer[vga->vptr*2+1] = value; 
 }
 
-void VGA::color(color_t value) 
-{
-	vram[vptr*2+1] = value; 
-}
-
-void VGA::scroll(void) 
+void vga_scroll(void) 
 {
 	/* Shift every row up one row */
-	for(count_t i=0; i<=B.size - B.cols; i++) {
-		vram[i] = vram[i+B.cols];
+	for(size_t i=0; i<=VGA_LEN - VGA_COL; i++) {
+		vga->buffer[i] = vga->buffer[i+VGA_COL];
 	}
 
 	/* Draw empty row at the bottom */
-	move(23,0);
-	for(count_t i=0; i<C.cols; i++) {
-		write(' ');
-		color(globalcolor);
-		vptr++;
+	vga_movexy(23,0);
+	for(size_t i=0; i<VGA_COL; i++) {
+		vga_write(' ');
+		vga_color(0x07);
+		vga->vptr++;
 	}
 	
-	move(23,0);
+	vga_movexy(23,0);
 }
-
-void VGA::print(string str) 
-{
-	/* Write the char* to VRAM starting at ENVAR.INDEX.vram */
-	for(count_t i=0; i<str.size(); i++) {
-	
-		     if(str[i] == '\n') { newline(); }
-		else if(str[i] == '\0') { ; }
-		else if(str[i] == '\r') { creturn(); }
-		else if(str[i] == '\t') { tab(); }
-		else {
-			addch(str[i]);
-		}
-	}
-}
-
-void VGA::print_raw(string str)
-{
-	for(count_t i=0; i<str.size(); i++) {
-		switch(str[i]) {
-			case '\n': print("\\n"); break;
-			case '\0': print("\\0"); break;
-			case '\r': print("\\r"); break;
-			case '\t': print("\\t"); break;
-			default: addch(str[i]); break;
-		}
-	}
-}
-#endif

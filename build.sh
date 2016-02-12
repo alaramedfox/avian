@@ -59,10 +59,15 @@ function assemble {
 }
 
 function compile_all {
-	FILES=$(ls -R | grep '\.c')
+	FILES=$(ls src/ -R | grep '\.c')
 	for i in $FILES; do
 		NAME=`echo "$i" | cut -d'.' -f1`
 		printf "$INFO Compiling $i...\n"
+		if [ "$i" = "main.c" ]; then
+			DIR="src/"
+		else
+			DIR="src/core/"
+		fi
 		colorgcc -m32 -c $DIR$NAME.c -o obj/$NAME.o --sysroot=src/ -Isrc/include/ -fno-exceptions -O1 -std=c99 -ffreestanding
 	done
 }
@@ -71,14 +76,23 @@ function compile {
 	for i in $TARGET; do
 		NAME=`echo "$i" | cut -d'.' -f1`
 		printf "$INFO Compiling $i...\n"
+		if [ "$i" = "main.c" ]; then
+			DIR="src/"
+		else
+			DIR="src/core/"
+		fi
 		colorgcc -m32 -c $DIR$NAME.c -o obj/$NAME.o --sysroot=src/ -Isrc/include/ -fno-exceptions -O1 -std=c99 -ffreestanding
 	done
 }
 
 function link {
 	printf "$INFO Linking object files:\n"
-	ls obj/*.o
-	ld -m elf_i386 -A i386 -T linker.ld -o bin/kernel-alpha obj/*.o
+	ls obj/
+	printf "\n"
+	for i in $TARGET; do
+		ld -m elf_i386 -A i386 -T linker.ld -o bin/kernel-$i obj/*.o
+		printf "$INFO Generated binary bin/kernel-$i\n"
+	done
 }
 
 
