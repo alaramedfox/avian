@@ -4,19 +4,17 @@ section .text
 	align 4						;multiboot spec
 	dd 	0x1BADB002        ;magic
 	dd 	0x00              ;flags
-	dd - (0x1BADB002 + 0x00);checksum. m+f+c should be zero
+	dd - (0x1BADB002+0x00)	;checksum. m+f+c should be zero
 
 global 	start					;kernel entry point
-global	keyboard_handler	;Other keyboard driver (?)
-global 	__load_idt			;hardware interrupts
-global 	__read_port			;read hardware data
-global 	__write_port		;write hardware data
-global	__i_listen			;Start listening for interrupts
-global	__i_ignore			;Quit listening for interrupts
-global	__shut_down			;Shut down the system
+global	ASM_kb_driver		;Other keyboard driver (?)
+global 	ASM_load_idt		;hardware interrupts
+global 	ASM_read_port		;read hardware data
+global 	ASM_write_port		;write hardware data
+global	ASM_shut_down		;Shut down the system
 
-extern 	main	       		;kmain is the C entry point
-extern	keyboard_driver	;Keyboard driver
+extern 	C_main	       	;main is the C entry point
+extern	C_kb_driver			;Keyboard driver
 
 start:
 	cli 							;block interrupts
@@ -24,34 +22,26 @@ start:
 	call	main					;Invoke the C kernel
 	hlt		 					;halt the CPU
 	
-__i_listen:
-	sti							;Enable interrupts
-	ret
-	
-__i_ignore:
-	cli							;Disable interrupts
-	ret
-	
-__load_idt:
+ASM_load_idt:
 	mov	edx, [esp + 4]
 	lidt [edx]
 	sti
 	ret
 	
-__read_port:				;Port data IN
+ASM_read_port:				;Port data IN
 	mov	edx, [esp + 4]
 						;al is the lower 8 bits of eax
 	in 	al, dx			;dx is the lower 16 bits of edx
 	ret
 
-__write_port:				;Port data OUT
+ASM_write_port:				;Port data OUT
 	mov   edx, [esp + 4]    
 	mov   al, [esp + 4 + 4]  
 	out   dx, al  
 	ret
-; end __write_port
+; end ASM_write_port
 
-__shut_down:
+ASM_shut_down:
 	;Connect to APM API
 	mov     ax,	0x5301
 	xor     bx, bx
@@ -71,7 +61,7 @@ __shut_down:
 	
 	ret
 	
-keyboard_handler:                 
+ASM_kb_driver:                 
 	call	 keyboard_driver	;call the keyboard driver
 	iretd
 
