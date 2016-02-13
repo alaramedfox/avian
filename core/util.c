@@ -1,5 +1,5 @@
-#ifndef UTIL_H_INCLUDED
-#define UTIL_H_INCLUDED
+#define UTIL_C_SOURCE
+#include <util.h>
 /*
  *		Popcorn Kernel
  *			File:		util.h
@@ -17,5 +17,3 @@ size_t strlen(const char* str)
 	}
 	return size;
 }
-
-#endif

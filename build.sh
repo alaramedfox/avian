@@ -11,7 +11,12 @@ WARN="${RED}Warning:${BLK}"
 VERSION="Popcorn Builder Tool v4.0"
 OPTIONS=()
 TARGET=()
-DIR="src/core/"
+ROOT="."
+OBJ="obj"
+BIN="bin"
+
+SOURCES=(". lib core")
+
 
 function printhelp {
 	printf "\n
@@ -34,8 +39,6 @@ function main {
 			"-a") OPTIONS+=" -a " ;;
 			"-h") OPTIONS+=" -h " ;;
 			"-l") OPTIONS+=" -l " ;;
-			"-c-all") OPTIONS+=" -c-all " ;;
-			"-m") OPTIONS+=" -m " ;;
 			"-make") OPTIONS+=" -make " ;;
 			"-run") OPTIONS+=" -run " ;;
 			*) TARGET+=" $i " ;;
@@ -48,42 +51,39 @@ function main {
 			"-a") assemble ;;
 			"-h") printhelp ;;
 			"-l") link ;;
-			"-c-all") compile_all;;
+			"-make") make_all;;
 			"-run") run ;;
 			*) printf "$WARN Unknown option '$i'\n" ;;
 		esac
 	done
 }
 
-function assemble {
-	printf "$INFO Assembling\n"
-	nasm -f elf src/boot.asm -o obj/boot.o
+function make_all {
+	TARGET+=$(ls -R | grep "\.c\|\.asm")
+	assemble
+	compile
+	link
 }
 
-function compile_all {
-	FILES=$(ls src/ -R | grep '\.c')
-	for i in $FILES; do
+function assemble {
+	for i in $TARGET; do
 		NAME=`echo "$i" | cut -d'.' -f1`
-		printf "$INFO Compiling $i...\n"
-		if [ "$i" = "main.c" ]; then
-			DIR="src/"
-		else
-			DIR="src/core/"
+		if [ -f $NAME.asm ]; then
+			printf "$INFO Assembling $i\n"
+			nasm -f elf $NAME.asm -o $OBJ/$NAME.o
 		fi
-		colorgcc -m32 -c $DIR$NAME.c -o obj/$NAME.o --sysroot=src/ -Isrc/include/ -fno-exceptions -O1 -std=c99 -ffreestanding
 	done
 }
 
 function compile {
-	for i in $TARGET; do
-		NAME=`echo "$i" | cut -d'.' -f1`
-		printf "$INFO Compiling $i...\n"
-		if [ "$i" = "main.c" ]; then
-			DIR="src/"
-		else
-			DIR="src/core/"
-		fi
-		colorgcc -m32 -c $DIR$NAME.c -o obj/$NAME.o --sysroot=src/ -Isrc/include/ -fno-exceptions -O1 -std=c99 -ffreestanding
+	for DIR in $SOURCES; do
+		for SRC in $TARGET; do
+			NAME=`echo "$SRC" | cut -d'.' -f1`
+			if [ -f $DIR/$NAME.c ]; then
+				printf "$INFO Compiling $SRC...\n"
+				colorgcc -m32 -c $DIR/$NAME.c -o $OBJ/$NAME.o --sysroot=$ROOT -Ilib/include/ -Icore/include/ -fno-exceptions -std=c99 -ffreestanding
+			fi
+		done
 	done
 }
 
@@ -92,16 +92,19 @@ function link {
 	ls obj/
 	printf "\n"
 	for i in $TARGET; do
-		ld -m elf_i386 -A i386 -T linker.ld -o bin/kernel-$i obj/*.o
-		NEWSIZE=$(stat -c%s "bin/kernel-$i")
-		printf "$INFO Generated binary bin/kernel-$i ($NEWSIZE bytes)\n"
+		BINARY=`echo $i | grep "alpha\|beta\|stable"`
+		ld -m elf_i386 -A i386 -T linker.ld -o bin/kernel-$BINARY obj/*.o
+		NEWSIZE=$(stat -c%s "bin/kernel-$BINARY")
+		printf "$INFO Generated binary bin/kernel-$BINARY ($NEWSIZE bytes)\n"
+		#return
 	done
 }
 
 function run {
 	for i in $TARGET; do
-		printf "$INFO Executing kernel-$i with QEMU...\n"
-		qemu-system-i386 -kernel bin/kernel-$i --no-kvm
+		BINARY=`echo $i | grep "alpha\|beta\|stable"`
+		printf "$INFO Executing kernel-$BINARY with QEMU...\n"
+		qemu-system-i386 -kernel bin/kernel-$BINARY --no-kvm
 		return
 	done
 }

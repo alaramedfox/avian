@@ -5,7 +5,7 @@
  *				This is the Popcorn start file.
  */
  
-const char VERSION[] = "Popcorn Kernel v0.5.2";
+const char VERSION[] = "Popcorn Kernel v0.5.3";
 
 #include <types.h>
 #include <vga.h>
@@ -70,5 +70,7 @@ extern void C_main(void)
 	while(1) {
 		vga_movexy(2,0);
 		print(kb_buffer());
+		vga_write(' ');
+		move_cursor(vga_getrow(),vga_getcol());
 	}
 }
