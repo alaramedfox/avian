@@ -1,13 +1,19 @@
-# popcorn
-A monolithic C/C++ kernel for i386 processors. 
+## The Avian Project
+*A monolithic C kernel for i386 processors.*
 
-`/bin/` -- The executable binaries. 
-* `popcorn-alpha` is the bleeding-edge binary where I'm testing little details. It usually doesn't work when I'm doing heavy tweaks.
-* `popcorn-beta` is the functioning prototype that should usually stay functional, while still having the new features I'm trying to implement. 
-* `popcorn-stable` is the latest, most functional binary. It also functions as a backup of sorts.
+The Avian Project is a hobby OS started in January 2016 by Bryan Webb.
+It began as a tutorial from the OSDev wiki, and when Bryan managed to
+get his first "Hello World" to boot, he decided to continue with the project.
 
-`/obj/` -- Un-linked object code files
+Originally titled "The Popcorn Kernel", the project was renamed to 
+The Avian Project on 12 February, 2016.
 
-`/src/` -- the actual buildable source
+The goal is to develop a functioning kernel with a full spectrum of
+features. Currently, the goal is for x86 platforms, but support for ARM
+and x86_64 should exist in the furure.
 
-`build.sh` -- my custom Makefile-like builder. Currently it is specific to this project, but it might be useful elsewhere. 
+Avian will be written in pure C, with minimal assembly. The project uses 
+the GNU gcc compiler, and is developed with Gedit and Gnome-terminal.
+
+If you have any comments whatsoever, including ideas, criticism, or desire
+to contribute, send the author an email: bwebb@pio.carrollu.edu
