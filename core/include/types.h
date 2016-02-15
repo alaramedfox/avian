@@ -1,7 +1,7 @@
 #ifndef TYPES_H_INCLUDED
 #define TYPES_H_INCLUDED
 /*
- *		Popcorn Kernel
+ *		Avian Project
  *			File:			/include/types.h
  *			Purpose:		Define a number of custom types
  *
@@ -18,7 +18,7 @@
 #include <stddef.h>		//size_t
 
 /* Types for special types of pointers */
-typedef uintptr_t address_t;	//Integer-casted pointer address
+typedef uintptr_t addr_t;	//Integer-casted pointer address
 
 /* Types for constant sizes */
 typedef uint8_t	byte;		//8-bit value

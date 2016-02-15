@@ -1,7 +1,7 @@
 #define KEYBOARD_C_SOURCE
 #include <keyboard.h>
 /*
- *		Popcorn Kernel - Bryan Webb
+ *		Avian Project - Bryan Webb
  *		File:		/core/keyboard.c
  *		Purpose:	Houses the keyboard interrupt function,
  *					and handles input from the keyboard.
@@ -38,7 +38,7 @@ struct __KEYMAP KEYMAP = {
 
 char* kb_buffer(void)
 {
-	return to_string(stdin);
+	return stack_str(stdin);
 }
 
 
@@ -86,7 +86,7 @@ extern void C_kb_driver(void)
 			else {
 				key = KEYMAP.lowercase[keycode];
 			}
-		
+			ENVAR.FLAGS.keypress = true;
 			switch(key)
 			{
 				case '\b': backspace(); 	break;

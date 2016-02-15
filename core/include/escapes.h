@@ -1,7 +1,7 @@
 #ifndef ESCAPES_H_INCLUDED
 #define ESCAPES_H_INCLUDED
 /*
- *		Popcorn Kernel (C) Bryan Webb
+ *		Avian Project (C) Bryan Webb
  *			File:		escapes.h
  *			Purpose:	Contains a hash of escapes and their respective characters
  */

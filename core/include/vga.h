@@ -1,7 +1,7 @@
 #ifndef VGA_H_INCLUDED
 #define VGA_H_INCLUDED
 /*
- *		Popcorn Kernel - Bryan Webb
+ *		Avian Project - Bryan Webb
  *		File:		/include/vga.h
  *		Purpose:	Header for the video handler
  */
@@ -47,5 +47,6 @@ void vga_color	(color_t);			//Safely write to vram[vptr+1]
 /* Special characters */
 void vga_newline(void);				//Move to next line, starting in first column
 void vga_creturn(void);				//Move to next line, staying in same column
+void vga_tabchar(void);				//Print 4 spaces
 
 #endif

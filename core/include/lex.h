@@ -1,5 +1,5 @@
 /*
- *	Popcorn Kernel
+ *	Avian Project
  *	  File:		lxtem.h
  *	  Purpose:	Main Popcorn command processor
  */

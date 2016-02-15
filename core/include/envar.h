@@ -3,7 +3,7 @@
 #include <envar.h>
 #include <types.h>
 /*
- *		Popcorn Kernel - Bryan Webb
+ *		Avian Project - Bryan Webb
  *		File:		/include/envar.h
  *		Purpose:	Header for envar.c
  */

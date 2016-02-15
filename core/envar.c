@@ -1,7 +1,7 @@
 #define ENVAR_C_SOURCE
 #include <envar.h>
 /*
- *		Popcorn Kernel - Bryan Webb
+ *		Avian Project - Bryan Webb
  *		File:		/core/envar.c
  *		Purpose:	Define enviornmental global variables
  */

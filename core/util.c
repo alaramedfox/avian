@@ -1,7 +1,7 @@
 #define UTIL_C_SOURCE
 #include <util.h>
 /*
- *		Popcorn Kernel
+ *		Avian Project
  *			File:		util.h
  *			Purpose:	Provide essential core functions
  */

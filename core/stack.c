@@ -1,12 +1,12 @@
 #define STACK_C_SOURCE
 #include <stack.h>
 /*
- *		Popcorn Kernel
+ *		Avian Project
  *			File:		/lib/stack.c
  *			Purpose:	Create stack of objects
  */
 
-char* to_string(stack* s)
+char* stack_str(stack* s)
 {
 	return s->data;
 }
@@ -20,7 +20,7 @@ void push_str(stack* s, char str[])
 
 stack* new_stack(const size_t size)
 {
-	stack* stk = (stack*)malloc(size);
+	stack* stk = (stack*) malloc(size*sizeof(stack));
 	stk->data = (char*)malloc(size);
 	stk->size = 0;
 	stk->max = size;

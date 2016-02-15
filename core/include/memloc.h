@@ -1,7 +1,7 @@
 #ifndef MEMLOC_H_INCLUDED
 #define MEMLOC_H_INCLUDED
 /*
- *		Popcorn Kernel - Bryan Webb
+ *		Avian Project - Bryan Webb
  *		File:		memloc.h
  *		Purpose:	Define constant memory locations
  */

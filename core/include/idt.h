@@ -1,7 +1,7 @@
 #ifndef IDT_H_INCLUDED
 #define IDT_H_INCLUDED
 /*
- *	Popcorn Kernel
+ *	Avian Project
  *	  File:		/include/idt.h
  *	  Purpose: 	Header file for idt.c
  */

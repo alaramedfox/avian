@@ -1,7 +1,7 @@
 #ifndef ASM_FUNC_H_INCLUDED
 #define ASM_FUNC_H_INCLUDED
 /*
- *		Popcorn Kernel - Bryan Webb
+ *		Avian Project - Bryan Webb
  *		File:		/include/asmfunc.h
  *		Purpose:	Header for all global assembly functions
  */

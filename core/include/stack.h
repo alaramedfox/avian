@@ -1,7 +1,7 @@
 #ifndef STACK_H_INCLUDED
 #define STACK_H_INCLUDED
 /*
- *		Popcorn Kernel - Bryan Webb
+ *		Avian Project - Bryan Webb
  *		File: 		stack.h
  *		Purpose:		Header file for stack.c
  */
@@ -26,6 +26,6 @@ bool empty(stack*);
 bool full(stack*);
 stack* new_stack(const size_t);
 void delete_stack(stack*);
-char* to_string(stack*);
+char* stack_str(stack*);
 
 #endif

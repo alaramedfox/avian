@@ -2,7 +2,7 @@
 #include <idt.h>
 
 /*
- *	Popcorn Kernel
+ *	Avian Project
  *	  File:		/core/idt.c
  *	  Purpose: 	Interrupt handler
  */

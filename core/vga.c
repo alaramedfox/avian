@@ -1,7 +1,7 @@
 #define VGA_C_SOURCE
 #include <vga.h>
 /*
- *		Popcorn Kernel - Bryan Webb
+ *		Avian Project - Bryan Webb
  *		File:		/core/vga.c
  *		Purpose:	Video output handler
  */
@@ -28,14 +28,22 @@ void hide_cursor(void)
 	move_cursor(25,0);
 }
 
-void vga_increment(void)		{ vga->vptr++; }
-void vga_decrement(void)		{ vga->vptr--; }
+void 	 vga_increment(void)		{ vga->vptr++; }
+void 	 vga_decrement(void)		{ vga->vptr--; }
 size_t vga_getcol(void) 		{ return vga->vptr % VGA_COL; }
 size_t vga_getrow(void) 		{ return vga->vptr / VGA_COL; }
 size_t vga_getloc(void) 		{ return vga->vptr; }
-void	vga_setcolor(color_t c) { vga->color = c; }
-void vga_newline(void)			{ vga_movexy(vga_getrow()+1,0); }
-void vga_creturn(void) 			{ vga_movexy(vga_getrow()+1, vga_getcol()); }
+void	 vga_setcolor(color_t c){ vga->color = c; }
+void 	 vga_newline(void)		{ vga_movexy(vga_getrow()+1,0); }
+void 	 vga_creturn(void) 		{ vga_movexy(vga_getrow()+1, vga_getcol()); }
+
+void vga_tabchar(void) 
+{ 
+	for(int i=0;i<4;i++) {
+		vga_write(' ');
+		vga_increment();
+	}
+}
 
 void vga_movexy(byte row, byte col) 
 {
