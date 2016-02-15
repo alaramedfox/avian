@@ -11,6 +11,7 @@
 #include <idt.h>
 #include <keyboard.h>
 #include <stdio.h>
+#include <util.h>
 
 void init(void) 
 {
@@ -33,6 +34,9 @@ void bootscreen(void)
 	vga_movexy(1,0);
 	print("\tAvian Kernel version 0.6.1\n");
 	print("\tGNU Public Liscense -- Bryan Webb, 2016\n");
+	char* integer = itoa(-123456,-4);
+	print("\tNumber: ");
+	print(integer);
 	vga_setcolor(0x07);
 }
 

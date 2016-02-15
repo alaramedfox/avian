@@ -9,5 +9,7 @@
 #include <types.h>
 
 size_t strlen(const char*);
+
+char* itoa(int,int);
  
 #endif
