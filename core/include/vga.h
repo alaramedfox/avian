@@ -12,8 +12,8 @@
 
 enum __VGA_LIMITS
 {
-	VGA_COL=80, VGA_ROW=24, VGA_LEN=1920,
-	VGA_BYTES=3840,
+	VGA_COL=80, VGA_ROW=25, VGA_LEN=2000,
+	VGA_BYTES=4000,
 };
 
 typedef struct __VGA
@@ -21,6 +21,7 @@ typedef struct __VGA
 	byte buffer[VGA_BYTES];
 	size_t vptr;
 	color_t color;
+	
 } vga_t;
 
 void move_cursor(byte,byte);

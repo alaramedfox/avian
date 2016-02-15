@@ -40,7 +40,7 @@ extern void C_main(void)
 {
 	init();
 	bootscreen();
-	vga_movexy(4,0);
+	vga_movexy(5,0);
 	
 	while(1) {
 		print("\n> ");

@@ -80,6 +80,7 @@ void vga_clear(void)
 void vga_write(char value) 
 {
 	vga->buffer[vga->vptr*2] = value;
+	vga_color(vga->color);
 }
 
 void vga_color(color_t value) 
@@ -90,17 +91,17 @@ void vga_color(color_t value)
 void vga_scroll(void) 
 {
 	/* Shift every row up one row */
-	for(size_t i=0; i<=VGA_LEN - VGA_COL; i++) {
-		vga->buffer[i] = vga->buffer[i+VGA_COL];
+	for(size_t i=0; i<VGA_BYTES-(VGA_COL*2); i++) {
+		vga->buffer[i] = vga->buffer[i+VGA_COL*2];
 	}
 
 	/* Draw empty row at the bottom */
-	vga_movexy(23,0);
+	vga_movexy(24,0);
 	for(size_t i=0; i<VGA_COL; i++) {
 		vga_write(' ');
 		vga_color(0x07);
 		vga->vptr++;
 	}
 	
-	vga_movexy(23,0);
+	vga_movexy(24,0);
 }
