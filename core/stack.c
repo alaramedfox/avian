@@ -20,8 +20,8 @@ void push_str(stack* s, char str[])
 
 stack* new_stack(const size_t size)
 {
-	stack* stk = (stack*) malloc(size*sizeof(stack));
-	stk->data = (char*)malloc(size);
+	stack* stk = (stack*) malloc(sizeof(stack));
+	stk->data = (char*) malloc(size);
 	stk->size = 0;
 	stk->max = size;
 	return stk;
@@ -29,6 +29,7 @@ stack* new_stack(const size_t size)
 
 void delete_stack(stack *s)
 {	
+	free(s->data);
 	free(s);
 }
 

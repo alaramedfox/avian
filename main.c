@@ -1,3 +1,5 @@
+#define MAIN_C_SOURCE
+#define __
 /* 
  *	Popcorn Kernel
  *	  File:		main.c
@@ -21,33 +23,42 @@ void init(void)
 	ENVAR.FLAGS.listen = false;
 }
 
+status_t main_loop(void)
+{
+	
+}
+
 void bootscreen(void)
 {
 	vga_setcolor(0x07);
 	vga_clear();
-	
+	vga_movexy(0,0);
 	vga_setcolor(0x1F);
 	for(size_t i=0; i<80; i++) 	{ addch(HLINE1); }
 	for(size_t i=0; i<80*4; i++) 	{ addch(' '); }
 	for(size_t i=0; i<80; i++) 	{ addch(HLINE1); }
 	
-	vga_movexy(1,0);
-	print("\tAvian Kernel version 0.6.1\n");
-	print("\tGNU Public Liscense -- Bryan Webb, 2016\n");
-	char* integer = itoa(-123456,-4);
-	print("\tNumber: ");
-	print(integer);
+	vga_movexy(0,4);
+	print("[ Avian Kernel version 0.6.3 ]");
+	
+	
 	vga_setcolor(0x07);
 }
+
 
 extern void C_main(void) 
 {
 	init();
 	bootscreen();
-	vga_movexy(5,0);
+	char* ub;
+	vga_setcolor(0x1F);
+	vga_movexy(1,4); print("Maximum blocks: "); print(itoa(MAX_BLOCKS,10));
+	vga_movexy(2,4); print("Current blocks: "); 
+	vga_movexy(3,4); print("Used Memory:    ");
 	
 	while(1) {
-		print("\n> ");
-		scan();
+		int32_t *giant = (int32_t*) malloc(1024);
+		vga_movexy(2,20); print(itoa(mem_blocks(),10));
+		vga_movexy(3,20); print(itoa(mem_used(),10));
 	}
 }

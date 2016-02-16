@@ -25,6 +25,7 @@ struct __FLAGS {
 	bool		shift;						//If set, flag for the uppercase charset
 	bool		caps;							//If set, permanant flag for uppercase
 	bool		keypress;					//True when key is pressed
+	bool		meminfo;
 	bool		general[16];				//General use flags
 };
 

@@ -11,5 +11,6 @@
 size_t strlen(const char*);
 
 char* itoa(int,int);
+char* itoa_bytes(int32_t);
  
 #endif

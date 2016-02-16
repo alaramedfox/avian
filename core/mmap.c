@@ -1,46 +1,83 @@
 #define MMAP_C_SOURCE
 #include <mmap.h>
+#include <stdio.h>
+#include <envar.h>
+#include <util.h>
 /*
  *		Avian Project - Bryan Webb
  *		File:		/core/mtable->c
  *		Purpose:	Handles memory allocation for pointers
  */
- 
+
 /* Declare memory map area */
 static mtable_t* const mtable = (mtable_t*)HEAP_ADDR;
 
+
 void free(void* ptr)
 {
-	mtable_delete( mtable_index((addr_t)ptr) );
+	size_t index = mtable_index((addr_t)ptr);
+	if(index == SIZE_MAX) {
+		mtable_error("Invalid memory table index\n");
+	}
+	else mtable_delete(index);
 }
 
 void* malloc(const size_t size)
 {
 	/* Loop through memory until a free block is found */
-	for(addr_t address = ALLOC_ADDR; address<ALLOC_SIZE; address++) 
+	for(addr_t address = ALLOC_ADDR; address<(ALLOC_ADDR+ALLOC_SIZE); address+=size) 
 	{
 		/* If all addresses are free between [addr] and [addr+size] */
-		if(max_block_size(address) > size) {
+		if(block_fits(address, size)) {
 			/* Reserve new memory block and push it to mtable */
 			mtable->entry[mtable->blocks].start = address;
 			mtable->entry[mtable->blocks].size  = size;
 			mtable->blocks++;
 			return (void*)address;
 		}
-		else {
-			/* Skip forward by size, because we already know this cannot fit here */
-			address += size;
-			//Note: This might be terribly wrong!
-		}
 	}
+	mtable_error("Failed to allocate memory block\n");
+	return 0;
+}
+
+size_t mem_blocks(void)
+{
+	return mtable->blocks;
+}	
+
+uint32_t mem_used(void)
+{
+	uint32_t used=0;
+	for(size_t i=0; i<mtable->blocks; i++) {
+		used += mtable->entry[i].size;
+	}
+	return used;
+}
+
+uint32_t mem_free(void)
+{
+	return ALLOC_SIZE-mem_used();
+}
+
+/******** Static helper functions *************/
+
+static void mtable_error(const char* str)
+{
+	vga_setcolor(0x07); 	print("[ ");
+	vga_setcolor(C_ERR);	print("MALLOC ERROR");
+	vga_setcolor(0x07);	print(" ] ");
+	print(str);
 }
 
 static void mtable_delete(const size_t index)
 {
-	for(size_t i=index; i<mtable->blocks-1; i++) {
-		mtable->entry[i] = mtable->entry[i+1];
-	}
-	mtable->blocks--;
+	mtable->entry[index] = mtable->entry[mtable->blocks-1];
+	mtable->blocks = mtable->blocks -1;
+}
+
+static void mtable_purge(void)
+{
+	
 }
 
 static size_t mtable_index(const addr_t ptr)
@@ -52,15 +89,14 @@ static size_t mtable_index(const addr_t ptr)
 			return i;
 		}	
 	}
-	return 0;
+	return SIZE_MAX;
 }
 
 static bool is_addr_free(const addr_t ptr)
 {
 	for(size_t i=0; i<mtable->blocks; i++)
 	{
-		if(ptr >= mtable->entry[i].start && ptr <= 
-			(mtable->entry[i].start + mtable->entry[i].size)) { 
+		if(ptr >= mtable->entry[i].start && ptr <= block_end(i)) { 
 			return false; 
 		}
 		else continue;
@@ -68,13 +104,18 @@ static bool is_addr_free(const addr_t ptr)
 	return true;
 }
 
-static size_t max_block_size(const addr_t ptr)
+static size_t block_end(const size_t index)
 {
-	size_t size = 0;
-	while(is_addr_free(ptr+size)) 
+	return (size_t)(mtable->entry[index].start + mtable->entry[index].size);
+}
+
+static inline bool block_fits(const addr_t ptr, const size_t size)
+{
+	size_t block_size = 0;
+	while(is_addr_free(ptr+block_size) && (ptr < ALLOC_ADDR+ALLOC_SIZE))
 	{
-		++size;
-		if(size > ALLOC_MAX) return ALLOC_MAX; //Failsafe to prevent infinite loops
+		++block_size;
+		if(block_size >= size) return true; //Failsafe to prevent infinite loops
 	}
-	return size;
+	return false;
 }
