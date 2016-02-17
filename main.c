@@ -1,10 +1,8 @@
 #define MAIN_C_SOURCE
-#define __
 /* 
- *	Popcorn Kernel
- *	  File:		main.c
- *	  Purpose:	Main loop, definitions, and primary entry point.
- *				This is the Popcorn start file.
+ *		Popcorn Kernel
+ *	  	File:		main.c
+ *	  	Purpose:	Main loop, definitions, and primary entry point.
  */
 
 #include <types.h>
@@ -14,6 +12,8 @@
 #include <keyboard.h>
 #include <stdio.h>
 #include <util.h>
+#include <asmfunc.h>
+#include <buildcount.h>
 
 void init(void) 
 {
@@ -23,9 +23,35 @@ void init(void)
 	ENVAR.FLAGS.listen = false;
 }
 
-status_t main_loop(void)
+void main_loop(void)
 {
+	// garbage collection
 	
+	
+	/* Check for and handle errors */
+	switch(ENVAR.GLOBAL.status.level)
+	{
+		case S_WARN: 
+			vga_setcolor(C_WARN);
+			print("\n[ WARNING ] ");
+			print(ENVAR.GLOBAL.status.message);
+			print("\n");
+			vga_setcolor(0x07);
+			ENVAR.GLOBAL.status = OKAY();
+			break;
+			
+		case S_FAIL: 
+			vga_setcolor(C_CRITICAL);
+			print("\n[ ERROR ] ");
+			print(ENVAR.GLOBAL.status.message);
+			print("\n");
+			vga_setcolor(0x07);
+			while(true);
+			
+			break;
+			
+		default: break;
+	}
 }
 
 void bootscreen(void)
@@ -39,7 +65,7 @@ void bootscreen(void)
 	for(size_t i=0; i<80; i++) 	{ addch(HLINE1); }
 	
 	vga_movexy(0,4);
-	print("[ Avian Kernel version 0.6.3 ]");
+	print("[ Avian Kernel version " VERSION " ]");
 	
 	
 	vga_setcolor(0x07);
@@ -50,15 +76,9 @@ extern void C_main(void)
 {
 	init();
 	bootscreen();
-	char* ub;
-	vga_setcolor(0x1F);
-	vga_movexy(1,4); print("Maximum blocks: "); print(itoa(MAX_BLOCKS,10));
-	vga_movexy(2,4); print("Current blocks: "); 
-	vga_movexy(3,4); print("Used Memory:    ");
 	
 	while(1) {
-		int32_t *giant = (int32_t*) malloc(1024);
-		vga_movexy(2,20); print(itoa(mem_blocks(),10));
-		vga_movexy(3,20); print(itoa(mem_used(),10));
+		char* boo = (char*) malloc(1024);
+		main_loop();
 	}
 }

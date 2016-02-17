@@ -17,15 +17,12 @@
 #include <stdbool.h>		//Booleans, true/false
 #include <stddef.h>		//size_t
 
-enum __STATUS_LEVEL
-{
-	OK, WARNING, ERROR, SEVERE, 
-};
-
-/* Types for special types of pointers */
-typedef uintptr_t addr_t;	//Integer-casted pointer address
+/* Verbose integer types */
+typedef uint16_t index_t;
 
 /* Status type, for function return values */
+enum __STATUS_CODES { S_OKAY, S_WARN, S_FAIL, };
+
 typedef struct __STATUS
 {
 	int8_t	level;
@@ -33,12 +30,16 @@ typedef struct __STATUS
 	
 } status_t;
 
-status_t STATUS(int8_t, char*);
-status_t STATUS_OK(void);
+status_t OKAY(void);
+status_t FAIL(char*);
+status_t WARN(char*);
+
+/* Types for special types of pointers */
+typedef uintptr_t addr_t;	//Integer-casted pointer address
 
 /* Types for constant sizes */
-typedef uint8_t	byte;		//8-bit value
-typedef uint16_t	word;		//16-bit value
-typedef uint32_t	dword; 	//32-bit value
+typedef uint8_t	byte;		//8-bit value		1 byte
+typedef uint16_t	word;		//16-bit value		2 bytes
+typedef uint32_t	dword; 	//32-bit value		4 bytes
  
 #endif

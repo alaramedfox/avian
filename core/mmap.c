@@ -1,23 +1,23 @@
 #define MMAP_C_SOURCE
 #include <mmap.h>
-#include <stdio.h>
-#include <envar.h>
-#include <util.h>
 /*
  *		Avian Project - Bryan Webb
  *		File:		/core/mtable->c
  *		Purpose:	Handles memory allocation for pointers
  */
+#include <envar.h>
+#include <types.h>
 
 /* Declare memory map area */
-static mtable_t* const mtable = (mtable_t*)HEAP_ADDR;
+static mtable_t* const mtable = (mtable_t*)HEAP_START;
 
 
 void free(void* ptr)
 {
 	size_t index = mtable_index((addr_t)ptr);
-	if(index == SIZE_MAX) {
-		mtable_error("Invalid memory table index\n");
+	if(index > mtable->blocks-1) {
+		ENVAR.GLOBAL.status = WARN("[ free ] Invalid memory table index");
+		return;
 	}
 	else mtable_delete(index);
 }
@@ -25,7 +25,7 @@ void free(void* ptr)
 void* malloc(const size_t size)
 {
 	/* Loop through memory until a free block is found */
-	for(addr_t address = ALLOC_ADDR; address<(ALLOC_ADDR+ALLOC_SIZE); address+=size) 
+	for(addr_t address = ALLOC_START; address<ALLOC_END; address+=size) 
 	{
 		/* If all addresses are free between [addr] and [addr+size] */
 		if(block_fits(address, size)) {
@@ -36,7 +36,7 @@ void* malloc(const size_t size)
 			return (void*)address;
 		}
 	}
-	mtable_error("Failed to allocate memory block\n");
+	ENVAR.GLOBAL.status = FAIL("[ malloc ] Failed to allocate memory");
 	return 0;
 }
 
@@ -60,14 +60,6 @@ uint32_t mem_free(void)
 }
 
 /******** Static helper functions *************/
-
-static void mtable_error(const char* str)
-{
-	vga_setcolor(0x07); 	print("[ ");
-	vga_setcolor(C_ERR);	print("MALLOC ERROR");
-	vga_setcolor(0x07);	print(" ] ");
-	print(str);
-}
 
 static void mtable_delete(const size_t index)
 {
@@ -112,7 +104,7 @@ static size_t block_end(const size_t index)
 static inline bool block_fits(const addr_t ptr, const size_t size)
 {
 	size_t block_size = 0;
-	while(is_addr_free(ptr+block_size) && (ptr < ALLOC_ADDR+ALLOC_SIZE))
+	while(is_addr_free(ptr+block_size) && (ptr < ALLOC_START+ALLOC_SIZE))
 	{
 		++block_size;
 		if(block_size >= size) return true; //Failsafe to prevent infinite loops

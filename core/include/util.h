@@ -8,6 +8,11 @@
  
 #include <types.h>
 
+enum __BASE
+{
+	DEC=10, HEX=16, OCT=8, BIN=2,
+};
+
 size_t strlen(const char*);
 
 char* itoa(int,int);

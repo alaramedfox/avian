@@ -8,7 +8,7 @@
  
 
  
-inline status_t STATUS(int8_t l, char* m)
+inline static status_t STATUS(int8_t l,char* m)
 {
 	status_t stat;
 	stat.level = l;
@@ -16,7 +16,6 @@ inline status_t STATUS(int8_t l, char* m)
 	return stat;
 }
 
-inline status_t STATUS_OK(void)
-{
-	return STATUS(OK,"OK");
-}
+inline status_t OKAY(void) 	{ return STATUS(S_OKAY,""); }
+inline status_t FAIL(char* e) { return STATUS(S_FAIL,e);  }
+inline status_t WARN(char* e) { return STATUS(S_WARN,e);  }

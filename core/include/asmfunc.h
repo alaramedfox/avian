@@ -12,6 +12,7 @@ extern byte ASM_read_port(word);
 extern void ASM_write_port(word, byte);
 extern void ASM_load_idt(int32_t*);
 extern void ASM_kb_driver(void);
+extern void ASM_shut_down(void);
 
 
 #endif

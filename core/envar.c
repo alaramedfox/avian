@@ -15,4 +15,5 @@ void ENVAR_init(void)
 	ENVAR.GLOBAL.echostate = ECHO;
 	ENVAR.FLAGS.captain = false;
 	ENVAR.GLOBAL.tabsize = 4;
+	ENVAR.GLOBAL.status = OKAY();
 }

@@ -1,34 +1,26 @@
 #define UTIL_C_SOURCE
 #include <util.h>
-#include <stack.h>
-#include <envar.h>
-#include <stdio.h>
 /*
  *		Avian Project
  *			File:		util.h
  *			Purpose:	Provide essential core functions
  */
- 
+#include <stack.h>
+#include <envar.h>
+#include <stdio.h>
  
 /* Calculate the size of a null-terminated string literal */
-#define C_STR_MAX_SIZE	512
 size_t strlen(const char* str)
 {
 	size_t size=0;
-	while(str[size] != '\0' && size < C_STR_MAX_SIZE) {
+	while(str[size] != '\0') {
 		++size;
 	}
 	return size;
 }
 
-enum __BASE
-{
-	DEC=10, HEX=16, OCT=8, BIN=2,
-};
-
-static char place_value[] = "0123456789ABCDEF";
-
-static char bytes_magnitude[] = "BKMGTP";
+static const char place_value[] = "0123456789ABCDEF";
+static const char bytes_magnitude[] = "BKMGTP";
 
 char* itoa_bytes(int32_t number)
 {
@@ -49,9 +41,10 @@ char* itoa_bytes(int32_t number)
 
 char* itoa(int number, int base)
 {
-	int row = vga_getrow();
-	if(ENVAR.FLAGS.meminfo) { vga_movexy(row,3); print("itoa()\n"); }
-	if(base < 1 || base > 16) return "Error: Invalid base";
+	if(base < 1 || base > 16) {
+		ENVAR.GLOBAL.status = WARN("[ itoa ] Invalid numerical base");
+		return "";
+	}
 
 	stack* result = new_stack(16);
 	bool negative=false;
@@ -81,11 +74,8 @@ char* itoa(int number, int base)
 		else if(base == 10 && negative) {
 		push(result, '-');
 	}
-
-	if(ENVAR.FLAGS.meminfo) { vga_movexy(row+1,3); print("new_stack()\n"); }
-	stack* inverted = new_stack(result->size);
-	if(ENVAR.FLAGS.meminfo) { vga_movexy(row+1,3); print("           \n"); }
 	
+	stack* inverted = new_stack(result->size);\
 	while(!empty(result)) {
 		push(inverted,pop(result));
 	}
@@ -94,9 +84,5 @@ char* itoa(int number, int base)
 	delete_stack(inverted);
 	delete_stack(result);
 	
-	if(ENVAR.FLAGS.meminfo) { 
-		vga_movexy(row,3); 
-		print("      "); 
-	}
 	return str_result;
 }

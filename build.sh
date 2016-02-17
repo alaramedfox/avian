@@ -18,6 +18,22 @@ BIN="bin"
 SOURCES=(". lib core")
 
 
+function increment_build {
+	BUILDFILE="version/build"
+	MAJORFILE="version/major"
+	TIMEFILE="version/time"
+	HEADER="lib/include/buildcount.h"
+
+	version="`sed  's/^ *//' $MAJORFILE`"  
+	old="`sed  's/^ *//' $BUILDFILE` +1"  
+	echo $old | bc > $BUILDFILE.temp  
+	mv $BUILDFILE.temp $BUILDFILE
+	echo "$version`sed  's/^ *//' $BUILDFILE` - `date`" > $TIMEFILE
+	echo "#define BUILD \"`sed  's/^ *//' $BUILDFILE`\"" > $HEADER 
+	echo "#define TIMESTAMP \"$version`sed  's/^ *//' $BUILDFILE` - `date`\"" >> $HEADER  
+	echo "#define VERSION \"$version`sed  's/^ *//' $BUILDFILE`\"" >> $HEADER
+}
+
 function printhelp {
 	printf "\n
 $VERSION\n
@@ -59,6 +75,7 @@ function main {
 }
 
 function make_all {
+	increment_build
 	TARGET+=$(ls -R | grep "\.c\|\.asm")
 	assemble
 	compile
