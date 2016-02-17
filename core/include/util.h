@@ -8,6 +8,12 @@
  
 #include <types.h>
 
+/* Function macros */
+#define until(exp) 	while(!(exp)) 	//Perl-like until loop
+#define unless(exp)	if(!(exp))   	//Perl-like unless switch
+#define STR(x)			#x
+#define QW(x)			"x"
+
 enum __BASE
 {
 	DEC=10, HEX=16, OCT=8, BIN=2,

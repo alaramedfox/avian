@@ -9,7 +9,7 @@
 #include <keyboard.h>
 #include <mmap.h>
 #include <vga.h>
- 
+
 /* Output functions, defined in /lib/stdprint.c */
 void addch(const char);							//Print a single character
 void print(const char[]);						//Standard print function

@@ -45,7 +45,7 @@ char* kb_buffer(void)
 void kb_init(void)
 {
 	/* 0xFD is 11111101 - enables only IRQ1 (keyboard)*/
-	ASM_write_port(0x21 , 0xFD);
+	ASM_outb(0x21 , 0xFD);
 	stdin = new_stack(128);
 }
 
@@ -58,16 +58,16 @@ extern void C_kb_driver(void)
 {
 	/* Do not continue if system isn't listening */
 	if(ENVAR.FLAGS.listen == false) { return; }
-	byte status = ASM_read_port(KB_STATUS_PORT);
+	byte status = ASM_inb(KB_STATUS_PORT);
 	int16_t keycode;
 	char key;
 	/* write EOI */
-	ASM_write_port(0x20, 0x20);
+	ASM_outb(0x20, 0x20);
 
 	/* Lowest bit of status will be set if buffer is not empty */
 	if (status & 0x01) {
 		ENVAR.FLAGS.keypress = true;
-		keycode = ASM_read_port(KB_DATA_PORT);
+		keycode = ASM_inb(KB_DATA_PORT);
 		
 		/* Consider keycodes */
 		if(keycode == LSHIFT_UP || keycode == RSHIFT_UP) {

@@ -1,6 +1,6 @@
 #define MAIN_C_SOURCE
 /* 
- *		Popcorn Kernel
+ *		Avian Kernel - Bryan Webb
  *	  	File:		main.c
  *	  	Purpose:	Main loop, definitions, and primary entry point.
  */
@@ -14,44 +14,27 @@
 #include <util.h>
 #include <asmfunc.h>
 #include <buildcount.h>
+#include <floppy.h>
+
+
 
 void init(void) 
 {
 	ENVAR_init();		//Init global values
 	idt_init();			//Init interrupt controller
 	kb_init();			//Init keyboard driver
+	floppy_init();
 	ENVAR.FLAGS.listen = false;
 }
 
-void main_loop(void)
+bool main_loop(void)
 {
+	// Test things
+	
 	// garbage collection
 	
-	
 	/* Check for and handle errors */
-	switch(ENVAR.GLOBAL.status.level)
-	{
-		case S_WARN: 
-			vga_setcolor(C_WARN);
-			print("\n[ WARNING ] ");
-			print(ENVAR.GLOBAL.status.message);
-			print("\n");
-			vga_setcolor(0x07);
-			ENVAR.GLOBAL.status = OKAY();
-			break;
-			
-		case S_FAIL: 
-			vga_setcolor(C_CRITICAL);
-			print("\n[ ERROR ] ");
-			print(ENVAR.GLOBAL.status.message);
-			print("\n");
-			vga_setcolor(0x07);
-			while(true);
-			
-			break;
-			
-		default: break;
-	}
+	return true;
 }
 
 void bootscreen(void)
@@ -71,14 +54,13 @@ void bootscreen(void)
 	vga_setcolor(0x07);
 }
 
-
 extern void C_main(void) 
 {
 	init();
 	bootscreen();
 	
-	while(1) {
-		char* boo = (char*) malloc(1024);
-		main_loop();
-	}
+	while(main_loop());
+	
+	vga_clear();
+	print("Kernel has shut down\n");
 }

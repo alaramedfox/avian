@@ -13,9 +13,10 @@
 size_t strlen(const char* str)
 {
 	size_t size=0;
-	while(str[size] != '\0') {
+	 while(str[size] != '\0') {
 		++size;
 	}
+	
 	return size;
 }
 
@@ -26,10 +27,11 @@ char* itoa_bytes(int32_t number)
 {
 	int magnitude=0;
 	int32_t memsize=number;
-	while(number > 1024) {
+	 while(number > 1024) {
 		number = number/1024;
 		magnitude++;
 	}
+	
 	
 	stack* mem = new_stack(8);
 	push_str(mem,itoa(number,10));
@@ -60,7 +62,7 @@ char* itoa(int number, int base)
 
 	// Process individual digits
 	
-	while (number != 0) {
+	 while (number != 0) {
 		int i = number % base;
 		push(result, place_value[i]);
 		number = number/base;
@@ -76,9 +78,10 @@ char* itoa(int number, int base)
 	}
 	
 	stack* inverted = new_stack(result->size);\
-	while(!empty(result)) {
+	 while(!empty(result)) {
 		push(inverted,pop(result));
 	}
+	
 	
 	char* str_result = stack_str(inverted);
 	delete_stack(inverted);

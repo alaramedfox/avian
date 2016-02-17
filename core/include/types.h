@@ -17,8 +17,11 @@
 #include <stdbool.h>		//Booleans, true/false
 #include <stddef.h>		//size_t
 
+
+
 /* Verbose integer types */
 typedef uint16_t index_t;
+typedef uint16_t port_t;
 
 /* Status type, for function return values */
 enum __STATUS_CODES { S_OKAY, S_WARN, S_FAIL, };

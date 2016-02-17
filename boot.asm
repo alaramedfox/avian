@@ -9,8 +9,8 @@ section .text
 global 	start					;kernel entry point
 global	ASM_kb_driver		;Other keyboard driver (?)
 global 	ASM_load_idt		;hardware interrupts
-global 	ASM_read_port		;read hardware data
-global 	ASM_write_port		;write hardware data
+global 	ASM_inb				;read hardware data
+global 	ASM_outb				;write hardware data
 global	ASM_shut_down		;Shut down the system
 
 extern 	C_main	       	;main is the C entry point
@@ -28,18 +28,18 @@ ASM_load_idt:
 	sti
 	ret
 	
-ASM_read_port:				;Port data IN
+ASM_inb:							;Port data IN
 	mov	edx, [esp + 4]
-						;al is the lower 8 bits of eax
-	in 	al, dx			;dx is the lower 16 bits of edx
+									;al is the lower 8 bits of eax
+	in 	al, dx				;dx is the lower 16 bits of edx
 	ret
 
-ASM_write_port:				;Port data OUT
+ASM_outb:						;Port data OUT
 	mov   edx, [esp + 4]    
 	mov   al, [esp + 4 + 4]  
 	out   dx, al  
 	ret
-; end ASM_write_port
+; end ASM_outb
 
 ASM_shut_down:
 	;Connect to APM API
@@ -56,7 +56,7 @@ ASM_shut_down:
 	;Turn off the system
 	mov     ax, 0x5307
 	mov     bx, 0x0001
-	mov     cx, 0003
+	mov     cx, 0x0003
 	int     0x15
 	
 	ret
@@ -66,6 +66,6 @@ ASM_kb_driver:
 	iretd
 
 section .bss
-	resb 8192				;8KB for stack
+	resb 16384				;16KB for stack
 	
 stack_space:

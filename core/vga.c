@@ -16,11 +16,11 @@ void move_cursor(byte row, byte col)
 	word position = (row*VGA_COL) + col;
 
 	// cursor LOW port to VGA INDEX register
-	ASM_write_port(0x3D4, 0x0F);
-	ASM_write_port(0x3D5, (byte)(position&0xFF));
+	ASM_outb(0x3D4, 0x0F);
+	ASM_outb(0x3D5, (byte)(position&0xFF));
 	// cursor HIGH port to VGA INDEX register
-	ASM_write_port(0x3D4, 0x0E);
-	ASM_write_port(0x3D5, (byte)((position>>8)&0xFF));
+	ASM_outb(0x3D4, 0x0E);
+	ASM_outb(0x3D5, (byte)((position>>8)&0xFF));
 }
 
 void hide_cursor(void)
