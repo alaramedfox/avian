@@ -16,8 +16,6 @@
 #include <buildcount.h>
 #include <floppy.h>
 
-
-
 void init(void) 
 {
 	ENVAR_init();		//Init global values
@@ -54,7 +52,7 @@ void bootscreen(void)
 	vga_setcolor(0x07);
 }
 
-extern void C_main(void) 
+void avian_main(void) 
 {
 	init();
 	bootscreen();

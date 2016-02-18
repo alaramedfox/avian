@@ -2,7 +2,7 @@
 #define KEYBOARD_H_INCLUDED
 /*
  *		Avian Project - Bryan Webb
- *		File:		/include/keyboard.h
+ *		File:		/core/include/keyboard.h
  *		Purpose:	Header for keyboard driver
  */
  
@@ -10,22 +10,13 @@
 #include <envar.h>
 #include <asmfunc.h>
 
-enum __KB_PORTS
-{
-	KB_DATA_PORT=0x60,
-	KB_STATUS_PORT=0x64,
-};
-
 char* kb_buffer(void);
 void kb_init(void);
 void kb_enter(void);
 void kb_backspace(void);
 void kb_undef_char(void);
 
-extern void C_kb_driver(void);
-
-/* Declare the global character stack */
-//stack * stdin = new_stack(128);
+void keyboard_driver(void);
 
 enum __EXTENDED_CHARS
 {

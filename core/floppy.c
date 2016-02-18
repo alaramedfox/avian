@@ -5,106 +5,58 @@
  *		File:		/core/floppy.c
  *		Purpose:	Floppy driver
  */
- 
-#include <envar.h>
 #include <util.h>
+#include <mmap.h>
 
 enum __FLOPPY_DATA
 {
-	CYL=80,	//Cylinders
-	HPC=2,	//Headers per cylinder
-	SPT=18,	//Sectors per track
+	CYL = 80,	//Cylinders
+	HPC = 2,	//Headers per cylinder
+	SPT = 18,	//Sectors per track
 };
 
-/* Public API functions */
-
-void floppy_init(void)
+/*		
+ *	Floppy Ports:
+ *		Read-Only status registers	
+ *		- SRA, SRB, MSR (Main Status Register), DIR
+ *		- MSR contains all the "busy" flags. Check it OFTEN!!
+ *		
+ *		Write-only config registers
+ *		- DSR, CCR (Both should be set to 0!!)
+ *
+ *		Data registers
+ *		- DOR (Digital Output Register): Drive motors
+ *		- FIFO: All I/O data transfer
+ */
+enum __DOR_BITFLAGS
 {
-	/* Set DSR register to 0 for use with 1.44 floppies */
-	ASM_outb( FDC_DSR, 0x00 );
-	ASM_outb( FDC_CCR, 0x00 );
-}
-
-byte floppy_write(block_t data, addr_t location)
-{
+	/* Drive Motor on/off */
+	MOTD = 0x80, MOTC = 0x40, MOTB = 0x20, MOTA = 0x10,
 	
-}
+	IRQBIT = 0x08, //IRQ/DMA enabled bit
+	RESET  = 0x04, //0 to enter RESET mode; 1 otherwise
+	DSEL 	 = 0x03, //Drive selection
+};
 
-block_t floppy_read(addr_t location)
+enum __MSR_BITFLAGS
 {
-
-}
-
-/******* Static helper functions **********/
-
-static msr_bitflag_t read_msr(void)
-{
-	byte msr_data = ASM_inb( FDC_MSR );
-	msr_bitflag_t *msr_bits = (msr_bitflag_t*)&msr_data;
-	return *msr_bits;
-}
-
-static void issue_command(byte com, byte *param, byte *result)
-{
-	msr_bitflag_t msr = read_msr();
+	RQM = 0x80, //FIFO data I/O READY
+	DIO = 0x40, //FIFO command READY
+	CB  = 0x10, //Busy: executing command
 	
-	if( msr.RQM != 1 || msr.DIO != 0) {
-		reset_controller();
-		issue_command(com,param,result);
-	}
-	else {
-		ASM_outb( FDC_FIFO, com ); //Issue command byte
-		issue_command_args(param); //Issue parameters
-		msr = read_msr();
-		if(msr.NDMA == 1) {
-			execution_phase(result);
-		}
-		else {
-			/* Skip to result phase */
-		}
-		
-	}
+	/* Drive Seek flags */
+	ACTD = 0x08, ACTC = 0x04, ACTB = 0x02, ACTA = 0x01,
+};
+
+status_t floppy_init(void)
+{
+	/* Init CCR & DSR for 1.44M Floppies */
+	outportb(FDC_CCR,0x00);
+	outportb(FDC_DSR,0x00);
+	
+	return OK;
 }
 
-static inline void execution_phase(byte *buffer)
-{
-	msr_bitflag_t msr = read_msr();
-	
-	 while(true)
-	{
-		wait_for_rqm();
-		while(msr.RQM == 1)
-		{
-			
-		}
-	}
-	
-}
-
-static inline void wait_for_rqm(void)
-{
-	until (read_msr().RQM == 1);
-	return;
-}
-
-static inline bool issue_command_args(byte *param)
-{
-	msr_bitflag_t msr = read_msr();
-	
-	for(int i=0; param[i] != 0xFF; i++) {
-		wait_for_rqm();
-		
-		/* Check if FIFO is expecting an opcode */
-		if(msr.DIO == 0) {
-			ASM_outb( FDC_FIFO, param[i] );
-		}
-	   else {
-	   	ENVAR.GLOBAL.status = WARN("[ FDC ] Invalid opcode");
-	   	return false;
-	   }
-	}
-	return true;
-}
 
 static void reset_controller(void)
 {
@@ -119,22 +71,7 @@ static chs_t lba_convert(dword lba)
    chs.sect = ((lba % (2 * SPT)) % SPT + 1);
 }
 
-static void motor_power(byte drive, bool power)
-{
-	byte dor_data = ASM_inb(FDC_DOR);
-	dor_bitflag_t *dor_bits = (dor_bitflag_t*)&dor_data;
-	
-	switch(drive)
-	{
-		case 0: dor_bits->MOTA=power; break;
-		case 1: dor_bits->MOTB=power; break;
-		case 2: dor_bits->MOTC=power; break;
-		case 3: dor_bits->MOTD=power; break;
-		default: break;
-	}
-	
-	ASM_outb(FDC_DOR, dor_data);
-}
+
 
 
 

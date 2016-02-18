@@ -1,39 +1,36 @@
 #define UTIL_C_SOURCE
-#include <util.h>
 /*
  *		Avian Project
  *			File:		util.h
  *			Purpose:	Provide essential core functions
  */
 #include <stack.h>
-#include <envar.h>
-#include <stdio.h>
+#include <util.h>
  
 /* Calculate the size of a null-terminated string literal */
 size_t strlen(const char* str)
 {
 	size_t size=0;
-	 while(str[size] != '\0') {
+	while(str[size] != '\0') {
 		++size;
 	}
-	
 	return size;
 }
 
 static const char place_value[] = "0123456789ABCDEF";
 static const char bytes_magnitude[] = "BKMGTP";
 
-char* itoa_bytes(int32_t number)
+char* itoa_bytes(int number)
 {
-	int magnitude=0;
-	int32_t memsize=number;
-	 while(number > 1024) {
+	int magnitude = 0;
+	int memsize = number;
+	stack* mem = new_stack(8);
+	
+	while(number > 1024) {
 		number = number/1024;
 		magnitude++;
 	}
 	
-	
-	stack* mem = new_stack(8);
 	push_str(mem,itoa(number,10));
 	push(mem,bytes_magnitude[magnitude]);
 	char* str = stack_str(mem);
@@ -41,10 +38,9 @@ char* itoa_bytes(int32_t number)
 	return str;
 }
 
-char* itoa(int number, int base)
+char* itoa(int number, base_t base)
 {
 	if(base < 1 || base > 16) {
-		ENVAR.GLOBAL.status = WARN("[ itoa ] Invalid numerical base");
 		return "";
 	}
 
@@ -62,23 +58,22 @@ char* itoa(int number, int base)
 
 	// Process individual digits
 	
-	 while (number != 0) {
+	until(number == 0) {
 		int i = number % base;
 		push(result, place_value[i]);
 		number = number/base;
 	}
 	
-
 	if(base == 16) {
 		push(result, 'x');
 		push(result, '0');
 	}
-		else if(base == 10 && negative) {
+	else if(base == 10 && negative) {
 		push(result, '-');
 	}
 	
 	stack* inverted = new_stack(result->size);\
-	 while(!empty(result)) {
+	until(empty(result)) {
 		push(inverted,pop(result));
 	}
 	

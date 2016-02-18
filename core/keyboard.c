@@ -1,7 +1,8 @@
 #define KEYBOARD_C_SOURCE
 #include <keyboard.h>
+#include <irq.h>
 /*
- *		Avian Project - Bryan Webb
+ *		Avian Kernel - Bryan Webb
  *		File:		/core/keyboard.c
  *		Purpose:	Houses the keyboard interrupt function,
  *					and handles input from the keyboard.
@@ -44,8 +45,7 @@ char* kb_buffer(void)
 
 void kb_init(void)
 {
-	/* 0xFD is 11111101 - enables only IRQ1 (keyboard)*/
-	ASM_outb(0x21 , 0xFD);
+	irq_listen(IRQ_KEYBOARD);
 	stdin = new_stack(128);
 }
 
@@ -54,20 +54,20 @@ void enter() 			{ push(stdin,'\n');	}
 void backspace() 		{ pop(stdin); 	}
 void undef_char() 	{ push(stdin,'?');	}
 
-extern void C_kb_driver(void)
+void keyboard_driver(void)
 {
 	/* Do not continue if system isn't listening */
 	if(ENVAR.FLAGS.listen == false) { return; }
-	byte status = ASM_inb(KB_STATUS_PORT);
-	int16_t keycode;
+	byte status = inportb(KB_STATUS);
+	word keycode;
 	char key;
 	/* write EOI */
-	ASM_outb(0x20, 0x20);
+	outportb(PIC1_CMD, 0x20);
 
 	/* Lowest bit of status will be set if buffer is not empty */
 	if (status & 0x01) {
 		ENVAR.FLAGS.keypress = true;
-		keycode = ASM_inb(KB_DATA_PORT);
+		keycode = inportb(KB_DATA);
 		
 		/* Consider keycodes */
 		if(keycode == LSHIFT_UP || keycode == RSHIFT_UP) {

@@ -1,12 +1,12 @@
 #define VGA_C_SOURCE
 #include <vga.h>
 /*
- *		Avian Project - Bryan Webb
+ *		Avian Kernel - Bryan Webb
  *		File:		/core/vga.c
- *		Purpose:	Video output handler
+ *		Purpose:	VGA Output driver
  */
  
-vga_t * const vga = (vga_t*)0xb8000;
+static vga_t * const vga = (vga_t*)0xb8000;
 
 /* void update_cursor(int row, int col)
  * by Dark Fiber
@@ -16,11 +16,11 @@ void move_cursor(byte row, byte col)
 	word position = (row*VGA_COL) + col;
 
 	// cursor LOW port to VGA INDEX register
-	ASM_outb(0x3D4, 0x0F);
-	ASM_outb(0x3D5, (byte)(position&0xFF));
+	outportb(0x3D4, 0x0F);
+	outportb(0x3D5, (byte)(position&0xFF));
 	// cursor HIGH port to VGA INDEX register
-	ASM_outb(0x3D4, 0x0E);
-	ASM_outb(0x3D5, (byte)((position>>8)&0xFF));
+	outportb(0x3D4, 0x0E);
+	outportb(0x3D5, (byte)((position>>8)&0xFF));
 }
 
 void hide_cursor(void)
