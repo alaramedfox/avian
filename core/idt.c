@@ -5,6 +5,8 @@
  *	  	Purpose: Interrupt Descriptor Table
  */
 #include <idt.h>
+#include <pic.h>
+#include <exceptions.h>
 
 typedef struct __IDT_ENTRY
 {
@@ -18,47 +20,46 @@ typedef struct __IDT_ENTRY
 
 static idt_entry_t idt_table[IDT_SIZE];
 
-void idt_add_handler(addr_t handler, index_t vector, type_attr_t gate)
-{
-	idt_table[vector].lower 		= handler & 0xFFFF;
-	idt_table[vector].selector 	= KERNEL_OFFSET;
-	idt_table[vector].zero 			= 0;
-	idt_table[vector].type_attr 	= gate;
-	idt_table[vector].higher 		= (handler & 0xFFFF0000) >> 16;
-}
-
 void idt_init(void)
 {
-	/* ICW1 - begin initialization */
-	outportb( PIC1_CMD , 0x11);
-	outportb( PIC2_CMD , 0x11);
+	//pic_remap();	
+	
+	idt_add_exception( (addr_t)throw_zero_divide, X_ZERO_DIVIDE, INTERRUPT_GATE);
+	idt_add_handler(   (addr_t)keyboard_irq,      IRQ_KEYBOARD,  INTERRUPT_GATE);
+	idt_add_handler(   (addr_t)floppy_irq,        IRQ_FLOPPY,    INTERRUPT_GATE);
+	
+	idt_write_table();
+}
 
-	/* ICW2 - remap offset address of IDT
-	 * In x86 protected mode, we have to remap the PICs beyond 0x20 because
-	 * Intel have designated the first 32 interrupts as "reserved" for cpu exceptions
-	 */
-	outportb( PIC1_DAT , 0x20);
-	outportb( PIC2_DAT , 0x28);
+static void idt_add_handler(addr_t handler, interrupt_t irq, type_attr_t gate)
+{
+	byte offset = OFFSET1 + irq;
+	
+	idt_table[offset].lower 		= handler & 0xFFFF;
+	idt_table[offset].selector 	= KERNEL_OFFSET;
+	idt_table[offset].zero 			= 0;
+	idt_table[offset].type_attr 	= gate;
+	idt_table[offset].higher 		= (handler & 0xFFFF0000) >> 16;
+}
 
-	/* ICW3 - setup cascading */
-	outportb( PIC1_DAT , 0x00);
-	outportb( PIC2_DAT , 0x00);
+static void idt_add_exception(addr_t handler, exception_t err, type_attr_t gate)
+{
+	idt_table[err].lower 		= handler & 0xFFFF;
+	idt_table[err].selector 	= KERNEL_OFFSET;
+	idt_table[err].zero 			= 0;
+	idt_table[err].type_attr 	= gate;
+	idt_table[err].higher 		= (handler & 0xFFFF0000) >> 16;
+}
 
-	/* ICW4 - environment info */
-	outportb( PIC1_DAT , 0x01);
-	outportb( PIC2_DAT , 0x01);
-	/* Initialization finished */
-
-	/* mask interrupts */
-	outportb( PIC1_DAT , 0xff);
-	outportb( PIC2_DAT , 0xff);
-
-	/* fill the IDT descriptor */
-	addr_t iaddr = (addr_t)idt_table;
-	int iptr[2] = { 
-		(sizeof(idt_entry_t) * IDT_SIZE) + ((iaddr & 0xffff) << 16),
-		iaddr >> 16,
+static inline void idt_write_table(void)
+{
+	addr_t table_address = (addr_t)idt_table;
+	int descriptor[2] = { 
+		(sizeof(idt_entry_t) * IDT_SIZE) + ((table_address & 0xffff) << 16),
+		table_address >> 16,
 	};
 
-	load_idt(iptr);
+	load_idt(descriptor);
 }
+
+

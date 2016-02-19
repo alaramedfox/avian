@@ -15,6 +15,9 @@ typedef struct __CHS
 	word cyl, head, sect;
 
 } chs_t;
+
+/* Function called by Interrupt Controller */
+void floppy_handler(void);
  
 /* Public API */
 status_t	floppy_init(void);
@@ -23,8 +26,9 @@ block_t	floppy_read(addr_t);
 
 /* Static helper functions */
 
-static void reset_controller(void);
-static chs_t lba_convert(dword);
+static void 	__floppy_irq_acknowledge(void);
+static void 	__floppy_reset(void);
+static chs_t	__lba_convert(dword);
 
 
 #endif

@@ -7,6 +7,7 @@
  */
 #include <util.h>
 #include <mmap.h>
+#include <pic.h>
 
 enum __FLOPPY_DATA
 {
@@ -48,8 +49,20 @@ enum __MSR_BITFLAGS
 	ACTD = 0x08, ACTC = 0x04, ACTB = 0x02, ACTA = 0x01,
 };
 
+static bool floppy_irq_recieved = false;
+
+/* Called when IRQ6 is generated */
+void floppy_handler(void)
+{
+	floppy_irq_recieved = true;
+}
+
+
 status_t floppy_init(void)
 {
+	/* Enable FDC irq signal */
+	pic_enable_irq( IRQ_FLOPPY );
+	
 	/* Init CCR & DSR for 1.44M Floppies */
 	outportb(FDC_CCR,0x00);
 	outportb(FDC_DSR,0x00);
@@ -57,13 +70,20 @@ status_t floppy_init(void)
 	return OK;
 }
 
+static void floppy_irq_acknowledge(void)
+{
+	floppy_irq_recieved = false;
+	pic_send_eoi( IRQ_FLOPPY );
+}	
 
-static void reset_controller(void)
+static void __floppy_reset(void)
 {
 
 }
 
-static chs_t lba_convert(dword lba)
+static byte __floppy_read_byte(void);
+
+static chs_t __lba_convert(dword lba)
 {
 	chs_t chs;
 	chs.cyl	= lba / (2 * SPT);

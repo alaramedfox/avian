@@ -1,6 +1,6 @@
 #define KEYBOARD_C_SOURCE
 #include <keyboard.h>
-#include <irq.h>
+#include <pic.h>
 /*
  *		Avian Kernel - Bryan Webb
  *		File:		/core/keyboard.c
@@ -45,7 +45,7 @@ char* kb_buffer(void)
 
 void kb_init(void)
 {
-	irq_listen(IRQ_KEYBOARD);
+	pic_enable_irq(IRQ_KEYBOARD);
 	stdin = new_stack(128);
 }
 
@@ -54,15 +54,13 @@ void enter() 			{ push(stdin,'\n');	}
 void backspace() 		{ pop(stdin); 	}
 void undef_char() 	{ push(stdin,'?');	}
 
-void keyboard_driver(void)
+void keyboard_handler(void)
 {
 	/* Do not continue if system isn't listening */
 	if(ENVAR.FLAGS.listen == false) { return; }
 	byte status = inportb(KB_STATUS);
 	word keycode;
 	char key;
-	/* write EOI */
-	outportb(PIC1_CMD, 0x20);
 
 	/* Lowest bit of status will be set if buffer is not empty */
 	if (status & 0x01) {
@@ -86,14 +84,13 @@ void keyboard_driver(void)
 			else {
 				key = KEYMAP.lowercase[keycode];
 			}
-			ENVAR.FLAGS.keypress = true;
 			switch(key)
 			{
 				case '\b': backspace(); 	break;
-				case '0':  undef_char(); 	break;
 				case '\0': 						break;
 				default: push(stdin,key);	break;
 			}
 		}
 	} /* if(status...) */
+	pic_send_eoi(IRQ_KEYBOARD);
 } /* extern void C_kb_driver(void) */

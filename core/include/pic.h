@@ -1,13 +1,18 @@
-#ifndef IRQ_H_INCLUDED
-#define IRQ_H_INCLUDED
+#ifndef PIC_H_INCLUDED
+#define PIC_H_INCLUDED
 /*
  *		Avian Kernel - Bryan Webb
- *	  	File:		/core/include/irq.h
- *	  	Purpose: Interrupt Request Handler
+ *		File:		/core/include/pic.h
+ *		Purpose:	Programmable Interrupt Controller
  */
-
+ 
 #include <types.h>
-#include <util.h>
+
+enum __PIC_DEFS
+{
+	OFFSET1 = 0x20,
+	OFFSET2 = 0x28,
+};
 
 typedef enum __IRQ_INTERRUPTS
 { 
@@ -31,8 +36,25 @@ typedef enum __IRQ_INTERRUPTS
 
 } interrupt_t;
 
-void irq_listen(interrupt_t);
-void irq_ignore(interrupt_t);
+typedef enum __PIC_COMMANDS
+{
+	PIC_INIT = 0x11,
+	PIC_EOI = 0x20,
+	
+} pic_cmd_t;
+ 
+void pic_init(void);
+void pic_remap(void);
+void pic_send_eoi(interrupt_t);
+void pic_enable_irq(interrupt_t);
+void pic_disable_irq(interrupt_t);
+static void pic_send_command(pic_cmd_t);
+static void pic_send_data(byte, byte);
+
+
+
+
+
 
 
 #endif

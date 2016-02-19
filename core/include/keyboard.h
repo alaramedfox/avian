@@ -16,7 +16,7 @@ void kb_enter(void);
 void kb_backspace(void);
 void kb_undef_char(void);
 
-void keyboard_driver(void);
+void keyboard_handler(void);
 
 enum __EXTENDED_CHARS
 {

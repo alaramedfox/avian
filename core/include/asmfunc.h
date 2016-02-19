@@ -8,13 +8,17 @@
  
 #include <types.h>
 
-/* Port IO */
+/* Port IO, defined in portio.asm */
 extern byte inportb(port_t);
 extern void outportb(port_t, byte);
 
-extern void ASM_load_idt(int32_t*);
-extern void ASM_kb_driver(void);
-extern void ASM_shut_down(void);
+/* Interrupt controllers, defined in interrupts.asm */
+extern void load_idt(int32_t*);
+extern void keyboard_irq(void);
+extern void floppy_irq(void);
+
+/* Exception controllers, defined in throw.asm */
+extern void throw_zero_divide(void);
 
 
 #endif
