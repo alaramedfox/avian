@@ -70,7 +70,7 @@ void vga_clear(void)
 	vga->vptr = 0;
 	for(size_t i=0; i<VGA_LEN; i++) {
 		vga_write(' ');
-		vga_color(0x07);
+		vga_color(vga->color);
 		vga_increment();
 	}
 	vga->vptr = 0;

@@ -26,11 +26,12 @@ void init(void)
 	ENVAR.FLAGS.listen = false;
 }
 
+byte divisor;
+
 bool main_loop(void)
 {
-	// Test things
-	print(" > ");
-	scan();
+	
+	10/0;
 	// garbage collection
 	
 	/* Check for and handle errors */
@@ -57,7 +58,7 @@ void avian_main(void)
 {
 	init();
 	bootscreen();
-	//int four = 3884/0;
+	int four = 3884/0;
 	vga_movexy(6,0);
 	while(main_loop());
 	

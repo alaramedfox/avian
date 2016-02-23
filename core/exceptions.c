@@ -12,20 +12,23 @@
 
 static byte error_level=0;
 
-static void __panic_screen(void)
+static void panic_screen(void)
 {
-	vga_clear();
 	vga_setcolor(C_BLUESCR);	//Famous Windows bluescreen
+	vga_clear();
+	
 	
 	/* Print kernel information */
-	print("AVIAN Kernel - " TIMESTAMP "\n");
-	print("An unhandled exception has occured, "
-			"and execution was unable to continue.\n");
+	print("\n");
+	print("\tAVIAN Kernel - " TIMESTAMP "\n\n");
+	print("\tAn unhandled exception has occured,\n"
+			"\tand execution was unable to continue.\n");
 }
 
 void catch_zero_divide(void)
 {
-	__panic_screen();
+	panic_screen();
 	print("\tFault: Divide by Zero error\n");
 	while(true);
 }
+

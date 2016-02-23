@@ -16,19 +16,23 @@ typedef struct __CHS
 
 } chs_t;
 
+#define DMA_BUFFER_ADDRESS  0x80000
+
 /* Function called by Interrupt Controller */
 void floppy_handler(void);
  
 /* Public API */
-status_t	floppy_init(void);
-status_t floppy_write(block_t, addr_t);
-block_t	floppy_read(addr_t);
+void	floppy_init(void);
 
 /* Static helper functions */
-
-static void 	__floppy_irq_acknowledge(void);
-static void 	__floppy_reset(void);
-static chs_t	__lba_convert(dword);
+static bool floppy_data_transfer(int,block_t*,bool,size_t);
+static void 	floppy_reset(void);
+static bool 	floppy_command_wait(bool);
+static void		floppy_start_motor(int);
+static void		floppy_stop_motor(int);
+static int 		floppy_send_byte(byte);
+static byte		floppy_read_byte(void);
+static chs_t	lba_convert(int);
 
 
 #endif

@@ -13,8 +13,9 @@
 #define STR(x)			itoa(x,10)
 #define QW(x)			#x
 
-#define bitmask(bit)	&= ~(1U << bit)
-#define bitset(bit)	|= (1U << bit)
+#define bitmask(bit)	& ~(1U << bit)
+#define bitset(bit)		| (1U << bit)
+#define bitcheck(bit)	& (1U << bit)
 
 typedef enum __BASE
 {
