@@ -11,8 +11,6 @@
 #include <vga.h>
 
 /* Output functions, defined in /lib/stdprint.c */
-void addch(const char);							//Print a single character
-void print(const char[]);						//Standard print function
 void printf(const char[], const char[]);	//Print with special formatting
 void println(const char[]);					//Append newline to output
 

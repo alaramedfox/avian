@@ -23,6 +23,7 @@
 
 void pic_init(void)
 {
+	print("Starting the Programmable Interrupt Controller\n");
 	pic_send_command(PIC_INIT);		// ICW1 - Begin init
 	pic_send_data(OFFSET1, OFFSET2);	// ICW2 - Remap IDT
 	pic_send_data(0x00, 0x00);			// ICW3 - Setup cascading

@@ -16,6 +16,7 @@ extern void outportb(port_t, byte);
 extern void load_idt(int32_t*);
 extern void keyboard_irq(void);
 extern void floppy_irq(void);
+extern void pit_irq(void);
 
 /* Exception controllers, defined in throw.asm */
 extern void throw_zero_divide(void);

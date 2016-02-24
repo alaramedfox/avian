@@ -1,6 +1,9 @@
 #define KEYBOARD_C_SOURCE
 #include <keyboard.h>
 #include <pic.h>
+#include <vga.h>
+#include <util.h>
+#include <idt.h>
 /*
  *		Avian Kernel - Bryan Webb
  *		File:		/core/keyboard.c
@@ -45,8 +48,11 @@ char* kb_buffer(void)
 
 void kb_init(void)
 {
+	idt_add_handler((addr_t)keyboard_handler, IRQ_KEYBOARD);
 	pic_enable_irq(IRQ_KEYBOARD);
 	stdin = new_stack(128);
+	
+	print_time(); print("Started keyboard driver\n");
 }
 
 /* Special character handlidng */
@@ -56,11 +62,14 @@ void undef_char() 	{ push(stdin,'?');	}
 
 void keyboard_handler(void)
 {
-	/* Do not continue if system isn't listening */
-	if(ENVAR.FLAGS.listen == false) { return; }
 	byte status = inportb(KB_STATUS);
 	word keycode;
 	char key;
+	
+	//ASSERT("Caught keyboard IRQ",ENVAR.FLAGS.listen,status,HEX);
+	
+	/* Do not continue if system isn't listening */
+	if(ENVAR.FLAGS.listen == false) { return; }
 
 	/* Lowest bit of status will be set if buffer is not empty */
 	if (status & 0x01) {

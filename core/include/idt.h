@@ -26,10 +26,11 @@ typedef enum __IDT_GATES
 
 
 void idt_init(void);
+void idt_add_handler(addr_t, interrupt_t);
+void idt_add_exception(addr_t, exception_t);
 
 /**** Static Helper Functions ******/
-static void idt_add_handler(addr_t, interrupt_t, type_attr_t);
-static void idt_add_exception(addr_t, exception_t, type_attr_t);
+static void idt_add_interrupt(addr_t, byte);
 static void idt_write_table(void);
  
 #endif

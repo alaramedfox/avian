@@ -14,6 +14,10 @@ typedef enum __CPU_EXCEPTIONS
 
 } exception_t;
 
+void exceptions_init(void);
+
+extern void throw_exception(void);
+
 /* -- Exception handlers --    |  -- Exceptions thrown via ASM -- */
 
 void catch_zero_divide	(void); 

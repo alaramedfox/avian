@@ -65,6 +65,11 @@ void vga_moveptr(word v)
 	}
 }
 
+char vga_char_at(byte row, byte col)
+{
+	return vga->buffer[(row*VGA_COL+col)*2];
+}
+
 void vga_clear(void)
 {
 	vga->vptr = 0;
@@ -86,6 +91,26 @@ void vga_write(char value)
 void vga_color(color_t value) 
 {
 	vga->buffer[vga->vptr*2+1] = value; 
+}
+
+void addch(const char c)
+{
+	vga_write(c);
+	vga_increment();
+}
+ 
+void print(const char str[])
+{
+	for(size_t i=0; str[i] != '\0'; i++) {
+		switch(str[i])
+		{
+			case '\n': vga_newline(); break;
+			case '\r': vga_creturn(); break;
+			case '\t': vga_tabchar(); break;
+			
+			default: addch(str[i]); break;
+		}
+	}
 }
 
 void vga_scroll(void) 

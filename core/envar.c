@@ -6,6 +6,8 @@
  *		Purpose:	Define enviornmental global variables
  */
 
+#include <vga.h>
+#include <util.h>
 
 void ENVAR_init(void)
 {
@@ -15,4 +17,5 @@ void ENVAR_init(void)
 	ENVAR.GLOBAL.echostate = ECHO;
 	ENVAR.FLAGS.captain = false;
 	ENVAR.GLOBAL.tabsize = 4;
+	print_time(); print("Starting enviornment\n");
 }

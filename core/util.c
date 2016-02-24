@@ -6,6 +6,75 @@
  */
 #include <stack.h>
 #include <util.h>
+#include <vga.h>
+
+/* 
+ *	Debug assertion command - 
+ *  Prints a message, the intended value, and the
+ *	 actual value produced.
+ */
+void ASSERT(const char message[], int intend, int actual, base_t base)
+{
+	
+	print_time();
+	vga_setcolor(C_WARN);
+	print("INFO: ");
+	print(message);
+	char* intend_str = itoa(intend,base);
+	char* actual_str = itoa(actual,base);
+	int justify = strlen(intend_str) + strlen(actual_str) + 7;
+	
+	vga_movexy(vga_getrow(), 80-justify-1);
+	
+	print(" [ ");
+	print(intend_str); 
+	print(", "); print(actual_str); print(" ]\n");
+	vga_setcolor(0x07);
+}
+
+void print_time(void)
+{
+	print("[ ");
+	vga_setcolor(0x02);
+	print(itoa(clock(),DEC));
+	vga_setcolor(0x07);
+	print(" ] ");
+}
+
+static const char spin_chars[] = { '|', '/', '-', '\\', };
+static int spin_state=0;
+static bool waiting=false;
+static int loc;
+static char ch;
+
+void wait_spin(bool done)
+{
+	if(!done && !waiting) {
+		waiting = true;
+		loc = vga_getloc();
+		ch = vga_char_at(0,0);
+		vga_color(0x05);
+	}
+	else if(!done && waiting) {
+		vga_movexy(0,0);
+		
+		switch(spin_state)
+		{
+			case 0:    vga_write(spin_chars[0]); break;
+			case 2000: vga_write(spin_chars[1]); break;
+			case 4000: vga_write(spin_chars[2]); break;
+			case 6000: vga_write(spin_chars[3]); break;
+		}
+		spin_state++;
+		if(spin_state >= 8000) spin_state = 0;
+	}
+	else {
+		waiting = false;
+		vga_movexy(0,0);
+		vga_write(ch);
+		vga_moveptr(loc);
+	}
+}
  
 /* Calculate the size of a null-terminated string literal */
 size_t strlen(const char* str)
@@ -40,7 +109,14 @@ char* itoa_bytes(int number)
 
 char* itoa(int number, base_t base)
 {
-	if(base < 1 || base > 16) {
+	if(base == BYTES) {
+		return itoa_bytes(number);
+	}
+	else if(base == BOOLEAN) {
+		if(number == 0) return "false";
+		else return "true";
+	}
+	else if(base < 1 || base > 16) {
 		return "";
 	}
 

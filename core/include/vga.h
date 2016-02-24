@@ -40,10 +40,14 @@ void vga_movexy	(byte,byte);		//Move cursor with 2D
 void vga_moveptr	(word);				//Move cursor with 1D
 void vga_increment(void);				//Move to next cell
 void vga_decrement(void);				//Move to previous cell
+char vga_char_at  (byte,byte);		//Return character at 2D point
 
 /* Printing */
 void vga_write	(char);				//Safely write to vram[vptr]
 void vga_color	(color_t);			//Safely write to vram[vptr+1]
+
+void addch		(char);
+void print		(const char[]);
 
 /* Special characters */
 void vga_newline(void);				//Move to next line, starting in first column
