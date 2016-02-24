@@ -15,8 +15,19 @@ ROOT="."
 OBJ="obj"
 BIN="bin"
 
+CFLAGS=" -m32 -ffreestanding -fno-exceptions -std=c99 "
+CINC=" -Ilib/include -Icore/include "
+CWARN=" "
+
 SOURCES=(". lib core")
 
+function increment_file {
+	file=$1
+	old="`sed  's/^ *//' $file` +1"  
+	echo $old | bc > $file.temp  
+	mv $1.temp $file
+	return "`sed  's/^ *//' $1`"
+}
 
 function increment_build {
 	BUILDFILE="version/build"
@@ -75,7 +86,7 @@ function main {
 }
 
 function make_all {
-	increment_build
+	increment_build "1"
 	TARGET+=$(ls -R | grep "\.c\|\.asm")
 	assemble
 	compile
@@ -97,8 +108,8 @@ function compile {
 		for SRC in $TARGET; do
 			NAME=`echo "$SRC" | cut -d'.' -f1`
 			if [ -f $DIR/$NAME.c ]; then
-				printf "$INFO Compiling $SRC...\n"
-				colorgcc -m32 -c $DIR/$NAME.c -o $OBJ/$NAME.o --sysroot=$ROOT -Ilib/include/ -Icore/include/ -fno-exceptions -std=c99 -ffreestanding
+				printf "$INFO Compiling $SRC\n"
+				colorgcc -c $DIR/$NAME.c -o $OBJ/$NAME.o $CINC $CFLAGS $CWARN
 			fi
 		done
 	done
@@ -108,22 +119,26 @@ function link {
 	printf "$INFO Linking object files:\n"
 	ls obj/
 	printf "\n"
-	for i in $TARGET; do
-		BINARY=`echo $i | grep "alpha\|beta\|stable"`
-		ld -m elf_i386 -A i386 -T linker.ld -o bin/kernel-$BINARY obj/*.o
-		NEWSIZE=$(stat -c%s "bin/kernel-$BINARY")
-		printf "$INFO Generated binary bin/kernel-$BINARY ($NEWSIZE bytes)\n"
+	#$for i in $TARGET; do
+		if [ -f "bin/kernel-alpha" ]; then
+			OLDSIZE=$(stat -c%s "bin/kernel-alpha")
+		else
+			OLDSIZE=0
+		fi
+		#BINARY=`echo $i | grep "alpha\|beta\|stable"`
+		ld -m elf_i386 -A i386 -T linker.ld -o bin/kernel-alpha obj/*.o
+		NEWSIZE=$(stat -c%s "bin/kernel-alpha")
+		
+		printf "$INFO Generated binary bin/kernel-alpha ($NEWSIZE bytes)\n"
+		printf "$INFO (Net change: $(( $NEWSIZE - $OLDSIZE )) bytes)\n"
 		#return
-	done
+	#done
 }
 
 function run {
-	for i in $TARGET; do
-		BINARY=`echo $i | grep "alpha\|beta\|stable"`
-		printf "$INFO Executing kernel-$BINARY with QEMU...\n"
-		qemu-system-i386 -kernel bin/kernel-$BINARY --no-kvm
-		return
-	done
+	printf "$INFO Executing kernel-alpha with QEMU...\n"
+	qemu-system-i386 -kernel bin/kernel-alpha -fda floppy.img --no-kvm
+	return
 }
 
 

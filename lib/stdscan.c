@@ -20,14 +20,10 @@ char* scan(void)
 	
 	while(peek(stdin) != '\n')
 	{
-		if(ENVAR.FLAGS.keypress)
-		{
-			vga_moveptr(location);
-			print(stack_str(stdin));
-			move_cursor(vga_getrow(), vga_getcol());
-			addch(' ');
-			ENVAR.FLAGS.keypress = false;
-		}
+		vga_moveptr(location);
+		print(stack_str(stdin));
+		move_cursor(vga_getrow(), vga_getcol());
+		addch(' ');
 	}
 	
 	while(peek(stdin) == '\n') {
@@ -35,6 +31,7 @@ char* scan(void)
 	}
 	
 	ENVAR.FLAGS.listen = false;
+	hide_cursor();
 	char* input = stack_str(stdin);
 	return input;
 }

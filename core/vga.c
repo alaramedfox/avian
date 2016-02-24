@@ -38,8 +38,11 @@ void 	 vga_newline(void)		{ vga_movexy(vga_getrow()+1,0); }
 void 	 vga_creturn(void) 		{ vga_movexy(vga_getrow()+1, vga_getcol()); }
 
 void vga_tabchar(void) 
-{ 
-	for(int i=0;i<4;i++) {
+{
+	int spaces = vga_getcol() % 5;
+	if(spaces == 0) spaces = 5;
+	
+	for(int i=0; i<spaces; i++) {
 		vga_write(' ');
 		vga_increment();
 	}

@@ -14,6 +14,9 @@ section .text
 	
 	global	floppy_irq
 	extern	floppy_handler
+	
+	global	pit_irq
+	extern	pit_handler
 
 	load_idt:
 		mov	edx, [esp + 4]
@@ -27,6 +30,10 @@ section .text
 		
 	floppy_irq:
 		call	floppy_handler
+		iretd
+		
+	pit_irq:
+		call	pit_handler
 		iretd
 
 ; END .text
