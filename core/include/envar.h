@@ -18,18 +18,21 @@ struct __GLOBAL {
 	byte	   echostate;		//Whether or not to echo STDIN
 	byte	   tabsize;			//Size of the tabs
 	status_t status;			//Error capturing
-};
+	
+} __attribute__ ((packed));
 
 struct __FLAGS {
-	bool 		listen;			//If set, signal to catch input
-	bool 		repaint;			//If set, signal need to repaint
-	bool		captain;			//If set, allow unrestricted access
-	bool		shift;			//If set, flag for the uppercase charset
-	bool		caps;				//If set, permanant flag for uppercase
-	bool		keypress;		//True when key is pressed
+	bool 		listen: 1;			//If set, signal to catch input
+	bool 		repaint: 1;			//If set, signal need to repaint
+	bool		captain: 1;			//If set, allow unrestricted access
+	bool		shift: 1;			//If set, flag for the uppercase charset
+	bool		caps: 1;				//If set, permanant flag for uppercase
+	bool		keypress: 1;		//True when key is pressed
+	bool		mmupdate: 1;
 	
-	bool		error;			//True when a component flags an error
-};
+	bool		error: 1;			//True when a component flags an error
+	
+} __attribute__ ((packed));
 
 struct __ENVAR {
 	struct __FLAGS		FLAGS;

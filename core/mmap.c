@@ -1,10 +1,11 @@
 #define MMAP_C_SOURCE
-#include <mmap.h>
 /*
  *		Avian Project - Bryan Webb
  *		File:		/core/mtable->c
  *		Purpose:	Handles memory allocation for pointers
  */
+#include <mmap.h>
+#include <stdlib.h>
 #include <envar.h>
 #include <types.h>
 #include <util.h>
@@ -23,6 +24,8 @@ void free(void* ptr)
 	else mtable_delete(index);
 }
 
+
+
 void* malloc(const size_t size)
 {
 	/* Loop through memory until a free block is found */
@@ -38,6 +41,17 @@ void* malloc(const size_t size)
 		}
 	}
 	return 0;
+}
+
+void* memcpy(void *str1, const void *str2, size_t n)
+{
+	byte *source = (byte*)str2;
+	byte *dest = (byte*)str1;
+	
+	for(int i=0; i<n; i++) {
+		dest[i] = source[i];
+	}
+	return dest;
 }
 
 size_t mem_blocks(void)

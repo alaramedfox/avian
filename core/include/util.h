@@ -8,16 +8,14 @@
 #include <types.h>
 #include <time.h>
 
-/* Function macros */
-#define until(exp) 	while(!(exp)) 	//Perl-like until loop
-#define unless(exp)	if(!(exp))   	//Perl-like unless switch
-#define STR(x)			itoa(x,10)
-#define QW(x)			#x
-
 #define bitmask(var,bit)	var & ~(1 << bit)
 #define bitset(var,bit)		var | (1 << bit)
 #define bitcheck(var,bit)	var & (1 << bit)
 
+#define BENCHMARK(time, function) 	\
+		time = clock();					\
+		function;							\
+		time = (clock() - time);
 
 typedef enum __BASE
 {
@@ -28,8 +26,6 @@ typedef enum __BASE
 void ASSERT(const char[], int, int, base_t);
 void print_time(void);
 void wait_spin(bool);
-
-size_t strlen(const char*);
 
 char* itoa(int,base_t);
 char* itoa_bytes(int32_t);

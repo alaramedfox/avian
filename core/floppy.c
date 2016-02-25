@@ -222,8 +222,6 @@ static int floppy_seek(byte track)
  *		Used after sending a command.
  *		Waits for the IRQ signal, then reads in
  *		the result bytes into the buffer.
- *
- *		TODO: Add timeouts and error codes
  */
 static bool floppy_command_wait(bool sensei)
 {
@@ -348,11 +346,6 @@ static bool floppy_data_transfer(int lba, byte *block, bool read, size_t sectors
 	/* Transfer data from track buffer to data buffer */
 	if(read) {
 		for(int i=0; i<sectors*512; i++) {
-			if(dma_buffer[i] != 0) {
-				print("DMA["); print(itoa(i,DEC)); print("] = ");
-				print(itoa(dma_buffer[i],HEX));
-				print("\n");
-			}
 			block[i] = dma_buffer[i];
 		}
 	}

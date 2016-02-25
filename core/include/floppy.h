@@ -20,7 +20,7 @@ typedef struct __CHS
 #define GAP3 0x1B
 
 /* Function called by Interrupt Controller */
-void floppy_handler(void);
+__attribute__((hot)) void floppy_handler(void);
  
 /* Public API */
 void floppy_init(void);

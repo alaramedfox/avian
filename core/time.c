@@ -8,7 +8,10 @@
 #include <pic.h>
 #include <idt.h>
 #include <util.h>
+#include <vga.h>
 #include <asmfunc.h>
+#include <mmap.h>
+#include <envar.h>
 
 static volatile uint32_t tick=0;
 
@@ -55,7 +58,17 @@ void sleep(uint32_t ms)
 	return;
 }
 
-void pit_handler(void)
+static void print_memory(void)
+{
+	int loc = vga_getloc();
+	vga_clear_row(1);
+	print("Memory: "); print(itoa(mem_used(),BYTES));
+	print(" / "); 		 print(itoa(mem_free(), BYTES));
+	vga_moveptr(loc);
+}
+
+
+__attribute__ ((hot)) void pit_handler(void) 
 {
 	tick++;
 	pic_send_eoi(IRQ_PIT);

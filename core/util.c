@@ -1,11 +1,12 @@
 #define UTIL_C_SOURCE
 /*
- *		Avian Project
- *			File:		util.h
- *			Purpose:	Provide essential core functions
+ *		Avian Kernel - Bryan Webb
+ *		File:		/core/include/util.h
+ *		Purpose:	Provide misc functions
  */
 #include <stack.h>
 #include <util.h>
+#include <string.h>
 #include <vga.h>
 
 /* 
@@ -15,7 +16,7 @@
  */
 void ASSERT(const char message[], int intend, int actual, base_t base)
 {
-	
+/*
 	print_time();
 	vga_setcolor(C_WARN);
 	print("INFO: ");
@@ -30,6 +31,7 @@ void ASSERT(const char message[], int intend, int actual, base_t base)
 	print(intend_str); 
 	print(", "); print(actual_str); print(" ]\n");
 	vga_setcolor(0x07);
+*/
 }
 
 void print_time(void)
@@ -76,16 +78,6 @@ void wait_spin(bool done)
 	}
 }
  
-/* Calculate the size of a null-terminated string literal */
-size_t strlen(const char* str)
-{
-	size_t size=0;
-	while(str[size] != '\0') {
-		++size;
-	}
-	return size;
-}
-
 static const char place_value[] = "0123456789ABCDEF";
 static const char bytes_magnitude[] = "BKMGTP";
 
@@ -134,7 +126,7 @@ char* itoa(int number, base_t base)
 
 	// Process individual digits
 	
-	until(number == 0) {
+	while(number != 0) {
 		int i = number % base;
 		push(result, place_value[i]);
 		number = number/base;
@@ -148,8 +140,8 @@ char* itoa(int number, base_t base)
 		push(result, '-');
 	}
 	
-	stack* inverted = new_stack(result->size);\
-	until(empty(result)) {
+	stack* inverted = new_stack(result->size);
+	while(!empty(result)) {
 		push(inverted,pop(result));
 	}
 	

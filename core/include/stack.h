@@ -6,10 +6,8 @@
  *		Purpose:		Header file for stack.c
  */
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <mmap.h>
+#include <types.h>
+#include <stdlib.h>
 
 typedef struct __STACK
 {

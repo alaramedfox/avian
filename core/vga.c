@@ -84,6 +84,15 @@ void vga_clear(void)
 	vga->vptr = 0;
 }
 
+void vga_clear_row(byte row)
+{
+	vga_movexy(row, 0);
+	for(int i=0; i<VGA_COL; i++) {
+		addch(' ');
+	}
+	vga_movexy(row, 0);
+}
+
 /* Safely write a single character to vram without segfault */
 void vga_write(char value) 
 {

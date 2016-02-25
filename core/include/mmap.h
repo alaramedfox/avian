@@ -4,7 +4,7 @@
 /*
  *		Avian Project - Bryan Webb
  *		File:		/include/mmap.h
- *		Purpose:	Header file for mtable->c
+ *		Purpose:	Header file for the MMU
  */
 
 /* Define allocatable memory ranges */
@@ -37,12 +37,19 @@ typedef struct __TABLE_MAP
 } mtable_t;
  
 /* Public API */
-void*		malloc(size_t);	//Allocate memory block, and return pointer to block
-void 		free(void*);		//De-allocate memory block asociated with given pointer
 
-size_t		mem_blocks(void); //Return number of allocated blocks
-uint32_t		mem_used(void);	//Return amount of used memory
-uint32_t		mem_free(void);	//Return amount of free memory
+/*		
+ *		NOTE: The prototypes for the memory management functions
+ *				are declared in stdlib.h
+ *
+ *				This file is just for the memory info functions and
+ *				static methods.
+ */
+#define  new(T) (T*)malloc(sizeof(T))
+
+__attribute__((hot)) size_t	mem_blocks(void); 
+__attribute__((hot)) uint32_t	mem_used(void);
+__attribute__((hot)) uint32_t	mem_free(void);
 
 /* Internal static functions */
 static size_t	mtable_index(addr_t);

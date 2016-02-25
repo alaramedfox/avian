@@ -23,16 +23,6 @@
 	#define __DATA_TYPES__
 #endif
 
-#if defined __FIXED_WIDTH_TYPES__
-	/* These defines re-declare the common `int', `short', etc
-	 * datatypes to constant-width types. It is preferred to use
-	 * `word' and `dword', but these are here for compatability and such.
-	 */
-	#define short		int16_t
-	#define int			int32_t
-	#define long		int32_t
-#endif
-
 typedef enum __STATUS
 {
 	RETRY, FAIL, ABORT, OK, READY,
@@ -54,12 +44,24 @@ typedef enum __PORTS
 
 } port_t;
 
+#if defined __FIXED_WIDTH_TYPES__
+	/* 
+	 * These defines re-declare the common `int', `short', etc
+	 * datatypes to constant-width types. It is preferred to use
+	 * `word' and `dword', but these are here for compatability and such.
+	 */
+	#define short		int16_t
+	#define int			int32_t
+	#define long		int32_t
+#endif
+
 #if defined __VERBOSE_TYPES__
 	/* These types are for use in clarity of function arguments.
 	 * They indicate the purpose of said arguments.
 	 */
 	typedef uint16_t 	index_t;
 	typedef uintptr_t addr_t;
+	
 #endif
 
 #if defined __DATA_TYPES__
