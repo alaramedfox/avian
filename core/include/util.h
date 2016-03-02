@@ -27,6 +27,8 @@ void ASSERT(const char[], int, int, base_t);
 void print_time(void);
 void wait_spin(bool);
 
+void notify(const char[]);
+
 char* itoa(int,base_t);
 char* itoa_bytes(int32_t);
  

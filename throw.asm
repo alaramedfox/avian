@@ -12,12 +12,19 @@ section .text
 	global throw_exception
 	extern catch_exception
 	
+	global throw_double_fault
+	extern catch_double_fault
+	
 	throw_exception:
 		call catch_exception
 		iret
 	
 	throw_zero_divide:
 		call catch_zero_divide
+		iret
+		
+	throw_double_fault:
+		call catch_double_fault
 		iret
 	
 ; END .text

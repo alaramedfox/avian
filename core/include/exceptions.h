@@ -5,7 +5,6 @@
  *		File:		/core/include/exceptions.h
  *		Purpose:	Header for exception handling engine
  */
-#include <types.h>
 
 typedef enum __CPU_EXCEPTIONS
 {
@@ -28,7 +27,7 @@ void catch_overflow		(void);
 void catch_range_bound	(void);
 void catch_bad_opcode	(void);
 void catch_no_device		(void);
-void catch_double_fault	(int);
+void catch_double_fault	(int);	extern void throw_double_fault(int);
 void catch_bad_tss		(int);
 void catch_no_segment	(int);
 void catch_stack_fault	(int);

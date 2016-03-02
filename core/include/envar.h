@@ -17,7 +17,6 @@ enum __ECHOSTATE
 struct __GLOBAL {
 	byte	   echostate;		//Whether or not to echo STDIN
 	byte	   tabsize;			//Size of the tabs
-	status_t status;			//Error capturing
 	
 } __attribute__ ((packed));
 

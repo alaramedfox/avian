@@ -8,18 +8,19 @@
 #define DEBUGMODE
 
 #include <stdlib.h>
+#include <string.h>
 #include <types.h>
 #include <vga.h>
 #include <envar.h>
 #include <idt.h>
+#include <exceptions.h>
+#include <pic.h>
 #include <keyboard.h>
 #include <util.h>
-#include <asmfunc.h>
 #include <buildcount.h>
 #include <floppy.h>
-#include <stdio.h>
 #include <time.h>
-#include <fat.h>
+#include <filesystem.h>
 
 void init(void);
 bool main_loop(void);
@@ -27,7 +28,6 @@ void bootscreen(void);
 
 void init(void) 
 {
-	ASSERT("Debug mode enabled",0,0,DEC);
 	exceptions_init();
 	hide_cursor();
 	vga_setcolor(0x07);
@@ -41,22 +41,52 @@ void init(void)
 	print("\nSystem booted.\n\n");
 }
 
-
-
 void avian_main(void) 
 {
 	bootscreen();
 	init();
 	
-	print("Testing file input\n");
+	print("Testing accuracy of floppy controller\n");
 	int time = clock();
+//#define TEST_IO
+
+#if defined TEST_IO	
+	byte* test = (byte*) malloc(512);
+	for(int i=0; i<512; i++) test[i] = 'T';
 	
-	byte *block = (byte*) malloc(512);
-	file_t file;
 	
-	open(&file,DFS_READ,"FILE.TXT");
+	floppy_write_block(37, test, 1);
 	
-	print("Input complete after "); print(itoa(clock()-time,DEC)); print("ms\n");
+	
+	for(int i=0; i<64; i++) {
+		print(itoa(test[i],HEX));
+		print(" ");
+	}
+	
+#else
+	print("Mounting volume\n");
+	volume_t* floppy = mount(fda);
+	
+	print("Opening file\n");
+	file_t* file = open(floppy, "AT.TXT", DFS_WRITE);
+	
+	char *source_string = (char*) malloc(512);
+	for(int i=0; i<512; i++) source_string[i] = '@';
+	
+	char *test_string = "If this shows up, there is an overflow";
+	
+	char* result_string = (char*) malloc(128);
+	
+	print("Writing file\n");
+	write(file, source_string, 512);
+	
+	print("Reading file\n");
+	read(file, result_string, 128);
+	
+	print("Contents of file: `"); print(result_string); print("'\n");
+#endif
+	
+	print("\nTest complete after "); print(itoa(clock()-time,DEC)); print("ms\n");
 	while(main_loop());
 	
 	

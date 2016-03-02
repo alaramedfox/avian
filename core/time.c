@@ -46,27 +46,16 @@ void time_init(word frequency)
 	
 }
 
-uint32_t clock(void)
+inline uint32_t clock(void)
 {
 	return tick;
 }
 
 void sleep(uint32_t ms)
 {
-	uint32_t start = clock();
-	while(clock()<start+ms);
-	return;
+	int t = tick;
+	while(tick < t+ms);
 }
-
-static void print_memory(void)
-{
-	int loc = vga_getloc();
-	vga_clear_row(1);
-	print("Memory: "); print(itoa(mem_used(),BYTES));
-	print(" / "); 		 print(itoa(mem_free(), BYTES));
-	vga_moveptr(loc);
-}
-
 
 __attribute__ ((hot)) void pit_handler(void) 
 {

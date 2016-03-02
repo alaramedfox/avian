@@ -43,6 +43,12 @@ void print_time(void)
 	print(" ] ");
 }
 
+void notify(const char str[])
+{
+	print_time();
+	print(str);
+}
+
 static const char spin_chars[] = { '|', '/', '-', '\\', };
 static int spin_state=0;
 static bool waiting=false;

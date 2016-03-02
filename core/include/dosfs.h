@@ -31,6 +31,8 @@ uint32_t DFS_WriteSector(uint8_t unit, uint8_t *buffer, uint32_t sector, uint32_
 #define DFS_NOTFOUND	3			// path or file not found
 #define DFS_PATHLEN		4			// path too long
 #define DFS_ALLOCNEW	5			// must allocate new directory cluster
+#define DFS_DNOTFOUND 6			// Directory not found
+#define DFS_NOTDIR 7				// Not a directory
 #define DFS_ERRMISC		0xffffffff	// generic error
 
 //===================================================================
@@ -95,7 +97,7 @@ typedef struct _tagDIRENT {
 	uint8_t filesize_1;			//
 	uint8_t filesize_2;			//
 	uint8_t filesize_3;			// file size, high byte
-} DIRENT, *PDIRENT;
+} __attribute__ ((packed)) DIRENT, *PDIRENT;
 
 /*
 	Partition table entry structure
@@ -117,7 +119,7 @@ typedef struct _tagPTINFO {
 	uint8_t		size_1;			//
 	uint8_t		size_2;			//
 	uint8_t		size_3;			// size of partition (high byte)
-} PTINFO, *PPTINFO;
+}__attribute__ ((packed)) PTINFO, *PPTINFO;
 
 /*
 	Master Boot Record structure
@@ -127,7 +129,7 @@ typedef struct _tagMBR {
 	PTINFO ptable[4];			// four partition table structures
 	uint8_t sig_55;				// 0x55 signature byte
 	uint8_t sig_aa;				// 0xaa signature byte
-} MBR, *PMBR;
+} __attribute__ ((packed)) MBR, *PMBR;
 
 /*
 	BIOS Parameter Block structure (FAT12/16)
@@ -158,7 +160,7 @@ typedef struct _tagBPB {
 	uint8_t sectors_l_1;		//
 	uint8_t sectors_l_2;		//
 	uint8_t sectors_l_3;		// large num sectors high byte
-} BPB, *PBPB;
+}  __attribute__ ((packed)) BPB, *PBPB;
 
 /*
 	Extended BIOS Parameter Block structure (FAT12/16)
@@ -173,7 +175,7 @@ typedef struct _tagEBPB {
 	uint8_t serial_3;			// serial#
 	uint8_t label[11];			// volume label
 	uint8_t system[8];			// filesystem ID
-} EBPB, *PEBPB;
+}  __attribute__ ((packed)) EBPB, *PEBPB;
 
 /*
 	Extended BIOS Parameter Block structure (FAT32)
@@ -206,7 +208,7 @@ typedef struct _tagEBPB32 {
 	uint8_t serial_3;			// serial#
 	uint8_t label[11];			// volume label
 	uint8_t system[8];			// filesystem ID
-} EBPB32, *PEBPB32;
+}  __attribute__ ((packed)) EBPB32, *PEBPB32;
 
 /*
 	Logical Boot Record structure (volume boot sector)
@@ -222,7 +224,7 @@ typedef struct _tagLBR {
 	uint8_t code[420];			// boot sector code
 	uint8_t sig_55;				// 0x55 signature byte
 	uint8_t sig_aa;				// 0xaa signature byte
-} LBR, *PLBR;
+}  __attribute__ ((packed)) LBR, *PLBR;
 
 /*
 	Volume information structure (Internal to DOSFS)
@@ -252,7 +254,7 @@ typedef struct _tagVOLINFO {
 	uint32_t fat1;				// starting sector# of FAT copy 1
 	uint32_t rootdir;			// starting sector# of root directory (FAT12/FAT16) or cluster (FAT32)
 	uint32_t dataarea;			// starting sector# of data area (cluster #2)
-} VOLINFO, *PVOLINFO;
+}  __attribute__ ((packed)) VOLINFO, *PVOLINFO;
 
 /*
 	Flags in DIRINFO.flags
@@ -268,7 +270,7 @@ typedef struct _tagDIRINFO {
 	uint8_t currententry;		// current dir entry in sector
 	uint8_t *scratch;			// ptr to user-supplied scratch buffer (one sector)
 	uint8_t flags;				// internal DOSFS flags
-} DIRINFO, *PDIRINFO;
+}  __attribute__ ((packed)) DIRINFO, *PDIRINFO;
 
 /*
 	File handle structure (Internal to DOSFS)
@@ -283,7 +285,7 @@ typedef struct _tagFILEINFO {
 
 	uint32_t cluster;			// current cluster
 	uint32_t pointer;			// current (BYTE) pointer
-} FILEINFO, *PFILEINFO;
+}  __attribute__ ((packed)) FILEINFO, *PFILEINFO;
 
 /*
 	Get starting sector# of specified partition on drive #unit

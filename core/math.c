@@ -6,9 +6,12 @@
  */
  
 #include <stdlib.h>
+#include <util.h>
+#include <vga.h>
 
 div_t div(int num, int den)
 {
+	if(den == 0) { print("Error!\n"); while(true); }
 	div_t result;
 	result.quot = num / den;
 	result.rem = num % den;
@@ -17,6 +20,7 @@ div_t div(int num, int den)
 
 ldiv_t ldiv(int num, int den)
 {
+	if(den == 0) { print("Error!\n"); while(true); }
 	ldiv_t result;
 	result.quot = num / den;
 	result.rem = num % den;

@@ -137,7 +137,7 @@ function link {
 
 function run {
 	printf "$INFO Executing kernel-alpha with QEMU...\n"
-	qemu-system-i386 -kernel bin/kernel-alpha -fda floppy.img --no-kvm
+	qemu-system-i386 -kernel bin/kernel-alpha -fda test.img --no-kvm
 	return
 }
 

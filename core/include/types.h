@@ -18,16 +18,9 @@
 #include <stddef.h>		//size_t
 
 #if !defined __SELECT_TYPES__
-	#define __FIXED_WIDTH_TYPES__
 	#define __VERBOSE_TYPES__
 	#define __DATA_TYPES__
 #endif
-
-typedef enum __STATUS
-{
-	RETRY, FAIL, ABORT, OK, READY,
-	
-} status_t;
 
 /* Define a list of usable ports for bus IO */
 typedef enum __PORTS
@@ -44,16 +37,14 @@ typedef enum __PORTS
 
 } port_t;
 
-#if defined __FIXED_WIDTH_TYPES__
-	/* 
-	 * These defines re-declare the common `int', `short', etc
-	 * datatypes to constant-width types. It is preferred to use
-	 * `word' and `dword', but these are here for compatability and such.
-	 */
-	#define short		int16_t
-	#define int			int32_t
-	#define long		int32_t
-#endif
+/* Define a list of input and output modes */
+enum __IO_MODE
+{
+	IO_READ	 = 1,	// Standard read mode
+	IO_WRITE  = 2,	// Standard write mode
+	IO_TRUNC  = 3,	// Force truncate when writing
+	IO_APPEND = 4, // Append when writing
+};
 
 #if defined __VERBOSE_TYPES__
 	/* These types are for use in clarity of function arguments.

@@ -8,8 +8,6 @@
  
 #include <types.h>
 #include <asmfunc.h>
-#include <exceptions.h>
-#include <pic.h>
 
 enum __IDT_DEFS
 {
@@ -24,10 +22,8 @@ typedef enum __IDT_GATES
 	
 } type_attr_t;
 
-
-void idt_init(void);
-void idt_add_handler(addr_t, interrupt_t);
-void idt_add_exception(addr_t, exception_t);
+void idt_add_handler(addr_t, byte);
+void idt_add_exception(addr_t, byte);
 
 /**** Static Helper Functions ******/
 static void idt_add_interrupt(addr_t, byte);

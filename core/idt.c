@@ -5,9 +5,6 @@
  *	  	Purpose: Interrupt Descriptor Table
  */
 #include <idt.h>
-#include <pic.h>
-#include <exceptions.h>
-#include <vga.h>
 
 typedef struct __IDT_ENTRY
 {
@@ -21,27 +18,6 @@ typedef struct __IDT_ENTRY
 
 static idt_entry_t idt_table[IDT_SIZE];
 
-void idt_init(void)
-{
-	//pic_remap();	
-
-	print("Populating the Interrupt Descriptor Table\n");
-	
-	idt_add_exception((addr_t)throw_zero_divide, X_ZERO_DIVIDE);
-	print(" * Added exception handler\n");
-	
-	idt_add_handler((addr_t)keyboard_irq, IRQ_KEYBOARD);
-	print(" * Added keyboard handler\n");
-	
-	idt_add_handler((addr_t)floppy_irq, IRQ_FLOPPY);
-	print(" * Added floppy handler\n");
-	
-	idt_add_handler((addr_t)pit_irq,	IRQ_PIT);
-	print(" * Added CPU clock handler\n");
-	
-	idt_write_table();
-}
-
 static void idt_add_interrupt(addr_t handler, byte offset)
 {
 	idt_table[offset].lower 		= handler & 0xFFFF;
@@ -53,13 +29,13 @@ static void idt_add_interrupt(addr_t handler, byte offset)
 	idt_write_table();
 }
 
-void idt_add_handler(addr_t handler, interrupt_t irq)
+void idt_add_handler(addr_t handler, byte irq)
 {
-	byte offset = OFFSET1 + irq;
+	byte offset = 0x20 + irq;
 	idt_add_interrupt(handler, offset);
 }
 
-void idt_add_exception(addr_t handler, exception_t err)
+void idt_add_exception(addr_t handler, byte err)
 {
 	byte offset = err;
 	idt_add_interrupt(handler, offset);

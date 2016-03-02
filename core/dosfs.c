@@ -10,8 +10,9 @@
 
 #include <string.h>
 #include <stdlib.h>
-
-#include "dosfs.h"
+#include <util.h>
+#include <vga.h>
+#include <dosfs.h>
 
 /*
 	Get starting sector# of specified partition on drive #unit
@@ -69,7 +70,7 @@ uint32_t DFS_GetVolInfo(uint8_t unit, uint8_t *scratchsector, uint32_t startsect
 	PLBR lbr = (PLBR) scratchsector;
 	volinfo->unit = unit;
 	volinfo->startsector = startsector;
-
+	
 	if(DFS_ReadSector(unit,scratchsector,startsector,1))
 		return DFS_ERRMISC;
 
@@ -77,7 +78,8 @@ uint32_t DFS_GetVolInfo(uint8_t unit, uint8_t *scratchsector, uint32_t startsect
 //	strncpy(volinfo->oemid, lbr->oemid, 8);
 //	volinfo->oemid[8] = 0;
 
-	volinfo->secperclus = lbr->bpb.secperclus;
+	volinfo->secperclus = scratchsector[13];
+	
 	volinfo->reservedsecs = (uint16_t) lbr->bpb.reserved_l |
 		  (((uint16_t) lbr->bpb.reserved_h) << 8);
 
@@ -644,7 +646,7 @@ uint32_t DFS_GetFreeDirEnt(PVOLINFO volinfo, uint8_t *path, PDIRINFO di, PDIRENT
 	uint32_t tempclus,i;
 
 	if (DFS_OpenDir(volinfo, path, di))
-		return DFS_NOTFOUND;
+		return DFS_DNOTFOUND;
 
 	// Set "search for empty" flag so DFS_GetNext knows what we're doing
 	di->flags |= DFS_DI_BLANKENT;
@@ -752,13 +754,13 @@ uint32_t DFS_OpenFile(PVOLINFO volinfo, uint8_t *path, uint8_t mode, uint8_t *sc
 	// tmppath = "MYDIR/MYDIR2".
 	di.scratch = scratch;
 	if (DFS_OpenDir(volinfo, tmppath, &di))
-		return DFS_NOTFOUND;
+		return DFS_DNOTFOUND;
 
 	while (!DFS_GetNext(volinfo, &di, &de)) {
 		if (!memcmp(de.name, filename, 11)) {
 			// You can't use this function call to open a directory.
 			if (de.attr & ATTR_DIRECTORY)
-				return DFS_NOTFOUND;
+				return DFS_NOTDIR;
 
 			fileinfo->volinfo = volinfo;
 			fileinfo->pointer = 0;
@@ -795,6 +797,8 @@ uint32_t DFS_OpenFile(PVOLINFO volinfo, uint8_t *path, uint8_t mode, uint8_t *sc
 	if (mode & DFS_WRITE) {
 		uint32_t cluster, temp;
 
+		print("File not found. Attempting to create.\n");		
+		
 		// Locate or create a directory entry for this file
 		if (DFS_OK != DFS_GetFreeDirEnt(volinfo, tmppath, &di, &de))
 			return DFS_ERRMISC;

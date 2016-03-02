@@ -35,7 +35,7 @@ size_t vga_getrow(void) 		{ return vga->vptr / VGA_COL; }
 size_t vga_getloc(void) 		{ return vga->vptr; }
 void	 vga_setcolor(color_t c){ vga->color = c; }
 void 	 vga_newline(void)		{ vga_movexy(vga_getrow()+1,0); }
-void 	 vga_creturn(void) 		{ vga_movexy(vga_getrow()+1, vga_getcol()); }
+void 	 vga_creturn(void) 		{ vga_movexy(vga_getrow(), 0); }
 
 void vga_tabchar(void) 
 {
