@@ -12,6 +12,9 @@
 #define bitset(var,bit)		var | (1 << bit)
 #define bitcheck(var,bit)	var & (1 << bit)
 
+/* This creates a `foreach' style loop */
+#define each(var, count)	int var=0; var<count; var++
+
 #define BENCHMARK(time, function) 	\
 		time = clock();					\
 		function;							\
@@ -22,6 +25,20 @@ typedef enum __BASE
 	DEC=10, HEX=16, OCT=8, BIN=2, BYTES=-1, BOOLEAN=0,
 	
 } base_t;
+
+typedef union __PAIR16
+{
+	byte _byte[2];
+	word _word;
+
+} pair16_t;
+
+typedef union __PAIR32
+{
+	byte _byte[4];
+	dword _dword;
+
+} pair32_t;
 
 void ASSERT(const char[], int, int, base_t);
 void print_time(void);

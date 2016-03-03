@@ -7,7 +7,7 @@
  */
 #include <types.h>
 #include <mmap.h>
-#include <dosfs.h>
+#include <lindafs.h>
 
 typedef enum __DEVICES
 {
@@ -16,8 +16,7 @@ typedef enum __DEVICES
 	
 } device_t;
 
-typedef FILEINFO file_t;
-typedef VOLINFO volume_t;
+#define file_t byte
 
 volume_t* 	mount(device_t);
 void			unmount(volume_t*);
