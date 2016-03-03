@@ -51,7 +51,7 @@ void avian_main(void)
 	int time = clock();
 
 	print("Formatting device to Linda\n");
-	linda_format_device(fda, 2880, 512, 2);
+	linda_format_device(2880, 512, 0, 2);
 	
 	print("\nTest complete after "); print(itoa(clock()-time,DEC)); print("ms\n");
 	while(main_loop());

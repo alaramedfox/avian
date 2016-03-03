@@ -1,3 +1,3 @@
-#define BUILD "1504"
-#define TIMESTAMP "0.7.0.1504 - Wed Mar  2 23:14:20 CST 2016"
-#define VERSION "0.7.0.1504"
+#define BUILD "1539"
+#define TIMESTAMP "0.7.0.1539 - Thu Mar  3 13:23:57 CST 2016"
+#define VERSION "0.7.0.1539"

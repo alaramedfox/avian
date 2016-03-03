@@ -328,7 +328,8 @@ static bool floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
 	//ASSERT("Floppy data transfer",lba,sectors,DEC);
 	chs_t chs = lba_convert(lba);
 	byte *dma_buffer = (byte*) malloc(512);
-	
+
+#if defined FDC_DEBUG
 	if(read) {
 		notify("Reading ");
 		print(itoa(bytes,BYTES));
@@ -346,6 +347,7 @@ static bool floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
 	print(itoa(chs.head,DEC)); print(", ");
 	print(itoa(chs.sect,DEC)); 
 	print(" }\n");
+#endif
 	
 	floppy_start_motor(0);
 	

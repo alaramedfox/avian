@@ -20,14 +20,26 @@
 
 enum __LINDA_TABLE_TYPE
 {
-	LINDA_DIR  = 'D',	// Directory node
-	LINDA_FILE = 'F',	// File node
-	LINDA_RES  = 'R',	// Reserved data area
-	LINDA_DATA = 'C',	// Data cluster
+	LINDA_DIR  = '@',	// Directory node
+	LINDA_FILE = '#',	// File node
+	LINDA_RES  = '$',	// Reserved data area
+	LINDA_DATA = '%',	// Data cluster
+	LINDA_FREE = '&', // Unused value
 
 };
 
-/*
+enum __LINDA_ERRORS
+{
+	LINDA_OK = 0,	   // Everything went OK
+	LINDA_FSERR = 1,	// Some sort of filesystem error
+	LINDA_NOFILE = 2, // Could not find file
+	LINDA_NODIR = 3, 	// Could not find directory
+	LINDA_IOERR = 4,	// Error reading or writing to device
+	
+	LINDA_ERR = 255,  // Some unknown error
+};
+
+/**
  *		Structure containing the Linda FS superblock data
  *		The superblock is a chunk of data loaded from the
  *		first sector of a partition that provides information
@@ -43,51 +55,49 @@ typedef struct __LINDA_SUPERBLOCK
 	dword  reserved;		// Number of reserved sectors (for bootloader)
 	dword  table_addr;	// Sector number of the first index table
 	byte   tables;       // Number of index tables
+	dword  table_size;	// Number of indexes per table
 	dword  root;			// Table index of the root directory (should be 0)
+	dword  entries;		// Number of index entries
 	
 } __attribute__ ((packed)) volume_t;
 
-/*		
+/**	
  *		The Index Table is a list of addresses (and sizes) of
  *		each unit of data, whether it be a directory, file, or
  *		actual block of file content.
  *
- *		Each table entry is 7 bytes:
- *			1 byte to identify the entry type,
- *			2 bytes that holds the size of the data in bytes
- *			4 bytes that hold the byte address of the data itself
+ *		Each table entry is 6 bytes - 
+ *			4 bits to identify the data type,
+ *			12 bits that hold the size of the data in bytes
+ *			32 bits that hold the byte address of the data itself
  *
- *    Since each entry is 7 bytes, a 512-byte table can store up
- *    to 73 entries, leaving one byte to signify the number of
- *    used entries.
+ *    Since each entry is 6 bytes, a 512-byte table can store up
+ *    to 85 entries, leaving two bytes to contain other table data
  */
  
 typedef struct __LINDA_TABLE_ENTRY
 {
-	byte 	type;
-	word	size;
+	byte 	type: 6;
+	word	size: 10; // Max continuous data size is 1 KiB
 	dword	addr;
 
 } __attribute__ ((packed)) lfs_entry_t;
 
-
 typedef struct __LINDA_INDEX_TABLE
 {
-	byte entries;
-	lfs_entry_t entry[73];
+	byte size;             // Number of entries
+	lfs_entry_t entry[85]; // List of entries
+	byte end;              // 0xED end byte signature
 
 } __attribute__ ((packed)) lfs_table_t;
 
-#define DIRNODE_SIZE		32
 typedef struct __LINDA_DIRNODE
 {
-	byte name[12];		  // ASCII Name of directory (a-Z, 0-9 only)
-	word permit;		  // Directory access permissions
-	word parent_index;  // Table index of parent directory
-	word this_index;	  // Table index of THIS directory
-	byte size;		     // Number of directory contents
-	word start;			  // Starting index of directory contents
-	byte empty[11];
+	byte name[12];	  // ASCII Name of directory (a-Z, 0-9 only)
+	word permit;	  // Directory access permissions
+	word parent;     // Table index of parent directory
+	word self;	     // Table index of THIS directory
+	byte size;		  // Number of directory contents
 
 } __attribute__ ((packed)) lfs_dir_t;
 
@@ -96,7 +106,7 @@ typedef struct __LINDA_DIRNODE
 /* ======================================================================= */
 
 bool linda_read_superblock(byte device, volume_t* superblock);
-bool linda_format_device(byte device, size_t sectors, size_t bps, byte tables);
+bool linda_format_device(size_t, size_t, size_t, size_t);
 
 
 
