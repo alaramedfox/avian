@@ -1,13 +1,15 @@
 #ifndef STDLIB_H_INCLUDED
 #define STDLIB_H_INCLUDED
-/*
- *		Avian Kernel - Bryan Webb
- *		File:		core/include/stdlib.h
- *		Purpose:	Header for the C Standard Library
- */
+/* ======================================================================== */
+/*		Avian Kernel   Bryan Webb (C) 2016
+/*		File:		      /core/include/stdlib.h
+/*		Purpose:	      Header for the C Standard Library
+/* ======================================================================== */
  
 #include <stdint.h>
 #include <stddef.h>
+#include <types.h>
+
 
 /* Prototypes for string-to-int functions */
 double 	atof(const char *str);

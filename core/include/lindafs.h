@@ -17,7 +17,7 @@
 /* ========================================================================= */
 
 #include <types.h>
-#include <util.h>
+#include <defs.h>
 
 enum __LINDA_TABLE_TYPE
 {

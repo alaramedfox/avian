@@ -8,7 +8,6 @@
 #include <types.h>
 #include <mmap.h>
 #include <lindafs.h>
-#include <dosfs.h>
 
 typedef enum __DEVICES
 {
@@ -17,12 +16,11 @@ typedef enum __DEVICES
 	
 } device_t;
 
-typedef VOLINFO fatvol_t;
-typedef FILEINFO file_t;
+typedef byte file_t;
 
-fatvol_t* 	mount(device_t);
-void			unmount(fatvol_t*);
-file_t* 		open(fatvol_t*, const char[], byte);
+volume_t* 	mount(device_t);
+void			unmount(volume_t*);
+file_t* 		open(volume_t*, const char[], byte);
 size_t 		read(file_t*, byte*, size_t);
 size_t 		write(file_t*, byte*, size_t);
 void 			close(file_t*);

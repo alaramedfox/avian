@@ -1,10 +1,10 @@
 #ifndef STACK_H_INCLUDED
 #define STACK_H_INCLUDED
-/*
- *		Avian Project - Bryan Webb
- *		File: 		stack.h
- *		Purpose:		Header file for stack.c
- */
+/* ======================================================================== */
+/*		Avian Kernel   Bryan Webb (C) 2016
+/*		File: 		   /core/include/stack.h
+/*		Purpose:		   Header file for stack.c
+/* ======================================================================== */
 
 #include <types.h>
 #include <stdlib.h>
@@ -14,6 +14,7 @@ typedef struct __STACK
 	size_t size;
 	size_t max;
 	char* data;
+	
 } stack;
 
 void push(stack*, char);

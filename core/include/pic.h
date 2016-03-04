@@ -1,10 +1,10 @@
 #ifndef PIC_H_INCLUDED
 #define PIC_H_INCLUDED
-/*
- *		Avian Kernel - Bryan Webb
- *		File:		/core/include/pic.h
- *		Purpose:	Programmable Interrupt Controller
- */
+/* ======================================================================== */
+/*		Avian Kernel   Bryan Webb (C) 2016
+/*		File:		      /core/include/pic.h
+/*		Purpose:	      Programmable Interrupt Controller
+/* ======================================================================== */
  
 #include <types.h>
 

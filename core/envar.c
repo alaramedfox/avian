@@ -1,12 +1,11 @@
 #define ENVAR_C_SOURCE
-#include <envar.h>
-/*
- *		Avian Project - Bryan Webb
- *		File:		/core/envar.c
- *		Purpose:	Define enviornmental global variables
- */
+/* ======================================================================== */
+/*		Avian Kernel   Bryan Webb (C) 2016
+/*		File:		      /core/envar.c
+/*		Purpose:	      Define enviornmental global variables
+/* ======================================================================== */
 
-#include <vga.h>
+#include <envar.h>
 #include <util.h>
 
 void ENVAR_init(void)

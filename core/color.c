@@ -1,12 +1,11 @@
 #define COLOR_C_SOURCE
-#include <color.h>
-/*
- *		Avian Project
- *		File:			/lib/color.c
- *		Purpose:		Manipulate color bitfields for VGA
- */
+/* ======================================================================= */
+/*		Avian Kernel   Bryan Webb (C) 2016
+/*		File:			   /core/color.c
+/*		Purpose:		   Manipulate color bitfields for VGA
+/* ======================================================================= */
  
-
+#include <color.h>
 
 color_t color_mix(int8_t fg, int8_t bg)
 {

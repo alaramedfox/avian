@@ -1,11 +1,13 @@
 #ifndef mtable_H_INCLUDED
 #define mtable_H_INCLUDED
-#include <types.h>
-/*
- *		Avian Project - Bryan Webb
- *		File:		/include/mmap.h
- *		Purpose:	Header file for the MMU
- */
+/* ======================================================================= */
+/*		Avian Kernel   Bryan Webb (C) 2016
+/*		File:		      /core/include/mmap.h
+/*		Purpose:	      Header file for the memory management unit
+/* ======================================================================= */
+
+#include <stdlib.h>
+#include <defs.h>
 
 /* Define allocatable memory ranges */
 enum __MMAP_DEFS
@@ -27,23 +29,23 @@ typedef struct __TABLE_ENTRY
 	addr_t 	start;	//Starting address of memory block
 	size_t 	size;		//Size of memory block in bytes
 	
-} mentry_t;
+} FLAT mentry_t;
 
 typedef struct __TABLE_MAP
 {
 	size_t 	blocks;
 	mentry_t	entry[BLOCK_COUNT];
 
-} mtable_t;
+} FLAT mtable_t;
  
 /* Public API */
 
-/*		
- *		NOTE: The prototypes for the memory management functions
- *				are declared in stdlib.h
+/**	
+ *	 NOTE: The prototypes for the memory management functions
+ *	   are declared in stdlib.h
  *
- *				This file is just for the memory info functions and
- *				static methods.
+ *	   This file is just for the memory info functions and
+ *    static methods.
  */
 #define  new(T) (T*)malloc(sizeof(T))
 
@@ -51,13 +53,6 @@ __attribute__((hot)) size_t	mem_blocks(void);
 __attribute__((hot)) uint32_t	mem_used(void);
 __attribute__((hot)) uint32_t	mem_free(void);
 
-/* Internal static functions */
-static size_t	mtable_index(addr_t);
-static bool		is_addr_free(addr_t);
-static bool 	block_fits(addr_t,size_t);
-static void		mtable_delete(size_t);
-static void		mtable_purge(void);
-static size_t  block_end(size_t);
-static void    mtable_error(const char*);
+
 
 #endif

@@ -1,19 +1,31 @@
 #define MMAP_C_SOURCE
-/*
- *		Avian Project - Bryan Webb
- *		File:		/core/mtable->c
- *		Purpose:	Handles memory allocation for pointers
- */
+/* ======================================================================== */
+/*		Avian Kernel   Bryan Webb (C) 2016
+/*		File:		      /core/mmap.c
+/*		Purpose:	      Handles memory allocation for pointers
+/* ======================================================================== */
+
 #include <mmap.h>
 #include <stdlib.h>
-#include <envar.h>
-#include <types.h>
 #include <util.h>
-#include <exceptions.h>
 
-/* Declare memory map area */
+/* ======================================================================== */
+/*       Static prototypes
+/* ======================================================================== */
+
 static mtable_t* const mtable = (mtable_t*)HEAP_START;
 
+static size_t	mtable_index(addr_t);
+static bool		is_addr_free(addr_t);
+static bool 	block_fits(addr_t,size_t);
+static void		mtable_delete(size_t);
+static void		mtable_purge(void);
+static size_t  block_end(size_t);
+static void    mtable_error(const char*);
+
+/* ======================================================================== */
+/*       Public API (Note: prototypes are in stdlib.h)
+/* ======================================================================== */
 
 void free(void* ptr)
 {
@@ -24,7 +36,14 @@ void free(void* ptr)
 	else mtable_delete(index);
 }
 
-
+void* calloc(size_t items, size_t size)
+{
+   byte* pointer = (byte*) malloc(items * size);
+   foreach(i, items*size) {
+      pointer[i] = 0;
+   }
+   return (void*) pointer;
+}
 
 void* malloc(const size_t size)
 {
@@ -48,7 +67,7 @@ void* memcpy(void *str1, const void *str2, size_t n)
 	byte *source = (byte*)str2;
 	byte *dest = (byte*)str1;
 	
-	for(int i=0; i<n; i++) {
+	foreach(i, n) {
 		dest[i] = source[i];
 	}
 	return dest;
@@ -62,10 +81,9 @@ size_t mem_blocks(void)
 uint32_t mem_used(void)
 {
 	uint32_t used=0;
-	 for(size_t i=0; i<mtable->blocks; i++) {
+   foreach(i, mtable->blocks) {
 		used += mtable->entry[i].size;
 	}
-	
 	return used;
 }
 
@@ -74,7 +92,10 @@ uint32_t mem_free(void)
 	return ALLOC_SIZE-mem_used();
 }
 
-/******** Static helper functions *************/
+/* ======================================================================== */
+/*       Static helper functions
+/* ======================================================================== */
+
 
 static inline void mtable_delete(const size_t index)
 {
@@ -82,15 +103,10 @@ static inline void mtable_delete(const size_t index)
 	mtable->blocks = mtable->blocks -1;
 }
 
-static void mtable_purge(void)
-{
-	/* Garbage collector */
-}
-
 static inline size_t mtable_index(const addr_t ptr)
 {
 	/* Find associated entry in mtable */
-	for(size_t i=0; i<mtable->blocks; i++)
+	foreach(i, mtable->blocks)
 	{
 		if(mtable->entry[i].start == ptr) {
 			return i;
@@ -102,7 +118,7 @@ static inline size_t mtable_index(const addr_t ptr)
 
 static inline bool is_addr_free(const addr_t ptr)
 {
-	for(size_t i=0; i<mtable->blocks; i++)
+	foreach(i, mtable->blocks)
 	{
 		if(ptr >= mtable->entry[i].start && ptr <= block_end(i)) { 
 			return false; 

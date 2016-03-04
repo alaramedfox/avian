@@ -8,24 +8,6 @@
 #include <types.h>
 #include <time.h>
 
-#define bitmask(var,bit)	var & ~(1 << bit)
-#define bitset(var,bit)		var | (1 << bit)
-#define bitcheck(var,bit)	var & (1 << bit)
-
-/* This creates a `foreach' style loop */
-#define foreach(var, count)	for(int var=0; var<count; var++)
-
-#define BENCHMARK(time, function) 	\
-		time = clock();					\
-		function;							\
-		time = (clock() - time);
-		
-/* This compresses the packed attribute into something smaller */
-#define FLAT   __attribute__((packed))
-
-/* For debugging lines of failure */
-#define TRY(expr) if(!(expr)) { print("Failed at line "); print(itoa(__LINE__,DEC)); print("\n"); }
-
 typedef enum __BASE
 {
 	DEC=10, HEX=16, OCT=8, BIN=2, BYTES=-1, BOOLEAN=0,

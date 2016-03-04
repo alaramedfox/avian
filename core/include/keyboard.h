@@ -7,7 +7,6 @@
  */
  
 #include <stack.h>
-#include <envar.h>
 #include <asmfunc.h>
 
 char* kb_buffer(void);

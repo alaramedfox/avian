@@ -43,11 +43,11 @@ typedef union __LINDA_DIR_B
 /*           Private function prototypes                                    */
 /* ======================================================================== */
 
-static void linda_format_sb(volume_t*, size_t,size_t,size_t,size_t);
-static bool 	 linda_mkdir(volume_t*,const char[12], word);
-static dword 	 linda_find_block(volume_t*, size_t);
-static int 	    linda_read_itable(volume_t*, lfs_table_t*, byte);
-static int 	    linda_write_itable(volume_t*, lfs_table_t*, byte);
+static void  linda_format_sb(volume_t*, size_t,size_t,size_t,size_t);
+static bool  linda_mkdir(volume_t*,const char[12], word);
+static dword linda_find_block(volume_t*, size_t);
+static int 	 linda_read_itable(volume_t*, lfs_table_t*, byte);
+static int 	 linda_write_itable(volume_t*, lfs_table_t*, byte);
 
 /* ======================================================================= */
 /*           Public API functions

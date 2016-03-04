@@ -1,15 +1,23 @@
 #define KEYBOARD_C_SOURCE
+/* ======================================================================== */
+/*		Avian Kernel   Bryan Webb (C) 2016
+/*		File:		      /core/keyboard.c
+/*		Purpose:	      Driver for the keyboard
+/*
+/*    Note: In the future, there should be a LOT less code in the
+/*          keyboard interrupt handler. It should only convert input
+/*          into a character, and place the character into a SMALL
+/*          character buffer, which can be accessed by the API
+/*
+/* ======================================================================== */
+
 #include <keyboard.h>
 #include <pic.h>
-#include <vga.h>
 #include <util.h>
 #include <idt.h>
-/*
- *		Avian Kernel - Bryan Webb
- *		File:		/core/keyboard.c
- *		Purpose:	Houses the keyboard interrupt function,
- *					and handles input from the keyboard.
- */
+#include <stack.h>
+#include <envar.h>
+
  
 /* Create character buffer */
 stack * stdin;
@@ -52,7 +60,7 @@ void kb_init(void)
 	pic_enable_irq(IRQ_KEYBOARD);
 	stdin = new_stack(128);
 	
-	print_time(); print("Started keyboard driver\n");
+	notify("Started keyboard driver\n");
 }
 
 /* Special character handlidng */

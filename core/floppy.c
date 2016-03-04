@@ -1,20 +1,19 @@
 #define FLOPPY_C_SOURCE
 
 /* ========================================================================= */
-/*	   Avian Kernel   Bryan Webb                                              */
-/*	   File:          /core/floppy.c                                          */
-/*	   Purpose:       Floppy Disk Controller (FDC)                            */
+/*	   Avian Kernel   Bryan Webb (C) 2016
+/*	   File:          /core/floppy.c
+/*	   Purpose:       Floppy Disk Controller (FDC)
 /* ========================================================================= */
 
-#include <util.h>
 #include <floppy.h>
 #include <pic.h>
-#include <vga.h>
 #include <time.h>
 #include <idt.h>
 #include <asmfunc.h>
 #include <dma.h>
 #include <stdlib.h>
+#include <defs.h>
 
 enum __FLOPPY_DATA
 {
@@ -261,17 +260,13 @@ static void floppy_sense_interrupt(void)
 	floppy_current_track = inportb(FDC_FIFO);
 }
 
-/*
- *	floppy_command_wait():
+/**
  *		Used after sending a command.
  *		Waits for the IRQ signal, then reads in
  *		the result bytes into the buffer.
  */
 static bool floppy_command_wait(int ms)
 {
-	//ASSERT("Waiting for command to finish (IRQ/sensei)",floppy_irq_recieved,sensei,BOOLEAN);
-	
-	/* Wait for interrupt to arrive */
 	int time = clock();
 	
 	while(!floppy_irq_recieved)
@@ -281,9 +276,7 @@ static bool floppy_command_wait(int ms)
 	
 	/* Read in the command result bytes */
 	for(int i=0; i<7 && (bitcheck(inportb(FDC_MSR), CB)); i++) {
-		
 		floppy_io_buffer[i] = floppy_read_byte();
-		//ASSERT("Read FIFO byte:",i,floppy_io_buffer[i],HEX);
 	}
 	floppy_irq_recieved = false;
 	return true;
@@ -298,12 +291,10 @@ static byte floppy_read_byte(void)
 		msr = inportb(FDC_MSR);
 	
 		if((msr & 0xC0) == 0x80) {
-			//ASSERT("Reading FIFO byte",msr,0,BIN);
 			return inportb(FDC_FIFO);
 		}
 		floppy_reset();
 	}
-	print("Failed to read byte\n");
 }
 
 static int floppy_send_byte(byte data)
@@ -315,51 +306,25 @@ static int floppy_send_byte(byte data)
 		msr = inportb(FDC_MSR);
 	
 		if((msr & 0xC0) == 0x80) {
-			//ASSERT("Writing FIFO byte",msr,0,BIN);
 			outportb(FDC_FIFO, data);
 			return true;
 		}
 		floppy_reset();
 	}	
-	//ASSERT("Failed to send byte to FIFO",inportb(FDC_MSR),0,BIN);
-	print("Failed to send byte\n");
 	return false;
 }
 
 static bool floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
 {
 	bool status = true;
-	//ASSERT("Floppy data transfer",lba,sectors,DEC);
 	chs_t chs = lba_convert(lba);
-	byte *dma_buffer = (byte*) malloc(512);
-
-#if defined FDC_DEBUG
-	if(read) {
-		notify("Reading ");
-		print(itoa(bytes,BYTES));
-		print(" from ");
-	}
-	else {
-		notify("Writing ");
-		print(itoa(bytes,BYTES));
-		print(" to ");
-	}
-	
-	print("sector "); print(itoa(lba,DEC)); print(", CHS ");
-	print("{ "); 
-	print(itoa(chs.cyl,DEC)); print(", ");
-	print(itoa(chs.head,DEC)); print(", ");
-	print(itoa(chs.sect,DEC)); 
-	print(" }\n");
-#endif
+	byte *dma_buffer = (byte*) malloc(bytes);
 	
 	floppy_start_motor(0);
 	
 	/* Write data buffer into track buffer */
 	if(!read) {
-		for(int i=0; i<bytes; i++) {
-			dma_buffer[i] = block[i];
-		}
+	   memcpy(dma_buffer, block, bytes);
 	}
 	
 	/* Move to correct track */
@@ -372,16 +337,6 @@ static bool floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
 	} while(tries && seek_status);
 	
 	if(seek_status) {
-		switch(seek_status)
-		{
-			case 1: print("Floppy error: Seek never caught IRQ\n"); break;
-			case 2: print("Floppy error: Seek could not align tracks\n"); break;
-			case 3: print("Floppy error: Seek reported bad status\n"); break;
-			default: 
-				print("Floppy error: Unknown error ("); 
-				print(itoa(seek_status,HEX)); print(")\n");
-				break;
-		}
 		status = false;
 		goto exit;
 	}
@@ -394,31 +349,27 @@ static bool floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
 	dma_xfer(2, (addr_t)dma_buffer, bytes, !read);
 	
 	if(read) {
-		TRY(floppy_send_byte(READ_DATA | 0x40));
+		floppy_send_byte(READ_DATA | 0x40);
 	}
 	else {
-		TRY(floppy_send_byte(WRITE_DATA | 0x40));
+		floppy_send_byte(WRITE_DATA | 0x40);
 	}
 	
 	/* Send address information */
-	TRY(floppy_send_byte(chs.head << 2));
-	TRY(floppy_send_byte(chs.cyl));
-	TRY(floppy_send_byte(chs.head));
-	TRY(floppy_send_byte(chs.sect));
-	TRY(floppy_send_byte(2));
-	TRY(floppy_send_byte(bytes/512));
-	TRY(floppy_send_byte(GAP3));
-	TRY(floppy_send_byte(0xFF));
-	
-	//sleep(100);
+	floppy_send_byte(chs.head << 2);
+	floppy_send_byte(chs.cyl);
+	floppy_send_byte(chs.head);
+	floppy_send_byte(chs.sect);
+	floppy_send_byte(2);
+	floppy_send_byte(bytes/512);
+	floppy_send_byte(GAP3);
+	floppy_send_byte(0xFF);
 	
 	floppy_command_wait(500);
 	
 	/* Transfer data from track buffer to data buffer */
 	if(read) {
-		for(int i=0; i<bytes; i++) {
-			block[i] = dma_buffer[i];
-		}
+	   memcpy(block, dma_buffer, bytes);
 	}
 	
 	exit:
