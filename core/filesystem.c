@@ -23,17 +23,25 @@ enum __PARTITIONS
  *		NOTE: Opening a file will take more than a KB of memory
  */
 
-volume_t* mount(device_t device)
+fatvol_t* mount(device_t device)
 {
-	volume_t* volume = new(volume_t);
+	fatvol_t* volume = new(fatvol_t);
+	byte* buffer = (byte*) malloc(512);
 	
+	DFS_GetVolInfo(0, buffer, 0, volume);
+	
+	free(buffer);
 	return volume;
 }
 
 file_t* open(volume_t* device, const char path[], byte mode)
 {
 	file_t* file = new(file_t);
+	byte* buffer = (byte*) malloc(512);
 	
+	DFS_OpenFile(device, path, mode, buffer, file);
+	
+	free(buffer);
 	return file;
 }
 
@@ -54,12 +62,12 @@ size_t write(file_t* file, byte* buffer, size_t bytes)
 	return file_io(file, buffer, bytes, false);
 }
 
-void close(file_t* file)
+void close(FILEINFO* file)
 {
 	free(file);
 }
 
-void unmount(volume_t *volume)
+void unmount(VOLINFO* volume)
 {
 	free(volume);
 }
@@ -68,5 +76,25 @@ char* fserr(int err)
 {
 	return "?";
 }
+
+uint32_t DFS_ReadSector(uint8_t unit, uint8_t *buffer, uint32_t sector, uint32_t count)
+{
+   return !floppy_read_block(sector, buffer, count*512);
+}
+uint32_t DFS_WriteSector(uint8_t unit, uint8_t *buffer, uint32_t sector, uint32_t count)
+{
+   return !floppy_write_block(sector, buffer, count*512);
+}
+
+
+
+
+
+
+
+
+
+
+
 
 /* End File Allocation Table driver */

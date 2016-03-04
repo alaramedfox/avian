@@ -42,18 +42,43 @@ void init(void)
 	print("\nSystem booted.\n\n");
 }
 
+/* Working offsets
+
+   0x4806   18438    36
+   0x9006   36870    72
+   0xd806   55302
+
+*/
+
 void avian_main(void) 
 {
 	bootscreen();
 	init();
-	
+//#define LINDA
 	print("Testing accuracy of floppy controller\n");
 	int time = clock();
-
+#define LINDA
+#if defined LINDA
 	print("Formatting device to Linda\n");
 	linda_format_device(2880, 512, 0, 2);
-	
+#else
+   byte* block = (byte*) malloc(512);
+   foreach(i, 512) block[i] = 0xFF;
+   memcpy(block, "Sector #", 8);
+   
+   foreach(i, 80) {
+      notify("Writing sector "); print(itoa(i,DEC)); print("\n");
+      memcpy(block+8, itoa(i,DEC), strlen(itoa(i,DEC)));
+      if(!floppy_write_block(i, block, 512)) {
+         print("IO Error\n");
+      }
+      //sleep(1000);
+   }
+   
+   free(block);
+#endif
 	print("\nTest complete after "); print(itoa(clock()-time,DEC)); print("ms\n");
+
 	while(main_loop());
 	
 	

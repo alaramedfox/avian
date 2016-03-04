@@ -17,6 +17,7 @@
 /* ========================================================================= */
 
 #include <types.h>
+#include <util.h>
 
 enum __LINDA_TABLE_TYPE
 {
@@ -59,7 +60,7 @@ typedef struct __LINDA_SUPERBLOCK
 	dword  root;			// Table index of the root directory (should be 0)
 	dword  entries;		// Number of index entries
 	
-} __attribute__ ((packed)) volume_t;
+} FLAT volume_t;
 
 /**	
  *		The Index Table is a list of addresses (and sizes) of
@@ -75,13 +76,13 @@ typedef struct __LINDA_SUPERBLOCK
  *    to 85 entries, leaving two bytes to contain other table data
  */
  
-typedef struct __LINDA_TABLE_ENTRY
+typedef struct __LINDA_ENTRY
 {
 	byte 	type: 6;
 	word	size: 10; // Max continuous data size is 1 KiB
 	dword	addr;
 
-} __attribute__ ((packed)) lfs_entry_t;
+} FLAT lfs_entry_t;
 
 typedef struct __LINDA_INDEX_TABLE
 {
@@ -89,7 +90,7 @@ typedef struct __LINDA_INDEX_TABLE
 	lfs_entry_t entry[85]; // List of entries
 	byte end;              // 0xED end byte signature
 
-} __attribute__ ((packed)) lfs_table_t;
+} FLAT lfs_table_t;
 
 typedef struct __LINDA_DIRNODE
 {
@@ -99,7 +100,7 @@ typedef struct __LINDA_DIRNODE
 	word self;	     // Table index of THIS directory
 	byte size;		  // Number of directory contents
 
-} __attribute__ ((packed)) lfs_dir_t;
+} FLAT lfs_dir_t;
 
 /* ======================================================================= */
 /*           Public API functions

@@ -129,8 +129,8 @@ void floppy_init(void)
 	pic_enable_irq( IRQ_FLOPPY );
 	
 	/* Obtain controller version */
-	floppy_send_byte(VERSION);
-	byte version = floppy_read_byte();
+	outportb(FDC_FIFO, VERSION);
+	byte version = inportb(FDC_FIFO);
 	if(version == 0x90) {
 		notify("Detected 82077AA floppy controller\n");
 	}
@@ -142,7 +142,7 @@ void floppy_init(void)
 	floppy_configure();
 	
 	floppy_recalibrate();
-	floppy_send_byte(LOCK);
+	outportb(FDC_FIFO, LOCK);
 	floppy_reset();
 	
 	/* Init CCR & DSR for 1.44M Floppies */
@@ -179,26 +179,26 @@ static void floppy_reset(void)
 static void floppy_configure(void)
 {
 	byte iseek = 1, nofifo = 0, poll = 0, thresh = 8, comp = 0;
-	floppy_send_byte(CONFIGURE);
-	floppy_send_byte(0);
-	floppy_send_byte(iseek<<6 | nofifo<<5 | poll<<4 | (thresh-1));
-	floppy_send_byte(comp);
+	outportb(FDC_FIFO, CONFIGURE);
+	outportb(FDC_FIFO, 0);
+	outportb(FDC_FIFO, iseek<<6 | nofifo<<5 | poll<<4 | (thresh-1));
+	outportb(FDC_FIFO, comp);
 }
 
 static void floppy_specify(byte srt, byte hlt, byte hut)
 {
 	/* 8 5 0 */
-	floppy_send_byte(SPECIFY);
-	floppy_send_byte(srt << 4 | hut);
-	floppy_send_byte(hlt << 1 | 0 );
+	outportb(FDC_FIFO, SPECIFY);
+	outportb(FDC_FIFO, srt << 4 | hut);
+	outportb(FDC_FIFO, hlt << 1 | 0 );
 }
 
 static void floppy_recalibrate(void)
 {
 	floppy_start_motor(0);
 	
-	floppy_send_byte(RECALIBRATE);
-	floppy_send_byte(0);
+	outportb(FDC_FIFO, RECALIBRATE);
+	outportb(FDC_FIFO, 0);
 	
 	if(!floppy_command_wait(3000)) {
 		notify("Recalibration failed\n");
@@ -216,9 +216,9 @@ static int floppy_seek(byte track)
 	
 	floppy_start_motor(0);
 	
-	floppy_send_byte(SEEK);
-	floppy_send_byte(0);
-	floppy_send_byte(track);
+	outportb(FDC_FIFO, SEEK);
+	outportb(FDC_FIFO, 0);
+	outportb(FDC_FIFO, track);
 	
 	int time = clock();
 	volatile byte msr;
@@ -256,9 +256,9 @@ static int floppy_seek(byte track)
 
 static void floppy_sense_interrupt(void)
 {
-	floppy_send_byte(SENSEI);
-	floppy_status = floppy_read_byte();
-	floppy_current_track = floppy_read_byte();
+	outportb(FDC_FIFO, SENSEI);
+	floppy_status = inportb(FDC_FIFO);
+	floppy_current_track = inportb(FDC_FIFO);
 }
 
 /*
@@ -297,11 +297,13 @@ static byte floppy_read_byte(void)
 	while(clock() < time+500) {
 		msr = inportb(FDC_MSR);
 	
-		if((msr & 0x80) == 0x80) {
+		if((msr & 0xC0) == 0x80) {
 			//ASSERT("Reading FIFO byte",msr,0,BIN);
 			return inportb(FDC_FIFO);
 		}
+		floppy_reset();
 	}
+	print("Failed to read byte\n");
 }
 
 static int floppy_send_byte(byte data)
@@ -312,13 +314,15 @@ static int floppy_send_byte(byte data)
 	while(clock() < time+500) {
 		msr = inportb(FDC_MSR);
 	
-		if((msr & 0x80) == 0x80) {
+		if((msr & 0xC0) == 0x80) {
 			//ASSERT("Writing FIFO byte",msr,0,BIN);
 			outportb(FDC_FIFO, data);
 			return true;
 		}
+		floppy_reset();
 	}	
 	//ASSERT("Failed to send byte to FIFO",inportb(FDC_MSR),0,BIN);
+	print("Failed to send byte\n");
 	return false;
 }
 
@@ -390,21 +394,21 @@ static bool floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
 	dma_xfer(2, (addr_t)dma_buffer, bytes, !read);
 	
 	if(read) {
-		floppy_send_byte(READ_DATA | 0x20);
+		TRY(floppy_send_byte(READ_DATA | 0x40));
 	}
 	else {
-		floppy_send_byte(WRITE_DATA | 0x20);
+		TRY(floppy_send_byte(WRITE_DATA | 0x40));
 	}
 	
 	/* Send address information */
-	floppy_send_byte(chs.head << 2);
-	floppy_send_byte(chs.cyl);
-	floppy_send_byte(chs.head);
-	floppy_send_byte(chs.sect);
-	floppy_send_byte(2);
-	floppy_send_byte(bytes/512);
-	floppy_send_byte(GAP3);
-	floppy_send_byte(0xFF);
+	TRY(floppy_send_byte(chs.head << 2));
+	TRY(floppy_send_byte(chs.cyl));
+	TRY(floppy_send_byte(chs.head));
+	TRY(floppy_send_byte(chs.sect));
+	TRY(floppy_send_byte(2));
+	TRY(floppy_send_byte(bytes/512));
+	TRY(floppy_send_byte(GAP3));
+	TRY(floppy_send_byte(0xFF));
 	
 	//sleep(100);
 	

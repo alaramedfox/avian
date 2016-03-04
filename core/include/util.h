@@ -13,12 +13,18 @@
 #define bitcheck(var,bit)	var & (1 << bit)
 
 /* This creates a `foreach' style loop */
-#define each(var, count)	int var=0; var<count; var++
+#define foreach(var, count)	for(int var=0; var<count; var++)
 
 #define BENCHMARK(time, function) 	\
 		time = clock();					\
 		function;							\
 		time = (clock() - time);
+		
+/* This compresses the packed attribute into something smaller */
+#define FLAT   __attribute__((packed))
+
+/* For debugging lines of failure */
+#define TRY(expr) if(!(expr)) { print("Failed at line "); print(itoa(__LINE__,DEC)); print("\n"); }
 
 typedef enum __BASE
 {
