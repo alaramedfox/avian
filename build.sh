@@ -16,10 +16,10 @@ OBJ="obj"
 BIN="bin"
 
 CFLAGS=" -m32 -ffreestanding -fno-exceptions -std=c99 "
-CINC=" -Ilib/include -Icore/include "
-CWARN=" "
+CINC=" -Isrc/drivers -Isrc/include -Isrc/asm "
+CWARN=" -Wall -Werror -Wfatal-errors "
 
-SOURCES=(". lib core")
+SOURCES=(" src src/asm")
 
 function increment_file {
 	file=$1
@@ -33,7 +33,7 @@ function increment_build {
 	BUILDFILE="version/build"
 	MAJORFILE="version/major"
 	TIMEFILE="version/time"
-	HEADER="lib/include/buildcount.h"
+	HEADER="src/include/buildcount.h"
 
 	version="`sed  's/^ *//' $MAJORFILE`"  
 	old="`sed  's/^ *//' $BUILDFILE` +1"  
@@ -96,9 +96,9 @@ function make_all {
 function assemble {
 	for i in $TARGET; do
 		NAME=`echo "$i" | cut -d'.' -f1`
-		if [ -f $NAME.asm ]; then
+		if [ -f src/asm/$NAME.asm ]; then
 			printf "$INFO Assembling $i\n"
-			nasm -f elf $NAME.asm -o $OBJ/$NAME.o
+			nasm -f elf src/asm/$NAME.asm -o $OBJ/$NAME.o
 		fi
 	done
 }
