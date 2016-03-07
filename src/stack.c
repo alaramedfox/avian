@@ -6,11 +6,10 @@
 // ======================================================================= */
  
 #include <stack.h>
-#include <stdlib.h>
 
 char* stack_str(stack* s)
 {
-	return s->data;
+	return (char*)s->data;
 }
 
 void push_str(stack* s, char str[])
@@ -23,7 +22,7 @@ void push_str(stack* s, char str[])
 stack* new_stack(const size_t size)
 {
 	stack* stk = (stack*) malloc(sizeof(stack));
-	stk->data = (char*) malloc(size);
+	stk->data = (byte*) malloc(size);
 	stk->size = 0;
 	stk->max = size;
 	return stk;
@@ -35,7 +34,7 @@ void delete_stack(stack *s)
 	free(s);
 }
 
-void push(stack* s, char c)
+void push(stack* s, byte c)
 {
 	if(s->size < s->max) {
 		s->data[s->size] = c;
@@ -44,7 +43,7 @@ void push(stack* s, char c)
 	}
 }
 
-char pop(stack *s)
+byte pop(stack *s)
 {
 	if(!empty(s)) {
 		char c = peek(s);
@@ -54,7 +53,7 @@ char pop(stack *s)
 	} else return '\0';
 }
 
-char peek(stack *s)
+byte peek(stack *s)
 {
 	if(!empty(s)) {
 		return s->data[s->size-1];

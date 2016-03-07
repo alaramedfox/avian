@@ -39,6 +39,18 @@ static void panic_screen(void)
 	\tand execution was unable to continue.\n");
 }
 
+static void line_panic_screen(void)
+{
+   print("\n");
+   int row = vga_getrow();
+   vga_setcolor(C_BLUESCR);
+   foreach(i, VGA_COL*2) {
+      print(" ");
+   }
+   vga_movexy(row, 0);
+   print("\tAVIAN Kernel - " TIMESTAMP);
+}
+
 void catch_exception(void)
 {
 	panic_screen();
@@ -56,7 +68,7 @@ void catch_double_fault(int arg)
 
 void catch_zero_divide(void)
 {
-	panic_screen();
+	line_panic_screen();
 	FAULT("Divide by zero");
 	while(true);
 }

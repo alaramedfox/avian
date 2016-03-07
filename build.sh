@@ -17,7 +17,8 @@ BIN="bin"
 
 CFLAGS=" -m32 -ffreestanding -fno-exceptions -std=c99 "
 CINC=" -Isrc/drivers -Isrc/include -Isrc/asm "
-CWARN=" -Wall -Werror -Wfatal-errors "
+#CWARN=" -Wall -Werror -Wfatal-errors "
+CWARN=" "
 
 SOURCES=(" src src/asm")
 
@@ -39,6 +40,7 @@ function increment_build {
 	old="`sed  's/^ *//' $BUILDFILE` +1"  
 	echo $old | bc > $BUILDFILE.temp  
 	mv $BUILDFILE.temp $BUILDFILE
+	
 	echo "$version`sed  's/^ *//' $BUILDFILE` - `date`" > $TIMEFILE
 	echo "#define BUILD \"`sed  's/^ *//' $BUILDFILE`\"" > $HEADER 
 	echo "#define TIMESTAMP \"$version`sed  's/^ *//' $BUILDFILE` - `date`\"" >> $HEADER  

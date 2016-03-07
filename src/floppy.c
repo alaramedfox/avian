@@ -311,12 +311,22 @@ static int floppy_send_byte(byte data)
 	}	
 	return false;
 }
-
+#include <vga.h>
+#include <util.h>
 static bool floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
 {
 	bool status = true;
 	chs_t chs = lba_convert(lba);
 	byte *dma_buffer = (byte*) malloc(bytes);
+	
+/*
+	print("Floppy: ");
+	if(read) print("Reading data from sector ");
+	else print("Writing data to sector ");
+	
+	print(itoa(lba,DEC));
+	print("\n");
+*/
 	
 	floppy_start_motor(0);
 	

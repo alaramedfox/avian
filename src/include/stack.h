@@ -12,14 +12,14 @@ typedef struct __STACK
 {
 	size_t size;
 	size_t max;
-	char* data;
+	byte* data;
 	
 } stack;
 
-void push(stack*, char);
+void push(stack*, byte);
 void push_str(stack*,char[]);
-char pop(stack*);
-char peek(stack*);
+byte pop(stack*);
+byte peek(stack*);
 bool empty(stack*);
 bool full(stack*);
 stack* new_stack(const size_t);

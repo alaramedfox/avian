@@ -47,8 +47,11 @@ void avian_main(void)
 	bootscreen();
 	init();
 
-	print("Testing accuracy of floppy controller\n");
+	print("Testing DOSFS library\n");
 	int time = clock();
+	
+	
+	linda_format_device(2880, 512, 0, 2);
 
    volume_t* floppy = mount(fda);
    file_t* file = open(floppy, "TEST.TXT", 4);

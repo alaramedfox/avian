@@ -76,36 +76,37 @@ typedef struct __LINDA_SUPERBLOCK
  
 typedef struct __LINDA_ENTRY
 {
-	byte 	type: 6;
-	word	size: 10; // Max continuous data size is 1 KiB
-	dword	addr;
+	byte 	type: 4;    // Type of data
+	word	size: 12;   // Size of pointed-to data in bytes
+	dword	addr;       // Byte address of data
 
-} FLAT lfs_entry_t;
+} FLAT lentry_t;
 
 typedef struct __LINDA_INDEX_TABLE
 {
 	byte size;             // Number of entries
-	lfs_entry_t entry[85]; // List of entries
+	lentry_t entry[85]; // List of entries
 	byte end;              // 0xED end byte signature
 
-} FLAT lfs_table_t;
+} FLAT ltable_t;
 
-typedef struct __LINDA_DIRNODE
+typedef struct __LINDA_NODE
 {
-	byte name[12];	  // ASCII Name of directory (a-Z, 0-9 only)
-	word permit;	  // Directory access permissions
-	word parent;     // Table index of parent directory
-	word self;	     // Table index of THIS directory
-	byte size;		  // Number of directory contents
+   char name[12];    // ASCII Name of node
+   word permit;      // Access permissions
+   word parent;      // Index of parent directory
+   word self;        // Index of this object
+   word data;        // Index of content data
 
-} FLAT lfs_dir_t;
+} FLAT lnode_t;
 
-// ======================================================================= */
-//           Public API functions
-// ======================================================================= */
+// ======================================================================= //
+//           Public API functions                                          //
+// ======================================================================= //
 
 bool linda_read_superblock(byte device, volume_t* superblock);
 bool linda_format_device(size_t, size_t, size_t, size_t);
+int  linda_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file);
 
 
 

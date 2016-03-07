@@ -16,7 +16,13 @@ typedef enum __DEVICES
 	
 } device_t;
 
-typedef byte file_t;
+typedef struct __FILE
+{
+   lnode_t node;     // Linda file node
+   volume_t vol;     // Linda filesystem
+   byte* data;       // All the data contents
+
+} FLAT file_t;
 
 volume_t* 	mount(device_t);
 void			unmount(volume_t*);
