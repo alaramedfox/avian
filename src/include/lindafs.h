@@ -20,11 +20,15 @@
 
 enum __LINDA_TABLE_TYPE
 {
-	LINDA_DIR  = 0xd,	// Directory node
-	LINDA_FILE = 0xf,	// File node
-	LINDA_DATA = 0xc,	// Cluster of data
-	LINDA_FREE = 0xa, // Available space
+	LINDA_DIR,
+	LINDA_FILE,
+	LINDA_DATA,
+	LINDA_FREE,
+};
 
+enum __LINDA_BOUNDS
+{
+   TABLE_SIZE = 102,
 };
 
 enum __LINDA_ERRORS
@@ -57,6 +61,7 @@ typedef struct __LINDA_SUPERBLOCK
 	dword  table_size;	// Number of indexes per table
 	dword  root;			// Table index of the root directory (should be 0)
 	dword  entries;		// Number of index entries
+	addr_t ramptr;       // Pointer to a RAM address with the index table cache
 	
 } FLAT volume_t;
 
@@ -65,47 +70,65 @@ typedef struct __LINDA_SUPERBLOCK
  *		each unit of data, whether it be a directory, file, or
  *		actual block of file content.
  *
- *		Each table entry is 6 bytes - 
- *			4 bits to identify the data type,
- *			12 bits that hold the size of the data in bytes
- *			32 bits that hold the byte address of the data itself
+ *		Each table entry is 4 bytes - 
+ *			2 bits to identify the data type, 
+ *          (for a maximum of 4 data types)
+ *			6 bits that hold the size of the data in clusters,
+ *          (for a maximum continuous data size of 2kb, or 64 clusters)
+ *			24 bits that hold the CLUSTER address of the data itself
+ *          (for a maximum of 512 MiB addressable space)
+ *       
  *
- *    Since each entry is 6 bytes, a 512-byte table can store up
- *    to 85 entries, leaving two bytes to contain other table data
+ *    Since each entry is 4 bytes, a 512-byte table can store up
+ *    to 128 entries, which equates to a maximum of 256kB of
+ *    indexable data. That means that one table can index 512 sectors.
+ *    Therefore, a floppy will need 6 tables. 
  */
  
 typedef struct __LINDA_ENTRY
 {
-	byte 	type: 6;
-	word	size: 10; // Max continuous data size is 1 KiB
-	dword	addr;
+	byte 	type: 2;   // Type of data
+	byte	size: 6;   // Size of pointed-to data in clusters
+	dword	addr;      // Byte address of data
 
-} FLAT lfs_entry_t;
+} FLAT lentry_t;
 
 typedef struct __LINDA_INDEX_TABLE
 {
-	byte size;             // Number of entries
-	lfs_entry_t entry[85]; // List of entries
-	byte end;              // 0xED end byte signature
+   char start;
+	lentry_t entry[TABLE_SIZE];
+	char end;
+	
+} FLAT ltable_t;
 
-} FLAT lfs_table_t;
-
-typedef struct __LINDA_DIRNODE
+typedef struct __LINDA_NODE
 {
-	byte name[12];	  // ASCII Name of directory (a-Z, 0-9 only)
-	word permit;	  // Directory access permissions
-	word parent;     // Table index of parent directory
-	word self;	     // Table index of THIS directory
-	byte size;		  // Number of directory contents
+   char start;
+   char name[12];    // ASCII Name of node
+   word permit;      // Access permissions
+   dword timestamp;  // Creation time
+   index_t parent;   // Index of parent directory
+   index_t self;     // Index of this object
+   index_t data;     // Index of content data
+   byte misc[6];     // Misc. free bytes
+   char end;
 
-} FLAT lfs_dir_t;
+} FLAT lnode_t;
 
-// ======================================================================= */
-//           Public API functions
-// ======================================================================= */
+typedef struct __LINDA_CLUSTER
+{
+   byte data[31];    // 31 bytes of cluster data
+   byte end;         // Byte that flags cluster info
+
+} FLAT lcluster_t;
+
+// ======================================================================= //
+//           Public API functions                                          //
+// ======================================================================= //
 
 bool linda_read_superblock(byte device, volume_t* superblock);
 bool linda_format_device(size_t, size_t, size_t, size_t);
+int  linda_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file);
 
 
 

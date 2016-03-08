@@ -124,6 +124,11 @@ void print(const char str[])
 	}
 }
 
+void println(const char str[])
+{
+   print(str); print("\n");
+}
+
 void vga_scroll(void) 
 {
 	/* Shift every row up one row */

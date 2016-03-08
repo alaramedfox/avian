@@ -9,6 +9,7 @@
 
 #include <stdlib.h>
 #include <util.h>
+#include <string.h>
 
 #include <floppy.h>
 
@@ -23,18 +24,19 @@ volume_t* mount(device_t device)
 	volume_t* volume = new(volume_t);
 	
 	linda_read_superblock(device, volume);
-
+	
 	return volume;
 }
 
 file_t* open(volume_t* device, const char path[], byte mode)
 {
 	file_t* file = new(file_t);
-	byte* buffer = (byte*) malloc(512);
+	lnode_t* filenode = new(lnode_t);
+	file->node = *(filenode);
+	file->vol = *(device);
 	
+	linda_open_file(device, path, mode, filenode);
 	
-	
-	free(buffer);
 	return file;
 }
 
@@ -76,7 +78,6 @@ char* fserr(int err)
 {
 	return "?";
 }
-
 
 
 

@@ -31,7 +31,7 @@ void hide_cursor(void);
 size_t vga_getcol	(void);				//Safely return the current column of the cursor
 size_t vga_getrow	(void);				//Safely return the current row of cursor
 size_t vga_getloc (void);				//Safely return the 1D vptr location
-void vga_setcolor (color_t);
+void   vga_setcolor (color_t);
 
 /* Screen manipulation */
 void vga_scroll	(void);				//Scrolling screen support
@@ -49,6 +49,7 @@ void vga_color	(color_t);			//Safely write to vram[vptr+1]
 
 __attribute__((hot)) void addch(char);
 __attribute__((hot)) void print(const char[]);
+__attribute__((hot)) void println(const char[]);
 
 /* Special characters */
 void vga_newline(void);				//Move to next line, starting in first column
