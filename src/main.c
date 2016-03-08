@@ -51,14 +51,14 @@ void avian_main(void)
 	int time = clock();
 	
 	
-	linda_format_device(2880, 512, 0, 2);
+	//linda_format_device(2880, 512, 1, 1);
 
    volume_t* floppy = mount(fda);
    file_t* file = open(floppy, "TEST.TXT", 4);
    
-   char* str = "I am a test string";
+   char* str = (char*) malloc(15);
    
-   write(file, (char*)str, 15);
+   read(file, (char*)str, 15);
    
    print("Contents of file: "); print(str); print("\n");
 

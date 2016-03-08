@@ -19,6 +19,11 @@ enum __LINDA_DEFS
    SOF = 0x02,   // Start of file
    LNF = 0x1a,   // Link point for more data
    EOF = 0x03,   // End of file
+   
+   NODE_START = '<',
+   NODE_END = '>',
+   TABLE_START = '{',
+   TABLE_END = '}',
 };
 
 // ======================================================================== //
@@ -26,8 +31,8 @@ enum __LINDA_DEFS
 // ======================================================================== //
 
 static void  linda_format_sb(volume_t*, size_t,size_t,size_t,size_t);
-static bool  linda_mkdir(volume_t*,char*, word);
-static dword linda_find_block(volume_t*, size_t);
+static bool  linda_mkdir(volume_t*,char*, word, ltable_t*);
+static dword linda_find_block(volume_t*, ltable_t*);
 static int 	 linda_read_itable(volume_t*, ltable_t*, byte);
 static int 	 linda_write_itable(volume_t*, ltable_t*, byte);
 static char* linda_filename(const char path[]);
@@ -52,6 +57,16 @@ bool linda_read_superblock(byte device, volume_t* superblock)
 
 bool linda_format_device(size_t sec, size_t bps, size_t res, size_t tbl)
 {
+   byte* zero = (byte*) calloc(512*18, sizeof(byte));
+   
+   foreach(i, 18) {
+      notify("Zeroing first track\r");
+      floppy_write_block(i, zero, 512*18);
+   }
+   free(zero);
+   print("\n");
+   
+
    /* Format the superblock */
    notify("Formatting superblock\n");
 	volume_t* vol = new(volume_t);
@@ -59,33 +74,36 @@ bool linda_format_device(size_t sec, size_t bps, size_t res, size_t tbl)
 	
 	/* Init index table(s) */
 	
-	/* Create blank table entry */
-	notify("Initializing index tables\n");
 	
-	lentry_t blank;
-	blank.type = LINDA_FREE;
-	blank.size = 0;
-	blank.addr = 0;
 	
 	/* Create blank table */
-	ltable_t table;
-	table.size = 0;
-	table.end = 0xED;
+	ltable_t* itable = new(ltable_t);
+	itable->start = '{';
+	itable->end = '}';
 	
-	/* Populate blank table with blank entries */
-	foreach(i, vol->table_size) {
-	   table.entry[i] = blank;
+	foreach(i, TABLE_SIZE) {
+	   lentry_t entry;
+	   entry.type = LINDA_FREE;
+	   entry.size = 0;
+	   entry.addr = 0;
+	   
+	   itable->entry[i] = entry;
 	}
 	
 	/* Populate disk with blank tables */
-   foreach(i, vol->tables) {
-      linda_write_itable(vol, &table, i);
+   for(int i=0; i<vol->tables; i++) {
+      notify("Initializing index table ("); print(itoa(i+1, DEC)); 
+      print("/"); print(itoa(vol->tables,DEC)); print(")\r");
+      linda_write_itable(vol, itable, i);
    }
+   print("\n");
 	
 	/* Create root directory */
 	notify("Creating root directory\n");
-	linda_mkdir(vol, "ROOT", 0);
+	linda_mkdir(vol, "ROOT", 0, itable);
 	
+	linda_write_itable(vol, itable, 0);
+	free(itable);
 	free(vol);
 	return true;
 	
@@ -98,43 +116,53 @@ int linda_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file)
    /* For now, assume path is in root directory */
    char* filename = linda_filename(path);
    
-   notify("Open: reading index table\n");
+   print("Looking for file node named `"); print(filename); print("'\n");
    
    /* Load the index table */
    ltable_t* itable = new(ltable_t);
    linda_read_itable(vol, itable, 0);
    
+   
    lentry_t* entry = new(lentry_t); // Temporary scratch entry
    lnode_t* node = new(lnode_t);    // Temporary scratch node
    
    /* Search the index table for the filename */
-   foreach(i, itable->size) {
-      notify("Open: Processing entry #"); print(itoa(i, DEC)); print("\n");
+   foreach(i, vol->entries) {
+      //notify("Open: Processing entry "); print(itoa(i+1, DEC)); print("/");
+      //print(itoa(vol->entries,DEC)); print("\r");
       *(entry) = itable->entry[i];
       
       /* We found a file, let's check its name */ 
       if(entry->type == LINDA_FILE) {
          /* Load the file node into memory */
          linda_read_node(vol, entry, node);
-         
-         if(strcmp(filename, node->name) == 0) {
+         char* str = (char*) malloc(13);
+         memcpy(str, "            ", 13);
+         memcpy(str, node->name, 12);
+         print("Found file node named `"); print(str); print("'\n");
+         if(strcmp(filename, str) == 0) {
             /* Yay, we found the file! */
+            print("Found it!\n");
             memcpy(file, node, sizeof(lnode_t));
             status = LINDA_OK;
             break;
          }
       }
    }
+   print("\n");
    
    /* File was not found, so lets create it */
    if(status != LINDA_OK) {
       notify("File not found. Attempting to create\n");
    
       /* Create file node */
+      node->start = '<';
       memcpy(node->name, filename, 12);
       node->parent = 0; // Still assuming root dir for now
-      node->self = itable->size+1;
-      node->data = itable->size+2;
+      node->permit = 0xC0DE;
+      node->self = vol->entries+1;
+      node->data = vol->entries+2;
+      node->end = '>';
       
       /* Copy file node to the provided node structure */
       memcpy(file, node, sizeof(lnode_t));
@@ -142,25 +170,23 @@ int linda_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file)
       /* Create table entry for file node */
       lentry_t* file_entry = new(lentry_t);
       file_entry->type = LINDA_FILE;
-      file_entry->size = sizeof(lnode_t);
-      file_entry->addr = linda_find_block(vol, sizeof(lnode_t));
+      file_entry->size = 1;
+      file_entry->addr = linda_find_block(vol, itable);
       
       /* Add file entry to the index table */
-      itable->entry[itable->size] = *(file_entry);
-      itable->size++;
+      itable->entry[vol->entries] = *(file_entry);
       vol->entries++;
       
-      linda_write_itable(vol, itable, 0);
+      //linda_write_itable(vol, itable, 0);
       
       /* Create table entry for file data */
       lentry_t* data_entry = new(lentry_t);
       data_entry->type = LINDA_DATA;
-      data_entry->size = 13;
-      data_entry->addr = linda_find_block(vol, 13);
+      data_entry->size = 4;
+      data_entry->addr = linda_find_block(vol, itable);
       
       /* Add data entry to index table */
-      itable->entry[itable->size] = *(data_entry);
-      itable->size++;
+      itable->entry[vol->entries] = *(data_entry);
       vol->entries++;
       
       linda_write_itable(vol, itable, 0);
@@ -208,9 +234,6 @@ int linda_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file)
 
 static addr_t linda_write_data(volume_t* vol, addr_t addr, byte* data, size_t bytes)
 {
-   notify("Writing data to byte address ");
-   print(itoa(addr, HEX));
-   print("\n");
    dword sector = addr / vol->sector_size;
    dword offset = addr % vol->sector_size;
    
@@ -225,9 +248,6 @@ static addr_t linda_write_data(volume_t* vol, addr_t addr, byte* data, size_t by
 
 static addr_t linda_read_data(volume_t* vol, addr_t addr, byte* data, size_t bytes)
 {
-   notify("Reading data from byte address ");
-   print(itoa(addr, HEX));
-   print("\n");
    dword sector = addr / vol->sector_size;
    dword offset = addr % vol->sector_size;
    
@@ -262,7 +282,7 @@ static char* linda_filename(const char path[])
    int ext_size = strlen(path) - (name_size+1);
    
    /* Calculate the number of padding spaces */
-   int pads = 12 - (ext_size + name_size);
+   int pads = 11 - (ext_size + name_size);
    
    /* Construct the new string */
    char* filename = (char*) malloc(12);
@@ -277,12 +297,14 @@ static char* linda_filename(const char path[])
    foreach(i, ext_size) {
       filename[i+name_size+pads] = path[i+name_size+1];
    }
+   /* Null terminate string */
+   filename[11] = 0;
    return filename;
 }
 
 static void linda_format_sb(volume_t* superblock, size_t sec, size_t bps, size_t res, size_t tbl)
 {
-	byte* mbr = (byte*) malloc(512);
+	byte* mbr = (byte*) calloc(512, sizeof(byte));
 	foreach(i,512) mbr[i] = 0;
 	const byte jump[3] = { 0xeb, 0x3c, 0x90 };
 	
@@ -292,9 +314,9 @@ static void linda_format_sb(volume_t* superblock, size_t sec, size_t bps, size_t
 	superblock->volume_size = sec;
 	superblock->sector_size = bps;
 	superblock->reserved = res;
-	superblock->table_addr = res + 1;
+	superblock->table_addr = res+1;
 	superblock->tables = tbl;
-	superblock->table_size = 85;
+	superblock->table_size = TABLE_SIZE;
 	superblock->root = 0;
 	superblock->entries = 0;
 	
@@ -304,22 +326,27 @@ static void linda_format_sb(volume_t* superblock, size_t sec, size_t bps, size_t
 	free(mbr);
 }
 
-static bool linda_mkdir(volume_t* vol, char* name, word parent)
+static bool linda_mkdir(volume_t* vol, char* name, word parent, ltable_t* itable)
 {
    bool status = true;
    
    /* Create the directory node */
 	lnode_t dir;
-	
-	char _name[12] = "            ";
+	char _name[12] = "           /";
 	memcpy(_name, name, strlen(name));
 	memcpy(dir.name, _name, 12);
-	dir.permit = 0xC0DE; 
+	dir.permit = 0xC0DE;
+	dir.timestamp = clock();
 	dir.parent = parent;
 	dir.self = vol->entries;  
 	dir.data = 0;
 	
-	/* Increment the entries counter in superblock */
+	/* Create table entry for the directory */
+	lentry_t entry;
+	entry.type = LINDA_DIR;
+	entry.size = 1;
+	entry.addr = linda_find_block(vol, itable);
+	itable->entry[vol->entries] = entry;
 	vol->entries++;
 	
 	/* Update superblock on disk */
@@ -329,32 +356,11 @@ static bool linda_mkdir(volume_t* vol, char* name, word parent)
    floppy_write_block(0, superblock, 512);
 	free(superblock);
 	
-	/* Load the correct table sector */
-	ltable_t itable;
-	byte table = vol->entries / vol->table_size;
-	linda_read_itable(vol, &itable, table);
-	
-	/* Create table entry for the directory */
-	lentry_t entry;
-	entry.type = LINDA_DIR;
-	entry.size = sizeof(lnode_t);
-	entry.addr = linda_find_block(vol, sizeof(lnode_t));
-	
+   /* Update index table on disk */
+	linda_write_itable(vol, itable, 0);
 	linda_write_node(vol, &entry, &dir); 
 	
-	/* Add the entry to the table */
-	itable.entry[itable.size] = entry;
-	itable.size++;
-	
-	/* Update index table on disk */
-	linda_write_itable(vol, &itable, table);
-	
-	/* All done! Erase allocated memory and exit */
-	//notify("Done\n");
-	//free(dir);
-	//free(itable);
-	
-	return status;
+   return status;
 	
 }
 
@@ -367,9 +373,10 @@ static bool linda_mkdir(volume_t* vol, char* name, word parent)
  */
 static int linda_read_itable(volume_t* vol, ltable_t* itable, byte table)
 {
-   print("Reading index table "); println(itoa(table,DEC));
+   int sector = vol->table_addr + table;
+   print("Reading table from sector "); print(itoa(sector,DEC)); print("\n");
 	byte* block = (byte*) malloc(512);
-	floppy_read_block(vol->table_addr + table, block, 512);
+	floppy_read_block(sector, block, 512);
 	memcpy(itable, block, 512);
 	free(block);
 	return LINDA_OK;
@@ -377,11 +384,11 @@ static int linda_read_itable(volume_t* vol, ltable_t* itable, byte table)
 
 static int linda_write_itable(volume_t* vol, ltable_t* itable, byte table)
 {
-   print("Writing index table "); print(itoa(table,DEC));
-   print(" ("); print(itoa(itable->size,DEC)); print(" entries)\n");
+   int sector = vol->table_addr + table;
+   print("Writing table to sector "); print(itoa(sector,DEC)); print("\n");
 	byte* block = (byte*) malloc(512);
-	memcpy(block,itable,512);
-	floppy_write_block(vol->table_addr + table, block, 512);
+	memcpy(block, itable, 512);
+	floppy_write_block(sector, block, 512);
 	free(block);
 	return LINDA_OK;
 }
@@ -397,46 +404,16 @@ static int linda_write_itable(volume_t* vol, ltable_t* itable, byte table)
  *  a space near other nodes. If not, then linda will prefer
  *  to use a space at the start of a sector.
  */
-static dword linda_find_block(volume_t* vol, size_t size)
+static dword linda_find_block(volume_t* vol, ltable_t* itable)
 {
-   /* Load index table */
-   ltable_t* itable = new(ltable_t);
-   linda_read_itable(vol, itable, 0);
+   dword start = 512*(vol->table_addr + vol->tables + vol->reserved);
+   dword address = start;
    
-   addr_t start = vol->sector_size * (vol->reserved + vol->tables + 1);
-   addr_t end = vol->volume_size * vol->sector_size;
-   addr_t addr = start;
-   
-   if(itable->size == 0) {
-      print("There are no entries in the index table\n");
-      free(itable);
-      return addr;
+   /* Sum up each cluster size */
+   foreach(i, vol->entries) {
+      address += itable->entry[i].size * 32;
    }
-   
-   while(addr < end)
-   {
-      foreach(i, itable->size) {
-         print("Looking at table entry "); print(itoa(i,DEC)); print("\n");
-         if(addr >= itable->entry[i].addr && 
-            addr <= itable->entry[i].addr + itable->entry[i].size) {
-         
-            continue;
-            
-         }
-         else {
-            /* Found a free block! */
-            notify("Found free address starting at ");
-            print(itoa(addr, HEX));
-            print("\n");
-            free(itable);
-            return (dword)addr;
-         }
-      }
-      
-      
-      addr += size;
-   }
-   return 0;
+   return address;
 }
 
 
