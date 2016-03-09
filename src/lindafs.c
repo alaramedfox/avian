@@ -30,11 +30,10 @@ enum __LINDA_DEFS
 //           Private function prototypes                                    //
 // ======================================================================== //
 
-static void  anica_format_sb(volume_t*, size_t,size_t,size_t);
+static void  anica_format_sb(lsuper_t*, size_t,size_t,size_t);
 static bool  anica_mkdir(volume_t*,char*, word);
 static dword anica_find_block(volume_t*);
-static int     anica_read_itable(volume_t*);
-static int     anica_write_itable(volume_t*);
+
 static char* anica_filename(const char path[]);
 static addr_t  anica_read_node(volume_t*, lentry_t*, lnode_t*);
 static addr_t  anica_write_node(volume_t*, lentry_t*, lnode_t*);
@@ -54,26 +53,22 @@ void anica_dump_entry(volume_t* vol, int i)
    print(itoa(vol->itable[i].addr, HEX)); print("\n");
 }
 
-bool anica_read_superblock(byte device, volume_t* superblock)
+bool anica_read_superblock(byte device, lsuper_t* superblock)
 {
-   byte* block = (byte*) malloc(512);
+   byte* block = (byte*) calloc(512, 1);
    floppy_read_block(0, block, 512);
-   memcpy(superblock, block, sizeof(volume_t));
-   
-   /* Load the index table and store a pointer to it in the superblock */
-   superblock->itable = (lentry_t*) malloc(superblock->table_size * sizeof(lentry_t));
-   anica_read_itable(superblock);
+   memcpy(superblock, block, sizeof(lsuper_t));
    
    free(block);
    return true;
 }
 
-bool anica_write_superblock(byte device, volume_t* superblock)
+bool anica_write_superblock(byte device, lsuper_t* superblock)
 {
-   byte* block = (byte*) malloc(512);
-   memcpy(block, superblock, sizeof(volume_t));
+   byte* block = (byte*) calloc(512, 1);
+   floppy_read_block(0, block, 512);
+   memcpy(block, superblock, sizeof(lsuper_t));
    floppy_write_block(0, block, 512);
-   anica_write_itable(superblock);
    free(block);
    return true;
 }
@@ -87,17 +82,27 @@ bool anica_format_device(size_t sec, size_t bps, size_t res)
    free(zero);
    
    /* Format the superblock */
+   print("Formatting superblock\n");
    volume_t* vol = new(volume_t);
-   anica_format_sb(vol, sec, bps, res);
+   anica_format_sb(&vol->sb, sec, bps, res);
+   vol->itable = (lentry_t*) malloc(vol->sb.table_size * sizeof(lentry_t));
    
-
+   /* Format reserved sectors */
+   foreach(i, vol->sb.reserved) {
+      byte* res = (byte*) malloc(512);
+      foreach(j, 512) res[j] = '-';
+      memcpy(res, "This sector is reserved for boot code", 37);
+      floppy_write_block(i+1, res, 512);
+      free(res);
+   }
    
    /* Create root directory */
    notify("Creating root directory\n");
    anica_mkdir(vol, "ROOT", 0);
    
-   //anica_write_superblock(0, vol);
-   //free(itable);
+   anica_write_superblock(0, &vol->sb);
+   anica_write_itable(vol);
+   free(vol->itable);
    free(vol);
    return true;
    
@@ -111,9 +116,9 @@ int anica_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file)
    char* filename = anica_filename(path);
    print("Looking for entry named `"); print(filename); print("'\n");
    /* Search the index table for the filename */
-   foreach(i, vol->entries) {
+   foreach(i, vol->sb.entries) {
       
-      anica_dump_entry(vol, i);
+      //anica_dump_entry(vol, i);
       
       /* We found a file, let's check its name */ 
       if(vol->itable[i].type == LINDA_FILE) {
@@ -141,12 +146,13 @@ int anica_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file)
       memcpy(node->name, filename, 12);
       node->parent = 0; // Still assuming root dir for now
       node->permit = 0xC0DE;
-      node->self = vol->entries+1;
-      node->data = vol->entries+2;
+      node->self = vol->sb.entries+1;
+      node->data = vol->sb.entries+2;
       node->end = '>';
       
       /* Copy file node to the provided node structure */
-      memcpy(file, node, sizeof(lnode_t));
+      //memcpy(file, node, sizeof(lnode_t));
+      *(file) = *(node);
       
       /* Create table entry for file node */
       lentry_t* file_entry = new(lentry_t);
@@ -155,9 +161,9 @@ int anica_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file)
       file_entry->addr = anica_find_block(vol);
       
       /* Add file entry to the index table */
-      vol->itable[vol->entries] = *(file_entry);
-      vol->entries++;
-      anica_dump_entry(vol, vol->entries-1);
+      vol->itable[vol->sb.entries] = *(file_entry);
+      vol->sb.entries++;
+      //anica_dump_entry(vol, vol->entries-1);
       
       //anica_write_itable(vol, itable, 0);
       
@@ -168,8 +174,8 @@ int anica_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file)
       data_entry->addr = anica_find_block(vol);
       
       /* Add data entry to index table */
-      vol->itable[vol->entries] = *(data_entry);
-      vol->entries++;
+      vol->itable[vol->sb.entries] = *(data_entry);
+      vol->sb.entries++;
       
       /* Create actual file data */
       byte* data = (byte*) calloc(4*32, 1);
@@ -219,8 +225,9 @@ int anica_write_file(volume_t* vol, byte* data, lnode_t* node)
 
 static addr_t anica_write_data(volume_t* vol, addr_t addr, byte* data, size_t bytes)
 {
-   dword sector = addr / vol->sector_size;
-   dword offset = addr % vol->sector_size;
+   print("Writing "); print(itoa(bytes,BYTES)); print(" to address "); println(itoa(addr,HEX));
+   dword sector = addr / vol->sb.sector_size;
+   dword offset = addr % vol->sb.sector_size;
    
    byte* block = (byte*) malloc(512);
    floppy_read_block(sector, block, 512);
@@ -233,8 +240,9 @@ static addr_t anica_write_data(volume_t* vol, addr_t addr, byte* data, size_t by
 
 static addr_t anica_read_data(volume_t* vol, addr_t addr, byte* data, size_t bytes)
 {
-   dword sector = addr / vol->sector_size;
-   dword offset = addr % vol->sector_size;
+   print("Reading "); print(itoa(bytes,BYTES)); print(" from address "); println(itoa(addr,HEX));
+   dword sector = addr / vol->sb.sector_size;
+   dword offset = addr % vol->sb.sector_size;
    
    byte* block = (byte*) malloc(512);
    floppy_read_block(sector, block, 512);
@@ -256,24 +264,15 @@ static addr_t anica_write_node(volume_t* vol, lentry_t* entry, lnode_t* node)
 
 static char* anica_filename(const char path[])
 {
-   /* file format is "NAME    EXT" */
-   
    /* Calculate the length of the file name */
    int name_size = 0;
    while(path[name_size] != '.' && name_size < strlen(path)) 
       { name_size++; }
-      
-   /* Calculate the length of the extension */
    int ext_size = strlen(path) - (name_size+1);
-   
-   /* Calculate the number of padding spaces */
    int pads = 11 - (ext_size + name_size);
-   
-   /* Construct the new string */
    char* filename = (char*) malloc(12);
    foreach(i, name_size) { filename[i] = path[i]; }
    foreach(i, pads) { filename[i+name_size] = ' '; }
-   
    foreach(i, ext_size) {
       filename[i+name_size+pads] = path[i+name_size+1];
    }
@@ -282,7 +281,7 @@ static char* anica_filename(const char path[])
    return filename;
 }
 
-static void anica_format_sb(volume_t* superblock, size_t sec, size_t bps, size_t res)
+static void anica_format_sb(lsuper_t* superblock, size_t sec, size_t bps, size_t res)
 {
    const byte jump[3] = { 0xeb, 0x3c, 0x90 };
    
@@ -313,7 +312,7 @@ static bool anica_mkdir(volume_t* vol, char* name, word parent)
    dir.permit = 0xC0DE;
    dir.timestamp = clock();
    dir.parent = parent;
-   dir.self = vol->entries;  
+   dir.self = vol->sb.entries;  
    dir.data = 0;
    
    print("Creating table entry\n");
@@ -322,13 +321,12 @@ static bool anica_mkdir(volume_t* vol, char* name, word parent)
    entry.type = LINDA_DIR;
    entry.size = 1;
    entry.addr = anica_find_block(vol);
-   vol->itable[vol->entries] = entry;
-   vol->entries++;
+   vol->itable[vol->sb.entries] = entry;
+   vol->sb.entries++;
    
    //print("Updating superblock\n");
    //anica_write_superblock(0, vol);
 
-   print("Writing node to address "); println(itoa(entry.addr, HEX));
    anica_write_node(vol, &entry, &dir);
    
    return status;
@@ -342,10 +340,11 @@ static bool anica_mkdir(volume_t* vol, char* name, word parent)
  *  the function cannot read the table, a value of -1 is
  *  returned. 
  */
-static int anica_read_itable(volume_t* vol)
+
+int anica_read_itable(volume_t* vol)
 {
-   int sector = vol->table_addr;
-   print("Reading table from sector "); print(itoa(sector,DEC)); print("\n");
+   int sector = vol->sb.table_addr;
+   //print("Reading table from sector "); print(itoa(sector,DEC)); print("\n");
    byte* block = (byte*) malloc(512);
    floppy_read_block(sector, block, 512);
    memcpy(vol->itable, block, 512);
@@ -353,13 +352,16 @@ static int anica_read_itable(volume_t* vol)
    return LINDA_OK;
 }
 
-static int anica_write_itable(volume_t* vol)
+int anica_write_itable(volume_t* vol)
 {
-   int sector = vol->table_addr;
-   print("Reading table from sector "); print(itoa(sector,DEC)); print("\n");
+   int sector = vol->sb.table_addr;
+   //print("Writing table to sector "); print(itoa(sector,DEC)); print("\n");
    byte* block = (byte*) malloc(512);
    memcpy(block, vol->itable, 512);
-   floppy_write_block(sector, block, 512);
+   
+   if(!floppy_write_block(sector, block, 512)) {
+      print("Failed to write block\n");
+   }
    free(block);
    return LINDA_OK;
 }
@@ -377,11 +379,11 @@ static int anica_write_itable(volume_t* vol)
  */
 static dword anica_find_block(volume_t* vol)
 {
-   dword start = (512*vol->table_addr + vol->table_size*sizeof(lentry_t));
+   dword start = (512*vol->sb.table_addr + vol->sb.table_size*sizeof(lentry_t));
    dword address = start;
    
    /* Sum up each cluster size */
-   foreach(i, vol->entries) {
+   foreach(i, vol->sb.entries) {
       address += vol->itable[i].size * 32;
    }
    return address;

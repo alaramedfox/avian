@@ -22,7 +22,9 @@ enum __PARTITIONS
 volume_t* mount(device_t device)
 {
    volume_t* volume = new(volume_t);
-   anica_read_superblock(device, volume);
+   anica_read_superblock(device, &volume->sb);
+   volume->itable = (lentry_t*) malloc(volume->sb.table_size * 8);
+   anica_read_itable(volume);
    return volume;
 }
 
@@ -68,9 +70,10 @@ void close(file_t* file)
 
 void unmount(volume_t* volume)
 {
-   anica_write_superblock(0, volume);
-   free(volume);
+   anica_write_superblock(0, &volume->sb);
+   anica_write_itable(volume);
    free(volume->itable);
+   free(volume);
 }
 
 char* fserr(int err)

@@ -48,10 +48,10 @@ void avian_main(void)
    print("AnicaFS: Allocation of Nodes by Indexed Cluster Addresses\n");
    int time = clock();
    
-   anica_format_device(2880, 512, 0);
+   anica_format_device(2880, 512, 1);
 
    volume_t* floppy = mount(fda);
-   file_t* file = open(floppy, "TEST.TXT", LINDA_WRITE);
+   file_t* file = open(floppy, "FILE.TXT", LINDA_WRITE);
    
    char* str = (char*) malloc(15);
    
