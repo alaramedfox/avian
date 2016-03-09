@@ -2,9 +2,9 @@
 #define LINDAFS_H_INCLUDED
 
 // ========================================================================= */
-//	   Avian Kernel   Bryan Webb (C) 2016
-//	   File:          avian/drivers/lindafs.h
-//	   Purpose:	      Header for the Linda filesystem
+//      Avian Kernel   Bryan Webb (C) 2016
+//      File:          avian/drivers/anicafs.h
+//      Purpose:         Header for the Linda filesystem
 //
 //    The LINDA Filesystem, or by its acronym,
 //     "Linked and Indexed Node Directory Architecture" is a filesystem
@@ -20,10 +20,10 @@
 
 enum __LINDA_TABLE_TYPE
 {
-	LINDA_DIR,
-	LINDA_FILE,
-	LINDA_DATA,
-	LINDA_FREE,
+   LINDA_DIR,
+   LINDA_FILE,
+   LINDA_DATA,
+   LINDA_FREE,
 };
 
 enum __LINDA_BOUNDS
@@ -31,75 +31,49 @@ enum __LINDA_BOUNDS
    TABLE_SIZE = 102,
 };
 
-enum __LINDA_ERRORS
+enum __LINDA_MODES
 {
-	LINDA_OK = 0,	   // Everything went OK
-	LINDA_FSERR = 1,	// Some sort of filesystem error
-	LINDA_NOFILE = 2, // Could not find file
-	LINDA_NODIR = 3, 	// Could not find directory
-	LINDA_IOERR = 4,	// Error reading or writing to device
-	
-	LINDA_ERR = 255,  // Some unknown error
+   LINDA_READ,
+   LINDA_WRITE,
 };
 
-/**
- *		Structure containing the Linda FS superblock data
- *		The superblock is a chunk of data loaded from the
- *		first sector of a partition that provides information
- *		about the data. 
- */
-typedef struct __LINDA_SUPERBLOCK
-{	
-	byte   jump[3];		// Jump instructions
-	char	 uuid[7];		// "LindaFS"
-	char	 label[16]; 	// String containing the filesystem label
-	dword  volume_size;	// Size of volume in blocks
-	dword  sector_size;	// Size of sector in bytes (should be 512)
-	dword  reserved;		// Number of reserved sectors (for bootloader)
-	dword  table_addr;	// Sector number of the first index table
-	byte   tables;       // Number of index tables
-	dword  table_size;	// Number of indexes per table
-	dword  root;			// Table index of the root directory (should be 0)
-	dword  entries;		// Number of index entries
-	addr_t ramptr;       // Pointer to a RAM address with the index table cache
-	
-} FLAT volume_t;
+enum __LINDA_ERRORS
+{
+   LINDA_OK = 0,      // Everything went OK
+   LINDA_FSERR = 1,   // Some sort of filesystem error
+   LINDA_NOFILE = 2, // Could not find file
+   LINDA_NODIR = 3,    // Could not find directory
+   LINDA_IOERR = 4,   // Error reading or writing to device
+   
+   LINDA_ERR = 255,  // Some unknown error
+};
 
-/**	
- *		The Index Table is a list of addresses (and sizes) of
- *		each unit of data, whether it be a directory, file, or
- *		actual block of file content.
+/**   
+ *      The Index Table is a list of addresses (and sizes) of
+ *      each unit of data, whether it be a directory, file, or
+ *      actual block of file content. On the disk, the index table
+ *    is a long list of consecutive entries, with each entry being
+ *    8 bytes (64 entries per sector). When nodes and clusters refer
+ *    to other nodes or clusters, this reference is by the index of
+ *    the sought-after node in the table. When a superblock is
+ *    loaded from disk, the index table is loaded into memory, and
+ *    the superblock records a pointer to that memory address.
  *
- *		Each table entry is 4 bytes - 
- *			2 bits to identify the data type, 
- *          (for a maximum of 4 data types)
- *			6 bits that hold the size of the data in clusters,
- *          (for a maximum continuous data size of 2kb, or 64 clusters)
- *			24 bits that hold the CLUSTER address of the data itself
- *          (for a maximum of 512 MiB addressable space)
- *       
+ *    Each table entry can address up to 4 GiB of space, with a
+ *    maximum continuous data size of 4 KiB. One sector of entries
+ *    can manage a maximum of 4 MiB of data, assuming each entry uses
+ *    the maximum cluster size of 4 KiB. I think these numbers are wrong...
  *
- *    Since each entry is 4 bytes, a 512-byte table can store up
- *    to 128 entries, which equates to a maximum of 256kB of
- *    indexable data. That means that one table can index 512 sectors.
- *    Therefore, a floppy will need 6 tables. 
  */
  
 typedef struct __LINDA_ENTRY
 {
-	byte 	type: 2;   // Type of data
-	byte	size: 6;   // Size of pointed-to data in clusters
-	dword	addr;      // Byte address of data
+   byte    type;    // Type of data (file, dir, etc)
+   byte   size;    // Size of data in clusters
+   word  uuid;    // Unique identifier
+   dword   addr;    // Byte address of cluster
 
 } FLAT lentry_t;
-
-typedef struct __LINDA_INDEX_TABLE
-{
-   char start;
-	lentry_t entry[TABLE_SIZE];
-	char end;
-	
-} FLAT ltable_t;
 
 typedef struct __LINDA_NODE
 {
@@ -110,7 +84,8 @@ typedef struct __LINDA_NODE
    index_t parent;   // Index of parent directory
    index_t self;     // Index of this object
    index_t data;     // Index of content data
-   byte misc[6];     // Misc. free bytes
+   size_t size;      // Size of content data
+   byte misc[2];     // Misc. free bytes
    char end;
 
 } FLAT lnode_t;
@@ -122,18 +97,38 @@ typedef struct __LINDA_CLUSTER
 
 } FLAT lcluster_t;
 
+/**
+ *      Structure containing the Linda FS superblock data
+ *      The superblock is a chunk of data loaded from the
+ *      first sector of a partition that provides information
+ *      about the data. 
+ */
+typedef struct __LINDA_SUPERBLOCK
+{   
+   byte   jump[3];      // Jump instructions
+   char    uuid[7];      // "LindaFS"
+   char    label[16];    // String containing the filesystem label
+   dword  volume_size;   // Size of volume in blocks
+   dword  sector_size;   // Size of sector in bytes (should be 512)
+   dword  reserved;      // Number of reserved sectors (for bootloader)
+   dword  table_addr;   // Sector number of the first index table
+   dword  table_size;   // Maximum number of table entries
+   dword  root;         // Table index of the root directory (should be 0)
+   dword  entries;      // Number of index entries
+   lentry_t* itable;       // Pointer to a RAM address with the index table cache
+   
+} FLAT volume_t;
+
 // ======================================================================= //
 //           Public API functions                                          //
 // ======================================================================= //
 
-bool linda_read_superblock(byte device, volume_t* superblock);
-bool linda_format_device(size_t, size_t, size_t, size_t);
-int  linda_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file);
-
-
-
-
-
+bool anica_read_superblock(byte device, volume_t* superblock);
+bool anica_write_superblock(byte device, volume_t* superblock);
+bool anica_format_device(size_t, size_t, size_t);
+int  anica_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file);
+int anica_write_file(volume_t* vol, byte* data, lnode_t* node);
+int anica_read_file(volume_t* vol, byte* data, lnode_t* node);
 
 
 
