@@ -1,51 +1,45 @@
-#ifndef LINDAFS_H_INCLUDED
-#define LINDAFS_H_INCLUDED
+#ifndef ANICAFS_H_INCLUDED
+#define ANICAFS_H_INCLUDED
 
 // ========================================================================= */
-//      Avian Kernel   Bryan Webb (C) 2016
-//      File:          avian/drivers/anicafs.h
-//      Purpose:         Header for the Linda filesystem
+//    Avian Kernel      Bryan Webb (C) 2016
+//    File:             avian/include/anicafs.h
+//    Purpose:          Header for the Linda filesystem
 //
-//    The LINDA Filesystem, or by its acronym,
-//     "Linked and Indexed Node Directory Architecture" is a filesystem
-//    similar to FAT and ext2. It is essentially a linked list of data
-//    structures, but instead of nodes containing memory addresses, they
-//    contain an index to a table of memory addresses. This allows the nodes
-//    to store less than a quarter of the bytes that an array of addresses
-//    would require. 
+//    AnicaFS - Allocation of Nodes by Indexed Cluster Addresses 
 //
 // ========================================================================= */
 
 #include <stdlib.h>
 
-enum __LINDA_TABLE_TYPE
+enum __ANICA_TABLE_TYPE
 {
-   LINDA_DIR = 'D',
-   LINDA_FILE = 'F',
-   LINDA_DATA = 'C',
-   LINDA_FREE = 'A',
+   ANICA_DIR = 'D',
+   ANICA_FILE = 'F',
+   ANICA_DATA = 'C',
+   ANICA_FREE = 'A',
 };
 
-enum __LINDA_BOUNDS
+enum __ANICA_BOUNDS
 {
    TABLE_SIZE = 102,
 };
 
-enum __LINDA_MODES
+enum __ANICA_MODES
 {
-   LINDA_READ,
-   LINDA_WRITE,
+   ANICA_READ,
+   ANICA_WRITE,
 };
 
-enum __LINDA_ERRORS
+enum __ANICA_ERRORS
 {
-   LINDA_OK = 0,      // Everything went OK
-   LINDA_FSERR = 1,   // Some sort of filesystem error
-   LINDA_NOFILE = 2, // Could not find file
-   LINDA_NODIR = 3,    // Could not find directory
-   LINDA_IOERR = 4,   // Error reading or writing to device
+   ANICA_OK = 0,      // Everything went OK
+   ANICA_FSERR = 1,   // Some sort of filesystem error
+   ANICA_NOFILE = 2, // Could not find file
+   ANICA_NODIR = 3,    // Could not find directory
+   ANICA_IOERR = 4,   // Error reading or writing to device
    
-   LINDA_ERR = 255,  // Some unknown error
+   ANICA_ERR = 255,  // Some unknown error
 };
 
 /**   
@@ -66,7 +60,7 @@ enum __LINDA_ERRORS
  *
  */
  
-typedef struct __LINDA_ENTRY
+typedef struct __ANICA_ENTRY
 {
    char    start;
    byte    type;    // Type of data (file, dir, etc)
@@ -76,7 +70,7 @@ typedef struct __LINDA_ENTRY
 
 } FLAT lentry_t;
 
-typedef struct __LINDA_NODE
+typedef struct __ANICA_NODE
 {
    char name[12];    // ASCII Name of node
    word permit;      // Access permissions
@@ -89,7 +83,7 @@ typedef struct __LINDA_NODE
 
 } FLAT lnode_t;
 
-typedef struct __LINDA_CLUSTER
+typedef struct __ANICA_CLUSTER
 {
    byte data[31];    // 31 bytes of cluster data
    byte end;         // Byte that flags cluster info
@@ -102,7 +96,7 @@ typedef struct __LINDA_CLUSTER
  *      first sector of a partition that provides information
  *      about the data. 
  */
-typedef struct __LINDA_SUPERBLOCK
+typedef struct __ANICA_SUPERBLOCK
 {   
    byte   jump[3];      // Jump instructions
    char   uuid[7];      // "LindaFS"
@@ -117,7 +111,7 @@ typedef struct __LINDA_SUPERBLOCK
    
 } FLAT lsuper_t;
 
-typedef struct __LINDA_VOLUME
+typedef struct __ANICA_VOLUME
 {
    lsuper_t sb;
    lentry_t *itable;

@@ -1,11 +1,11 @@
-#define LINDAFS_C_SOURCE
+#define ANICAFS_C_SOURCE
 // ======================================================================== */
 //    Avian Kernel   Bryan Webb (C) 2016                                  
 //    File:          avian/anicafs.c                                     
 //    Purpose:       Implementation of the Linda FS                      
 // ======================================================================== */
 
-#include <lindafs.h>
+#include <anicafs.h>
 #include <stdlib.h>
 #include <vga.h>
 #include <util.h>
@@ -14,16 +14,11 @@
 
 #include <util.h>
 
-enum __LINDA_DEFS
+enum __ANICA_DEFS
 {
    SOF = 0x02,   // Start of file
    LNF = 0x1a,   // Link point for more data
    EOF = 0x03,   // End of file
-   
-   NODE_START = '<',
-   NODE_END = '>',
-   TABLE_START = '{',
-   TABLE_END = '}',
 };
 
 // ======================================================================== //
@@ -32,7 +27,13 @@ enum __LINDA_DEFS
 
 static void  anica_format_sb(lsuper_t*, size_t,size_t,size_t);
 static bool  anica_mkdir(volume_t*,char*, word);
+
+#define NEW_SEARCH 1
+#if NEW_SEARCH
+static dword anica_find_block(volume_t*, size_t);
+#else
 static dword anica_find_block(volume_t*);
+#endif
 
 static char* anica_filename(const char path[]);
 static addr_t  anica_read_node(volume_t*, lentry_t*, lnode_t*);
@@ -50,10 +51,10 @@ void anica_dump_entry(volume_t* vol, int i)
    print("Entry "); iprint(i,DEC); print(": Type=");
    switch(vol->itable[i].type)
    {
-      case LINDA_DIR: print("DIR, Size="); break;
-      case LINDA_FILE: print("FILE, Size="); break;
-      case LINDA_DATA: print("DATA, Size="); break;
-      case LINDA_FREE: print("FREE, Size="); break;
+      case ANICA_DIR: print("DIR, Size="); break;
+      case ANICA_FILE: print("FILE, Size="); break;
+      case ANICA_DATA: print("DATA, Size="); break;
+      case ANICA_FREE: print("FREE, Size="); break;
       default: print("???, Size="); break;
    }
    iprint(vol->itable[i].size, DEC); print(", Addr=");
@@ -119,17 +120,15 @@ bool anica_format_device(size_t sec, size_t bps, size_t res)
 int anica_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file)
 {
    int status;
-   //notify("Opening file\n");
+   
    /* For now, assume path is in root directory */
    char* filename = anica_filename(path);
-   //print("Looking for entry named `"); print(filename); print("'\n");
+   
    /* Search the index table for the filename */
    foreach(i, vol->sb.entries) {
       
-      ASSERT(anica_dump_entry(vol, i));
-      
       /* We found a file, let's check its name */ 
-      if(vol->itable[i].type == LINDA_FILE) {
+      if(vol->itable[i].type == ANICA_FILE) {
          /* Load the file node into memory */
          lnode_t node;
          anica_read_node(vol, &vol->itable[i], &node);
@@ -137,7 +136,7 @@ int anica_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file)
          if(strcmp(filename, node.name) == 0) {
             /* Yay, we found the file! */
             *(file) = node;
-            status = LINDA_OK;
+            status = ANICA_OK;
             print("Found the file!\n");
             break;
          }
@@ -145,7 +144,7 @@ int anica_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file)
    }
    
    /* File was not found, so lets create it */
-   if(status != LINDA_OK && mode == LINDA_WRITE) {
+   if(status != ANICA_OK && mode == ANICA_WRITE) {
       ASSERT(print("File not found. Attempting to create\n"));
    
       /* Create file node */
@@ -165,18 +164,18 @@ int anica_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file)
       /* Create table entry for file node */
       lentry_t* file_entry = new(lentry_t);
       file_entry->start = '{';
-      file_entry->type = LINDA_FILE;
+      file_entry->type = ANICA_FILE;
       file_entry->size = 32;
-      file_entry->addr = anica_find_block(vol);
+      file_entry->addr = anica_find_block(vol, 32);
       file_entry->end = '}';
       vol->itable[node->self] = *(file_entry);
       
       /* Create table entry for file data */
       lentry_t* data_entry = new(lentry_t);
       data_entry->start = '{';
-      data_entry->type = LINDA_DATA;
+      data_entry->type = ANICA_DATA;
       data_entry->size = 128;
-      data_entry->addr = anica_find_block(vol);
+      data_entry->addr = anica_find_block(vol, 128);
       data_entry->end = '}';
       
       /* Add data entry to index table */
@@ -197,7 +196,7 @@ int anica_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file)
       free(file_entry);
       free(node);
       
-      status = LINDA_OK;
+      status = ANICA_OK;
    }
    
    return status;
@@ -232,7 +231,8 @@ int anica_write_file(volume_t* vol, byte* data, lnode_t* node)
 
 static addr_t anica_write_data(volume_t* vol, addr_t addr, byte* data, size_t bytes)
 {
-   //print("Writing "); iprint((bytes,DEC)); print("bytes to address "); println(itoa(addr,HEX));
+   print("Writing "); iprint(bytes,DEC); print("bytes to address "); iprint(addr,HEX);
+   print("\n");
    dword sector = addr / vol->sb.sector_size;
    dword offset = addr % vol->sb.sector_size;
    
@@ -328,14 +328,11 @@ static bool anica_mkdir(volume_t* vol, char* name, word parent)
    /* Create table entry for the directory */
    lentry_t entry;
    entry.start = '{';
-   entry.type = LINDA_DIR;
+   entry.type = ANICA_DIR;
    entry.size = 32;
-   entry.addr = anica_find_block(vol);
+   entry.addr = anica_find_block(vol, 32);
    entry.end = '}';
    vol->itable[dir.self] = entry;
-   
-   //print("Updating superblock\n");
-   //anica_write_superblock(0, vol);
 
    anica_write_node(vol, &entry, &dir);
    
@@ -345,10 +342,10 @@ static bool anica_mkdir(volume_t* vol, char* name, word parent)
 
 /**
  *    Reads/writes the given itable from the volume into the provided
- *  table pointer. If the table is read correctly, then the 
- *  function returns the number of elements in the table. If
- *  the function cannot read the table, a value of -1 is
- *  returned. 
+ *    table pointer. If the table is read correctly, then the 
+ *    function returns the number of elements in the table. If
+ *    the function cannot read the table, a value of -1 is
+ *    returned. 
  */
 
 int anica_read_itable(volume_t* vol)
@@ -359,7 +356,7 @@ int anica_read_itable(volume_t* vol)
    floppy_read_block(sector, block, 512);
    memcpy(vol->itable, block, 512);
    free(block);
-   return LINDA_OK;
+   return ANICA_OK;
 }
 
 int anica_write_itable(volume_t* vol)
@@ -373,20 +370,66 @@ int anica_write_itable(volume_t* vol)
       print("Failed to write block\n");
    }
    free(block);
-   return LINDA_OK;
+   return ANICA_OK;
 }
 
 /**
  *    Searches for a space at least the size of the given
- *  size (in bytes), based on the entries in the index
- *  table. If a block is found, the address is returned.
- *  If not, a value of 0 is returned.
+ *    size (in bytes), based on the entries in the index
+ *    table. If a block is found, the address is returned.
+ *    If not, a value of 0 is returned.
  *
- *  If the requested size is the size of a node, then anica
- *  assumes that a node is being stored, and will prefer
- *  a space near other nodes. If not, then anica will prefer
- *  to use a space at the start of a sector.
  */
+ 
+static bool anica_is_addr_free(volume_t* vol, addr_t addr)
+{
+   addr_t start, end;
+   foreach(i, vol->sb.entries)
+   {
+      start = vol->itable[i].addr;
+      end = vol->itable[i].addr + vol->itable[i].size;
+      
+      if(addr >= start && addr <= end) { 
+         return false; 
+      }
+      else continue;
+   }
+   
+   return true;
+}
+ 
+static bool anica_block_fits(volume_t* vol, addr_t addr, size_t size)
+{
+   size_t bs = 0;
+   addr_t max = vol->sb.volume_size * vol->sb.sector_size;
+   
+   while(anica_is_addr_free(vol, addr+bs) && (addr < max))
+   {
+      ++bs;
+      if(bs >= size) return true;
+   }
+   
+   return false;
+}
+
+#if NEW_SEARCH
+static dword anica_find_block(volume_t* vol, size_t size)
+{
+   addr_t search_start = (512*vol->sb.table_addr + vol->sb.table_size*sizeof(lentry_t));
+   addr_t max = vol->sb.volume_size * vol->sb.sector_size - vol->sb.sector_size;
+   
+   for(addr_t address = search_start; address < max; address+=size)
+   {
+      if(anica_block_fits(vol, address, size)) {
+         return address;
+      }
+      else continue;
+   }
+
+   return -1;
+}
+
+#else
 static dword anica_find_block(volume_t* vol)
 {
    dword start = (512*vol->sb.table_addr + vol->sb.table_size*sizeof(lentry_t));
@@ -398,7 +441,7 @@ static dword anica_find_block(volume_t* vol)
    }
    return address;
 }
-
+#endif
 
 
 

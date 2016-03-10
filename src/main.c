@@ -19,7 +19,6 @@
 #include <floppy.h>
 #include <time.h>
 #include <filesystem.h>
-#include <lindafs.h>
 
 void init(void);
 bool main_loop(void);
@@ -48,16 +47,16 @@ void avian_main(void)
    print("AnicaFS: Allocation of Nodes by Indexed Cluster Addresses\n");
    int time = clock();
    
-   //anica_format_device(2880, 512, 1);
+   anica_format_device(2880, 512, 1);
 
    volume_t* floppy = mount(fda);
-   file_t* file = open(floppy, "TEST.TXT", LINDA_WRITE);
+   file_t* file = open(floppy, "TEST.TXT", ANICA_WRITE);
    
    char* str;
    
    read(file, (char*)str, 15);
    
-   print("Contents of file: "); print(str); print("\n");
+   print("Contents of file: `"); print(str); print("'\n");
    unmount(floppy);
    print("\nTest complete after "); iprint(clock()-time,DEC); print("ms\n");
 

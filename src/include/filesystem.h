@@ -7,7 +7,7 @@
 // ======================================================================== */
 
 #include <stdlib.h>
-#include <lindafs.h>
+#include <anicafs.h>
 
 typedef enum __DEVICES
 {
