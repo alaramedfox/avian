@@ -129,6 +129,13 @@ void println(const char str[])
    print(str); print("\n");
 }
 
+void iprint(dword val, byte base)
+{
+   char str[9];
+   itoa(val, base, str);
+   print(str);
+}
+
 void vga_scroll(void) 
 {
    /* Shift every row up one row */

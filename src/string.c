@@ -9,6 +9,84 @@
 #include <string.h>
 #include <stdlib.h>
 
+static const char place_value[] = "0123456789ABCDEF";
+static const char bytes_magnitude[] = "BKMGTP";
+
+static inline void itoa_bytes(int number, char str[])
+{
+   int magnitude = 0;
+   
+   while(number > 1024) {
+      number = number/1024;
+      magnitude++;
+   }
+   
+   itoa(number,10, str);
+   int len = strlen(str);
+   str[len-2] = bytes_magnitude[magnitude];
+   str[len-1] = '\0';
+}
+
+void reverse(char s[])
+ {
+     int i, j;
+     char c;
+ 
+     for (i = 0, j = strlen(s)-1; i<j; i++, j--) {
+         c = s[i];
+         s[i] = s[j];
+         s[j] = c;
+     }
+ }
+#define KR 0
+#if KR
+/* itoa:  convert n to characters in s */
+ void itoa(uint32_t n, base_t base, char s[])
+ {
+     int i, sign;
+ 
+     if ((sign = n) < 0)  /* record sign */
+         n = -n;          /* make n positive */
+     i = 0;
+     do {       /* generate digits in reverse order */
+         s[i++] = n % base + '0';   /* get next digit */
+     } while ((n /= base) > 0);     /* delete it */
+     if (sign < 0)
+         s[i++] = '-';
+     s[i] = '\0';
+     reverse(s);
+ }
+#else
+void itoa(uint32_t number, base_t base, char str[])
+{
+   if(base == BYTES) {
+      itoa_bytes(number, str);
+   }
+   else if(base == BOOLEAN) {
+      str = number?"1":"0";
+   }
+   else if(base == 0 || number == 0) {
+      str[0] = '0';
+      str[1] = '\0';
+   }
+   else {
+      int pos=0;
+      
+      while(number > 0)
+      {
+         int i = number % base;
+         str[pos++] = place_value[i];
+         number = number / base;
+      }
+      if(base == HEX) {
+         str[pos++] = 'x';
+         str[pos++] = '0';
+      }
+      str[pos] = 0;
+      reverse(str);
+   }
+}
+#endif
 char *strcat(char *dest, const char *src)
 {
    char *tmp = dest;

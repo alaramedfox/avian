@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <color.h>
 #include <asmfunc.h>
+#include <string.h>
 
 enum __VGA_LIMITS
 {
@@ -50,6 +51,7 @@ void vga_color   (color_t);          //Safely write to vram[vptr+1]
 __attribute__((hot)) void addch(char);
 __attribute__((hot)) void print(const char[]);
 __attribute__((hot)) void println(const char[]);
+__attribute__((hot)) void iprint(dword, byte);
 
 /* Special characters */
 void vga_newline(void);            //Move to next line, starting in first column

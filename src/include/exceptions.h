@@ -6,6 +6,9 @@
 //      Purpose:         Header for exception handling engine
 // ======================================================================== */
 
+#include <stdlib.h>
+#include <string.h>
+
 typedef enum __CPU_EXCEPTIONS
 {
    X_ZERO_DIVIDE=0, X_DOUBLE_FAULT=8, X_RANGE_BOUND=5, 

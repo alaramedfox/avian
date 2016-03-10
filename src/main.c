@@ -48,18 +48,18 @@ void avian_main(void)
    print("AnicaFS: Allocation of Nodes by Indexed Cluster Addresses\n");
    int time = clock();
    
-   anica_format_device(2880, 512, 1);
+   //anica_format_device(2880, 512, 1);
 
    volume_t* floppy = mount(fda);
-   file_t* file = open(floppy, "FILE.TXT", LINDA_WRITE);
+   file_t* file = open(floppy, "TEST.TXT", LINDA_WRITE);
    
-   char* str = (char*) malloc(15);
+   char* str;
    
    read(file, (char*)str, 15);
    
    print("Contents of file: "); print(str); print("\n");
    unmount(floppy);
-   print("\nTest complete after "); print(itoa(clock()-time,DEC)); print("ms\n");
+   print("\nTest complete after "); iprint(clock()-time,DEC); print("ms\n");
 
    while(main_loop());
    

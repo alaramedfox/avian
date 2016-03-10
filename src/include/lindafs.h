@@ -20,10 +20,10 @@
 
 enum __LINDA_TABLE_TYPE
 {
-   LINDA_DIR,
-   LINDA_FILE,
-   LINDA_DATA,
-   LINDA_FREE,
+   LINDA_DIR = 'D',
+   LINDA_FILE = 'F',
+   LINDA_DATA = 'C',
+   LINDA_FREE = 'A',
 };
 
 enum __LINDA_BOUNDS
@@ -68,25 +68,24 @@ enum __LINDA_ERRORS
  
 typedef struct __LINDA_ENTRY
 {
+   char    start;
    byte    type;    // Type of data (file, dir, etc)
-   byte   size;    // Size of data in clusters
-   word  uuid;    // Unique identifier
+   byte    size;    // Size of data in clusters
    dword   addr;    // Byte address of cluster
+   char    end;     // Ending byte
 
 } FLAT lentry_t;
 
 typedef struct __LINDA_NODE
 {
-   char start;
    char name[12];    // ASCII Name of node
    word permit;      // Access permissions
-   dword timestamp;  // Creation time
+   dword ctime;      // Creation time
+   dword atime;      // Access time
    index_t parent;   // Index of parent directory
    index_t self;     // Index of this object
    index_t data;     // Index of content data
    size_t size;      // Size of content data
-   byte misc[2];     // Misc. free bytes
-   char end;
 
 } FLAT lnode_t;
 
@@ -108,9 +107,9 @@ typedef struct __LINDA_SUPERBLOCK
    byte   jump[3];      // Jump instructions
    char   uuid[7];      // "LindaFS"
    char   label[16];    // String containing the filesystem label
-   dword  volume_size;   // Size of volume in blocks
-   dword  sector_size;   // Size of sector in bytes (should be 512)
-   dword  reserved;      // Number of reserved sectors (for bootloader)
+   dword  volume_size;  // Size of volume in blocks
+   dword  sector_size;  // Size of sector in bytes (should be 512)
+   dword  reserved;     // Number of reserved sectors (for bootloader)
    dword  table_addr;   // Sector number of the first index table
    dword  table_size;   // Maximum number of table entries
    dword  root;         // Table index of the root directory (should be 0)

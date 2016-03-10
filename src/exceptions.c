@@ -15,7 +15,7 @@
 #include <stdlib.h>
 
 #define FAULT(str)   print("\n\tError: "); print(str);
-#define VALUE(val)   print("\n\tStack: "); print(itoa(val,HEX));
+#define VALUE(val)   print("\n\tStack: "); iprint(val,16);
 
 void exceptions_init(void)
 {

@@ -8,11 +8,13 @@
 
 #include <stdlib.h>
 
-typedef enum __BASE
-{
-   DEC=10, HEX=16, OCT=8, BIN=2, BYTES=-1, BOOLEAN=0,
-   
-} base_t;
+#define ASSERT(expr)       \
+   print("[ ");            \
+   vga_setcolor(0x05);     \
+   print(__func__);        \
+   vga_setcolor(0x07);     \
+   print(" ] ");           \
+   expr
 
 typedef union __PAIR16
 {
@@ -33,8 +35,5 @@ void wait_spin(bool);
 
 void notify(const char[]);
 void notify_progress(const char[], int, int);
-
-char* itoa(int,base_t);
-char* itoa_bytes(int32_t);
  
 #endif
