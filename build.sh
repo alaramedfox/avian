@@ -18,7 +18,7 @@ BIN="bin"
 CFLAGS=" -m32 -ffreestanding -fno-exceptions -std=c99 "
 CINC=" -Isrc/drivers -Isrc/include -Isrc/asm "
 #CWARN=" -Wall -Werror -Wfatal-errors "
-CWARN=" "
+CWARN=" -Wfatal-errors "
 
 SOURCES=(" src src/asm")
 

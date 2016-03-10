@@ -1,11 +1,9 @@
 #define MAIN_C_SOURCE
 /* 
- *		Avian Kernel - Bryan Webb
- *	  	File:		main.c
- *	  	Purpose:	Main loop, definitions, and primary entry point.
+ *      Avian Kernel - Bryan Webb
+ *        File:      main.c
+ *        Purpose:   Main loop, definitions, and primary entry point.
  */
- 
-#define DEBUGMODE
 
 #include <stdlib.h>
 #include <string.h>
@@ -29,66 +27,65 @@ void bootscreen(void);
 
 void init(void) 
 {
-	exceptions_init();
-	hide_cursor();
-	vga_setcolor(0x07);
-	pic_init();
-	time_init(1000);	//Init clock to measure milliseconds
-	ENVAR_init();		//Init global values
-	kb_init();			//Init keyboard driver
-	floppy_init();
-	ENVAR.FLAGS.listen = false;
-	
-	print("\nSystem booted.\n\n");
+   exceptions_init();
+   hide_cursor();
+   vga_setcolor(0x07);
+   pic_init();
+   time_init(1000);   //Init clock to measure milliseconds
+   ENVAR_init();      //Init global values
+   kb_init();         //Init keyboard driver
+   floppy_init();
+   ENVAR.FLAGS.listen = false;
+   
+   print("\nSystem booted.\n\n");
 }
 
 void avian_main(void) 
 {
-	bootscreen();
-	init();
+   bootscreen();
+   init();
 
-	print("Testing DOSFS library\n");
-	int time = clock();
-	
-	
-	//linda_format_device(2880, 512, 1, 1);
+   print("AnicaFS: Allocation of Nodes by Indexed Cluster Addresses\n");
+   int time = clock();
+   
+   //anica_format_device(2880, 512, 1);
 
    volume_t* floppy = mount(fda);
-   file_t* file = open(floppy, "TEST.TXT", 4);
+   file_t* file = open(floppy, "TEST.TXT", LINDA_WRITE);
    
-   char* str = (char*) malloc(15);
+   char* str;
    
    read(file, (char*)str, 15);
    
    print("Contents of file: "); print(str); print("\n");
+   unmount(floppy);
+   print("\nTest complete after "); iprint(clock()-time,DEC); print("ms\n");
 
-	print("\nTest complete after "); print(itoa(clock()-time,DEC)); print("ms\n");
-
-	while(main_loop());
-	
-	
-	vga_clear();
-	print("Kernel has shut down\n");
-	
+   while(main_loop());
+   
+   
+   vga_clear();
+   print("Kernel has shut down\n");
+   
 }
 
 bool main_loop(void)
 {
-	return true;
+   return true;
 }
 
 void bootscreen(void)
 {
-	vga_setcolor(0x07);
-	vga_clear();
-	vga_setcolor(C_BLUESCR);
+   vga_setcolor(0x07);
+   vga_clear();
+   vga_setcolor(C_BLUESCR);
 
-	int location = vga_getloc();
-	for(size_t i=0; i<80; i++) 	{ addch(HLINE1); }
-	vga_moveptr(location+4);
-	print("[ Avian Kernel version " VERSION " ]\n\n");
-	
-	vga_setcolor(0x07);
+   int location = vga_getloc();
+   for(size_t i=0; i<80; i++)    { addch(HLINE1); }
+   vga_moveptr(location+4);
+   print("[ Avian Kernel version " VERSION " ]\n\n");
+   
+   vga_setcolor(0x07);
 }
 
 

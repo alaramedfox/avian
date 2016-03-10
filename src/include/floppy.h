@@ -1,9 +1,9 @@
 #ifndef FLOPPY_H_INCLUDED
 #define FLOPPY_H_INCLUDED
 // ======================================================================== */
-//		Avian Kernel   Bryan Webb (C) 2016
-//		File:		      avian/drivers/floppy.h
-//		Purpose:	      Header for the floppy controller
+//      Avian Kernel   Bryan Webb (C) 2016
+//      File:            avian/drivers/floppy.h
+//      Purpose:         Header for the floppy controller
 // ======================================================================== */
 
 #include <stdlib.h>
@@ -11,7 +11,7 @@
 /* Floppy CHS Address datatype */
 typedef struct __CHS
 {
-	word cyl, head, sect;
+   word cyl, head, sect;
 
 } chs_t;
 

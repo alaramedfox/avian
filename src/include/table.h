@@ -1,45 +1,45 @@
 #ifndef TABLE_H_INCLUDED
 #define TABLE_H_INCLUDED
 // ======================================================================== */
-//		Avian Kernel   Bryan Webb (C) 2016
-//		File:		      avian/include/table.h
-//		Purpose:	      Manage tables of data
+//      Avian Kernel   Bryan Webb (C) 2016
+//      File:            avian/include/table.h
+//      Purpose:         Manage tables of data
 // ======================================================================== */
  
 #include <stdlib.h>
 
 /**
- *  	Definition of the different types 
- *		of data, for searching purposes 
+ *     Definition of the different types 
+ *      of data, for searching purposes 
  */
  
 enum __ENTRY_TYPES
 {
-	RAM_TABLE, 	// Table type for addressable memory
-	
+   RAM_TABLE,    // Table type for addressable memory
+   
 };
 
 /**
- * 	Each table entry is 8 bytes, and contains
- *		the starting address of the structure and
- *		the allocated size. These structures are
- *		NOT controlled by `malloc'!
+ *    Each table entry is 8 bytes, and contains
+ *      the starting address of the structure and
+ *      the allocated size. These structures are
+ *      NOT controlled by `malloc'!
  */
  
 typedef struct __ENTRY
 {
-	addr_t 	start;	// Starting address of entry
-	size_t	size;		// Size of element
-	
+   addr_t    start;   // Starting address of entry
+   size_t   size;      // Size of element
+   
 } FLAT entry_t;
 
 /* Table list */
 typedef struct __TABLE
 {
-	byte info;
-	size_t size;
-	size_t max;
-	entry_t *entry;
+   byte info;
+   size_t size;
+   size_t max;
+   entry_t *entry;
 
 } FLAT table_t;
 

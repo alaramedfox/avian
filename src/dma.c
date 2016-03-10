@@ -37,21 +37,21 @@ static void __dma_xfer(byte channel, byte page, uint32_t offset, uint32_t length
 
 void dma_xfer(byte channel, addr_t address, size_t length, bool read)
 {
-	byte page=0, mode=0;
-	uint32_t offset = 0;
-	
-	if(read)
-		mode = 0x48 + channel;
-	else
-		mode = 0x44 + channel;
-		
-	page = address >> 16;
-	offset = address & 0xFFFF;
-	length--;
-	
-	__dma_xfer(channel, page, offset, length, mode);	
-}	
-		
+   byte page=0, mode=0;
+   uint32_t offset = 0;
+   
+   if(read)
+      mode = 0x48 + channel;
+   else
+      mode = 0x44 + channel;
+      
+   page = address >> 16;
+   offset = address & 0xFFFF;
+   length--;
+   
+   __dma_xfer(channel, page, offset, length, mode);   
+}   
+      
 
 static void __dma_xfer(byte channel, byte page, uint32_t offset, uint32_t length, byte mode)
 {
