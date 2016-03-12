@@ -84,26 +84,12 @@ bool anica_write_superblock(byte device, lsuper_t* superblock)
 
 bool anica_format_device(size_t sec, size_t bps, size_t res)
 {
-   byte* zero = (byte*) calloc(512*18, 1);
-
-   print("Zeroing first track\n");
-   floppy_write_block(0, zero, 512*18);
-   free(zero);
    
    /* Format the superblock */
    print("Formatting superblock\n");
    volume_t* vol = new(volume_t);
    anica_format_sb(&vol->sb, sec, bps, res);
    vol->itable = (lentry_t*) malloc(vol->sb.table_size * sizeof(lentry_t));
-   
-   /* Format reserved sectors */
-   foreach(i, vol->sb.reserved) {
-      byte* res = (byte*) malloc(512);
-      foreach(j, 512) res[j] = '-';
-      memcpy(res, "This sector is reserved for boot code", 37);
-      floppy_write_block(i+1, res, 512);
-      free(res);
-   }
    
    /* Create root directory */
    notify("Creating root directory\n");
@@ -152,10 +138,10 @@ int anica_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file)
       memcpy(node->name, filename, 12);
       node->parent = 0; // Still assuming root dir for now
       node->permit = 0xC0DE;
-      node->self = vol->sb.entries++;
-      node->data = vol->sb.entries++;
+      node->self = vol->sb.entries+1;
+      node->data = vol->sb.entries+2;
       node->ctime = clock();
-      node->size = 128;
+      node->end = ';';
       
       /* Copy file node to the provided node structure */
       //memcpy(file, node, sizeof(lnode_t));
@@ -163,35 +149,32 @@ int anica_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file)
       
       /* Create table entry for file node */
       lentry_t* file_entry = new(lentry_t);
-      file_entry->start = '{';
       file_entry->type = ANICA_FILE;
-      file_entry->size = 32;
-      file_entry->addr = anica_find_block(vol, 32);
-      file_entry->end = '}';
+      file_entry->size = sizeof(lnode_t);
+      file_entry->addr = anica_find_block(vol, sizeof(lnode_t));
+      file_entry->end = ';';
       vol->itable[node->self] = *(file_entry);
+      vol->sb.entries++;
       
       /* Create table entry for file data */
       lentry_t* data_entry = new(lentry_t);
-      data_entry->start = '{';
       data_entry->type = ANICA_DATA;
-      data_entry->size = 128;
-      data_entry->addr = anica_find_block(vol, 128);
-      data_entry->end = '}';
+      data_entry->size = 12;
+      data_entry->addr = anica_find_block(vol, 12);
+      data_entry->end = ';';
       
       /* Add data entry to index table */
       vol->itable[node->data] = *(data_entry);
-      
-      /* Create actual file data */
-      byte* data = (byte*) calloc(128, 1);
-      memcpy(data, "Empty file", 12);
-      data[12] = EOF;
+      vol->sb.entries++;
+
       
       /* Write data to disk */
       anica_write_node(vol, file_entry, node);
-      anica_write_file(vol, data, node);
+      char* message = new_str("Empty File");
+      anica_write_file(vol, message, node);
       
       /* De-allocate used memory */
-      free(data);
+      free(message);
       free(data_entry);
       free(file_entry);
       free(node);
@@ -204,15 +187,17 @@ int anica_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file)
 
 int anica_read_file(volume_t* vol, byte* data, lnode_t* node)
 {
+
    size_t bytes = vol->itable[node->data].size;
    dword address = vol->itable[node->data].addr;
    byte* buffer = (byte*) malloc(bytes);
    anica_read_data(vol, address, buffer, bytes);
+   
    for(int i=0; buffer[i] != EOF; i++) {
       data[i] = buffer[i];
    }
+   
    free(buffer);
-   node->atime = clock();
    return 0;
 }
 
@@ -221,6 +206,16 @@ int anica_write_file(volume_t* vol, byte* data, lnode_t* node)
    size_t bytes = vol->itable[node->data].size;
    dword address = vol->itable[node->data].addr;
    
+   size_t datasize = ptrsize(data)+2;
+   /* If the file will be larger, re-allocate the file */
+   if(datasize > bytes) {
+      address = anica_find_block(vol, datasize);
+      bytes = datasize;
+      vol->itable[node->data].size = bytes;
+      vol->itable[node->data].addr = address;
+      anica_write_node(vol, &vol->itable[node->data], node);
+   }
+   data[bytes-1] = EOF;
    anica_write_data(vol, address, data, bytes);
    return 0;
 }
@@ -236,10 +231,10 @@ static addr_t anica_write_data(volume_t* vol, addr_t addr, byte* data, size_t by
    dword sector = addr / vol->sb.sector_size;
    dword offset = addr % vol->sb.sector_size;
    
-   byte* block = (byte*) malloc(512);
-   floppy_read_block(sector, block, 512);
+   byte* block = (byte*) malloc(1024);
+   floppy_read_block(sector, block, 1024);
    memcpy(block+offset, data, bytes);
-   floppy_write_block(sector, block, 512);
+   floppy_write_block(sector, block, 1024);
    free(block);
    
    return addr;
@@ -247,14 +242,15 @@ static addr_t anica_write_data(volume_t* vol, addr_t addr, byte* data, size_t by
 
 static addr_t anica_read_data(volume_t* vol, addr_t addr, byte* data, size_t bytes)
 {
-   //print("Reading "); iprint(bytes,DEC); 
-   //print(" bytes from address "); iprint(addr,HEX);
-   //print("\n");
+   print("Reading "); //iprint(bytes,DEC); 
+   //print(" bytes from address "); //iprint(addr,HEX);
+   print("\n");
+   //char longinstruction[] = "This is a long instruction, lets see what will happen!\n";
    dword sector = addr / vol->sb.sector_size;
    dword offset = addr % vol->sb.sector_size;
    
-   byte* block = (byte*) malloc(512);
-   floppy_read_block(sector, block, 512);
+   byte* block = (byte*) malloc(1024);
+   floppy_read_block(sector, block, 1024);
    memcpy(data, block+offset, bytes);
    free(block);
    
@@ -292,9 +288,7 @@ static char* anica_filename(const char path[])
 
 static void anica_format_sb(lsuper_t* superblock, size_t sec, size_t bps, size_t res)
 {
-   const byte jump[3] = { 0xeb, 0x3c, 0x90 };
    
-   memcpy(superblock->jump, jump, 3);
    memcpy(superblock->uuid, "AnicaFS", 7);
    memcpy(superblock->label, "(No Label      )", 16);
    superblock->volume_size = sec;
@@ -304,8 +298,18 @@ static void anica_format_sb(lsuper_t* superblock, size_t sec, size_t bps, size_t
    superblock->table_size = 64;
    superblock->root = 0;
    superblock->entries = 0;
-   
-   anica_write_superblock(0, superblock);
+/*
+   memcpy(superblock->uuid, "AnicaFS", 7);
+   memcpy(superblock->label, "(No Label      )", 16);
+   superblock->volume_size = sec - res;
+   superblock->sector_size = bps;
+   superblock->reserved = res;
+   superblock->table_addr = res+1;
+   superblock->table_size = 64;
+   superblock->root = 0;
+   superblock->entries = 0;
+*/
+   //anica_write_superblock(0, superblock);
 }
 
 static bool anica_mkdir(volume_t* vol, char* name, word parent)
@@ -321,17 +325,17 @@ static bool anica_mkdir(volume_t* vol, char* name, word parent)
    dir.permit = 0xC0DE;
    dir.ctime = clock();
    dir.parent = parent;
-   dir.self = vol->sb.entries++;  
+   dir.self = vol->sb.entries++;
    dir.data = 0;
+   dir.end = ';';
    
    print("Creating table entry\n");
    /* Create table entry for the directory */
    lentry_t entry;
-   entry.start = '{';
    entry.type = ANICA_DIR;
-   entry.size = 32;
-   entry.addr = anica_find_block(vol, 32);
-   entry.end = '}';
+   entry.size = sizeof(lnode_t);
+   entry.addr = anica_find_block(vol, sizeof(lnode_t));
+   entry.end = ';';
    vol->itable[dir.self] = entry;
 
    anica_write_node(vol, &entry, &dir);
@@ -394,7 +398,6 @@ static bool anica_is_addr_free(volume_t* vol, addr_t addr)
       }
       else continue;
    }
-   
    return true;
 }
  
@@ -408,11 +411,9 @@ static bool anica_block_fits(volume_t* vol, addr_t addr, size_t size)
       ++bs;
       if(bs >= size) return true;
    }
-   
    return false;
 }
 
-#if NEW_SEARCH
 static dword anica_find_block(volume_t* vol, size_t size)
 {
    addr_t search_start = (512*vol->sb.table_addr + vol->sb.table_size*sizeof(lentry_t));
@@ -428,20 +429,6 @@ static dword anica_find_block(volume_t* vol, size_t size)
 
    return -1;
 }
-
-#else
-static dword anica_find_block(volume_t* vol)
-{
-   dword start = (512*vol->sb.table_addr + vol->sb.table_size*sizeof(lentry_t));
-   dword address = start;
-   
-   /* Sum up each cluster size */
-   foreach(i, vol->sb.entries) {
-      address += vol->itable[i].size;
-   }
-   return address;
-}
-#endif
 
 
 

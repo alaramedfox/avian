@@ -12,6 +12,13 @@
 static const char place_value[] = "0123456789ABCDEF";
 static const char bytes_magnitude[] = "BKMGTP";
 
+char* new_str(const char str[])
+{
+   char* newstr = (char*) malloc(strlen(str));
+   memcpy(newstr, str, strlen(str));
+   return newstr;
+}  
+
 static inline void itoa_bytes(int number, char str[])
 {
    int magnitude = 0;

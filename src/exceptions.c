@@ -53,14 +53,14 @@ static void line_panic_screen(void)
 
 void catch_exception(void)
 {
-   panic_screen();
+   line_panic_screen();
    FAULT("Unknown exception");
    while(true);
 }
 
 void catch_double_fault(int arg)
 {
-   panic_screen();
+   line_panic_screen();
    FAULT("Double Fault");
    VALUE(arg);
    while(true);

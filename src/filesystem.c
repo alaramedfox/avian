@@ -40,27 +40,15 @@ file_t* open(volume_t* device, const char path[], byte mode)
    return file;
 }
 
-static size_t file_io(file_t* file, void* data, size_t bytes, bool read)
+size_t read(file_t* file)
 {
-   size_t bc = 0; // Number of bytes transferred
-
-   if(read) {
-      anica_read_file(file->vol, (byte*)data, file->node);
-   }
-   else {
-      
-   }
-   return bc;
+   anica_read_file(file->vol, file->data, file->node);
 }
 
-size_t read(file_t* file, void* data, size_t bytes)
+size_t write(file_t* file, void* data)
 {
-   return file_io(file, data, bytes, true);
-}
-
-size_t write(file_t* file, void* data, size_t bytes)
-{
-   return file_io(file, data, bytes, false);
+   byte* bdata = (byte*) data;
+   anica_write_file(file->vol, bdata, file->node);
 }
 
 void close(file_t* file)

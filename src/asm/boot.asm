@@ -22,7 +22,7 @@ section .text
 ; END .text
 	
 section .bss
-	resb 8192					; 8KB for stack
+	resb 8192					; 8 KiB for stack
 	
 	__stack:
 

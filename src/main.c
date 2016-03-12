@@ -48,16 +48,22 @@ void avian_main(void)
    int time = clock();
    
    anica_format_device(2880, 512, 1);
-
+   
    volume_t* floppy = mount(fda);
    file_t* file = open(floppy, "TEST.TXT", ANICA_WRITE);
    
-   char* str;
+   read(file);
+   print("Contents of file: `"); print(file->data); print("'\n");
    
-   read(file, (char*)str, 15);
+   char* newcontent = new_str("This is the new file content");
+   write(file, newcontent);
+   free(newcontent);
    
-   print("Contents of file: `"); print(str); print("'\n");
+   read(file);
+   print("Contents of file: `"); print(file->data); print("'\n");
+   
    unmount(floppy);
+   
    print("\nTest complete after "); iprint(clock()-time,DEC); print("ms\n");
 
    while(main_loop());

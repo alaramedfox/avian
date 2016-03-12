@@ -136,7 +136,8 @@ void floppy_init(void)
       notify("Detected 82077AA floppy controller\n");
    }
    else {
-      notify("Unsupported floppy controller\n");
+      notify("Unsupported floppy controller: ");
+      iprint(version, HEX); print("\n");
       return;
    }
    

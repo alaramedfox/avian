@@ -62,9 +62,8 @@ enum __ANICA_ERRORS
  
 typedef struct __ANICA_ENTRY
 {
-   char    start;
    byte    type;    // Type of data (file, dir, etc)
-   byte    size;    // Size of data in clusters
+   word    size;    // Size of data in bytes
    dword   addr;    // Byte address of cluster
    char    end;     // Ending byte
 
@@ -75,20 +74,12 @@ typedef struct __ANICA_NODE
    char name[12];    // ASCII Name of node
    word permit;      // Access permissions
    dword ctime;      // Creation time
-   dword atime;      // Access time
    index_t parent;   // Index of parent directory
    index_t self;     // Index of this object
    index_t data;     // Index of content data
-   size_t size;      // Size of content data
+   char end;
 
 } FLAT lnode_t;
-
-typedef struct __ANICA_CLUSTER
-{
-   byte data[31];    // 31 bytes of cluster data
-   byte end;         // Byte that flags cluster info
-
-} FLAT lcluster_t;
 
 /**
  *      Structure containing the Linda FS superblock data
@@ -98,8 +89,7 @@ typedef struct __ANICA_CLUSTER
  */
 typedef struct __ANICA_SUPERBLOCK
 {   
-   byte   jump[3];      // Jump instructions
-   char   uuid[7];      // "LindaFS"
+   char   uuid[7];      // "AnicaFS"
    char   label[16];    // String containing the filesystem label
    dword  volume_size;  // Size of volume in blocks
    dword  sector_size;  // Size of sector in bytes (should be 512)

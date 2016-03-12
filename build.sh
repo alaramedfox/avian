@@ -69,6 +69,7 @@ function main {
 			"-h") OPTIONS+=" -h " ;;
 			"-l") OPTIONS+=" -l " ;;
 			"-make") OPTIONS+=" -make " ;;
+			"-write") OPTIONS+=" -write " ;;
 			"-run") OPTIONS+=" -run " ;;
 			*) TARGET+=" $i " ;;
 		esac
@@ -81,6 +82,7 @@ function main {
 			"-h") printhelp ;;
 			"-l") link ;;
 			"-make") make_all;;
+			"-write") update ;;
 			"-run") run ;;
 			*) printf "$WARN Unknown option '$i'\n" ;;
 		esac
@@ -128,7 +130,7 @@ function link {
 			OLDSIZE=0
 		fi
 		#BINARY=`echo $i | grep "alpha\|beta\|stable"`
-		ld -m elf_i386 -A i386 -T linker.ld -o bin/kernel-alpha obj/*.o
+		ld -m elf_i386 -A i386 -T linker.ld -o bin/kernel-alpha obj/*.o -Map kernel.map
 		NEWSIZE=$(stat -c%s "bin/kernel-alpha")
 		
 		printf "$INFO Generated binary bin/kernel-alpha ($NEWSIZE bytes)\n"
@@ -136,10 +138,22 @@ function link {
 		#return
 	#done
 }
+LOCAL="1"
+function update {
+   LOCAL="0"
+   sudo mount -o loop bootgrub.img /media/floppy
+   sudo cp bin/kernel-alpha /media/floppy/boot/avian.bin
+   sudo umount /media/floppy
+}
 
 function run {
-	printf "$INFO Executing kernel-alpha with QEMU...\n"
-	qemu-system-i386 -kernel bin/kernel-alpha -fda test.img --no-kvm
+   if [ $LOCAL = "1" ]; then
+      printf "$INFO Executing kernel-alpha with QEMU...\n"
+      qemu-system-i386 -kernel bin/kernel-alpha -fda test.img --no-kvm
+   else
+	   printf "$INFO Executing grub-test.img with QEMU...\n"
+	   qemu-system-i386 -fda bootgrub.img --no-kvm
+	fi
 	return
 }
 

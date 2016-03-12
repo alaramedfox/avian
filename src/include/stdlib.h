@@ -55,6 +55,7 @@ void*      calloc(size_t nitems, size_t size) __attribute__ ((malloc));
 void      free(void *ptr);
 void*      malloc(size_t size) __attribute__ ((malloc));
 void*      realloc(void *ptr, size_t size);
+size_t     ptrsize(void *ptr);
 
 typedef struct __DIV
 {
