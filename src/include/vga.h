@@ -33,6 +33,7 @@ size_t vga_getcol   (void);          //Safely return the current column of the c
 size_t vga_getrow   (void);          //Safely return the current row of cursor
 size_t vga_getloc (void);            //Safely return the 1D vptr location
 void   vga_setcolor (color_t);
+int    vga_tabsize  (int);
 
 /* Screen manipulation */
 void vga_scroll   (void);            //Scrolling screen support

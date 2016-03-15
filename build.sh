@@ -16,7 +16,7 @@ OBJ="obj"
 BIN="bin"
 
 CFLAGS=" -m32 -ffreestanding -fno-exceptions -std=c99 "
-CINC=" -Isrc/drivers -Isrc/include -Isrc/asm "
+CINC=" -Isrc/include -Isrc/asm "
 #CWARN=" -Wall -Werror -Wfatal-errors "
 CWARN=" -Wfatal-errors "
 
@@ -71,6 +71,7 @@ function main {
 			"-make") OPTIONS+=" -make " ;;
 			"-write") OPTIONS+=" -write " ;;
 			"-run") OPTIONS+=" -run " ;;
+			"-dev") OPTIONS+=" -dev " ;;
 			*) TARGET+=" $i " ;;
 		esac
 	done
@@ -84,6 +85,7 @@ function main {
 			"-make") make_all;;
 			"-write") update ;;
 			"-run") run ;;
+			"-dev") DEV="1" ;;
 			*) printf "$WARN Unknown option '$i'\n" ;;
 		esac
 	done
@@ -141,8 +143,10 @@ function link {
 LOCAL="1"
 function update {
    LOCAL="0"
-   sudo mount -o loop bootgrub.img /media/floppy
-   sudo cp bin/kernel-alpha /media/floppy/boot/avian.bin
+   printf "$INFO Writing kernel image to floppy\n"
+   #dd if=bin/kernel-alpha of=boot-floppy.img seek=200 conv=notrunc
+   sudo mount -o loop test.img /media/floppy
+   sudo cp bin/kernel-alpha /media/floppy/boot/kernel-alpha
    sudo umount /media/floppy
 }
 
@@ -152,7 +156,7 @@ function run {
       qemu-system-i386 -kernel bin/kernel-alpha -fda test.img --no-kvm
    else
 	   printf "$INFO Executing grub-test.img with QEMU...\n"
-	   qemu-system-i386 -fda bootgrub.img --no-kvm
+	   qemu-system-i386 -fda boot-floppy.img --no-kvm
 	fi
 	return
 }

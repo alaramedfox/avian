@@ -9,6 +9,7 @@
 #include <asmfunc.h>
  
 static vga_t * const vga = (vga_t*)0xb8000;
+static int TABSIZE = 5;
 
 void move_cursor(byte row, byte col)
 {
@@ -27,21 +28,23 @@ void hide_cursor(void)
    move_cursor(25,0);
 }
 
-void     vga_increment(void)      { vga->vptr++; }
-void     vga_decrement(void)      { vga->vptr--; }
-size_t vga_getcol(void)       { return vga->vptr % VGA_COL; }
-size_t vga_getrow(void)       { return vga->vptr / VGA_COL; }
-size_t vga_getloc(void)       { return vga->vptr; }
-void    vga_setcolor(color_t c){ vga->color = c; }
-void     vga_newline(void)      { vga_movexy(vga_getrow()+1,0); }
-void     vga_creturn(void)       { vga_movexy(vga_getrow(), 0); }
+int     vga_tabsize(int i)       { TABSIZE = i?i:TABSIZE; return TABSIZE; }
+void    vga_increment(void)      { vga->vptr++; }
+void    vga_decrement(void)      { vga->vptr--; }
+size_t  vga_getcol(void)         { return vga->vptr % VGA_COL; }
+size_t  vga_getrow(void)         { return vga->vptr / VGA_COL; }
+size_t  vga_getloc(void)         { return vga->vptr; }
+void    vga_setcolor(color_t c)  { vga->color = c; }
+void    vga_newline(void)        { vga_movexy(vga_getrow()+1,0); }
+void    vga_creturn(void)        { vga_movexy(vga_getrow(), 0); }
 
 void vga_tabchar(void) 
 {
-   int spaces = vga_getcol() % 5;
-   if(spaces == 0) spaces = 5;
+   int spaces = TABSIZE - (vga_getcol() % TABSIZE);
+   if(spaces == 0) spaces = TABSIZE;
    
    foreach(i, spaces) {
+      if(vga_getcol() == 79) break;
       vga_write(' ');
       vga_increment();
    }

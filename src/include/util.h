@@ -8,13 +8,7 @@
 
 #include <stdlib.h>
 
-#define ASSERT(expr)       \
-   print("[ ");            \
-   vga_setcolor(0x05);     \
-   print(__func__);        \
-   vga_setcolor(0x07);     \
-   print(" ] ");           \
-   expr
+#define ASSERT(expr) trace_function(__func__); expr
 
 typedef union __PAIR16
 {
@@ -32,7 +26,9 @@ typedef union __PAIR32
 
 void print_time(void);
 void wait_spin(bool);
+void types_test(void);
 
+void trace_function(char* function);
 void notify(const char[]);
 void notify_progress(const char[], int, int);
  

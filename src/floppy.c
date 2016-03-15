@@ -81,6 +81,7 @@ enum __MSR
 
 /* Private variables */
 static volatile bool floppy_irq_recieved = false;
+static bool floppy_supported;
 static byte floppy_dor_status;
 static byte floppy_status;
 static byte floppy_current_track;
@@ -88,30 +89,30 @@ static byte floppy_io_buffer[7];
 static byte floppy_motor_count=0;
 
 /* Private functions */
-static void floppy_sense_interrupt(void);
-static void floppy_configure(void);
-static void floppy_specify(byte,byte,byte);
-static bool floppy_data_transfer(int,byte*,size_t,bool);
+static void  floppy_sense_interrupt(void);
+static void  floppy_configure(void);
+static void  floppy_specify(byte,byte,byte);
+static int   floppy_data_transfer(int,byte*,size_t,bool);
 static int   floppy_seek(byte);
-static void   floppy_recalibrate(void);
-static void floppy_reset(void);
-static bool floppy_command_wait(int);
-static void   floppy_start_motor(int);
-static void   floppy_stop_motor(int);
-static int    floppy_send_byte(byte);
-static byte   floppy_read_byte(void);
+static void  floppy_recalibrate(void);
+static void  floppy_reset(void);
+static bool  floppy_command_wait(int);
+static void  floppy_start_motor(int);
+static void  floppy_stop_motor(int);
+static int   floppy_send_byte(byte);
+static int   floppy_read_byte(byte*);
 static chs_t lba_convert(int);
 
 // ========================================================================= //
 //           Public API Definitions                                          //
 // ========================================================================= //
 
-bool floppy_write_block(word lba, byte *block, size_t bytes)
+int floppy_write_block(word lba, byte *block, size_t bytes)
 {
    return floppy_data_transfer(lba, block, bytes, false);
 }
 
-bool floppy_read_block(word lba, byte *block, size_t bytes)
+int floppy_read_block(word lba, byte *block, size_t bytes)
 {
    return floppy_data_transfer(lba, block, bytes, true);
 }
@@ -130,21 +131,24 @@ void floppy_init(void)
    pic_enable_irq( IRQ_FLOPPY );
    
    /* Obtain controller version */
-   outportb(FDC_FIFO, VERSION);
-   byte version = inportb(FDC_FIFO);
+   byte version;
+   floppy_send_byte(VERSION);
+   floppy_read_byte(&version);
+   
    if(version == 0x90) {
       notify("Detected 82077AA floppy controller\n");
+      floppy_supported = true;
    }
    else {
-      notify("Unsupported floppy controller: ");
-      iprint(version, HEX); print("\n");
+      notify("Unsupported floppy controller (");
+      iprint(version, HEX); print(")\n");
+      floppy_supported = false;
       return;
    }
-   
    floppy_configure();
    
    floppy_recalibrate();
-   outportb(FDC_FIFO, LOCK);
+   floppy_send_byte(LOCK);
    floppy_reset();
    
    /* Init CCR & DSR for 1.44M Floppies */
@@ -198,8 +202,10 @@ static void floppy_recalibrate(void)
 {
    floppy_start_motor(0);
    
-   outportb(FDC_FIFO, RECALIBRATE);
-   outportb(FDC_FIFO, 0);
+   //outportb(FDC_FIFO, RECALIBRATE);
+   //outportb(FDC_FIFO, 0);
+   floppy_send_byte(RECALIBRATE);
+   floppy_send_byte(0);
    
    if(!floppy_command_wait(3000)) {
       notify("Recalibration failed\n");
@@ -212,14 +218,17 @@ static void floppy_recalibrate(void)
 
 static int floppy_seek(byte track)
 {
-   //ASSERT("floppy_seek() (0/track)", 0, track, DEC);
-   if(floppy_current_track == track) return 0;
+   if(!floppy_supported) return FDC_UNSUP;
+   if(floppy_current_track == track) return FDC_OK;
    
    floppy_start_motor(0);
    
-   outportb(FDC_FIFO, SEEK);
-   outportb(FDC_FIFO, 0);
-   outportb(FDC_FIFO, track);
+   //outportb(FDC_FIFO, SEEK);
+   //outportb(FDC_FIFO, 0);
+   //outportb(FDC_FIFO, track);
+   floppy_send_byte(SEEK);
+   floppy_send_byte(0);
+   floppy_send_byte(track);
    
    volatile byte msr;
    do {
@@ -231,23 +240,22 @@ static int floppy_seek(byte track)
       floppy_sense_interrupt();
       floppy_reset();
       floppy_stop_motor(0);
-      return 1; // IRQ timed out
+      return FDC_TMO; // IRQ timed out
    }
    
    floppy_sense_interrupt();
-   //print("Caught IRQ after "); print(itoa(clock()-time,DEC)); print(" ms\n");
    
    floppy_stop_motor(0);
    
    /* Ensure that the seek worked */
    if(floppy_current_track != track) {
-      return 2; // Track align fail
+      return FDC_IOERR; // Track align fail
    }
    else if(floppy_status != 0x20) {
-      return 3; // Bad status
+      return FDC_STATUS; // Bad status
    }
    else {
-      return 0;
+      return FDC_OK;
    }
 }
 
@@ -274,13 +282,13 @@ static bool floppy_command_wait(int ms)
    
    /* Read in the command result bytes */
    for(int i=0; i<7 && (bitcheck(inportb(FDC_MSR), CB)); i++) {
-      floppy_io_buffer[i] = floppy_read_byte();
+      floppy_read_byte(&floppy_io_buffer[i]);
    }
    floppy_irq_recieved = false;
    return true;
 }
 
-static byte floppy_read_byte(void)
+static int floppy_read_byte(byte* data)
 {
    volatile byte msr;
    
@@ -288,12 +296,13 @@ static byte floppy_read_byte(void)
    while(clock() < time+500) {
       msr = inportb(FDC_MSR);
    
-      if((msr & 0xC0) == 0x80) {
-         return inportb(FDC_FIFO);
+      if((msr & 0xC0) == 0xc0) {
+         *data = inportb(FDC_FIFO);
+         return FDC_OK;
       }
       floppy_reset();
    }
-   return 0;
+   return FDC_IOERR;
 }
 
 static int floppy_send_byte(byte data)
@@ -306,26 +315,30 @@ static int floppy_send_byte(byte data)
    
       if((msr & 0xC0) == 0x80) {
          outportb(FDC_FIFO, data);
-         return true;
+         return FDC_OK;
       }
       floppy_reset();
    }   
-   return false;
+   return FDC_IOERR;
 }
+
+#define FLOPPY_IO_PRINT 1
+
+#if FLOPPY_IO_PRINT
 #include <vga.h>
 #include <util.h>
-static bool floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
+#endif
+static int floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
 {
-   bool status = true;
+   bool status = FDC_OK;
    chs_t chs = lba_convert(lba);
    byte *dma_buffer = (byte*) malloc(bytes);
    
-#if 0
-   print("Floppy: ");
-   if(read) print("Reading data from sector ");
-   else print("Writing data to sector ");
+#if FLOPPY_IO_PRINT
+   print("Floppy: Buffer");
+   print( read?" <-- ":" --> " ); print("sector ");
    
-   print(itoa(lba,DEC));
+   iprint(lba,DEC);
    print("\n");
 #endif
    
@@ -346,7 +359,7 @@ static bool floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
    } while(tries && seek_status);
    
    if(seek_status) {
-      status = false;
+      status = seek_status;
       goto exit;
    }
    
@@ -358,10 +371,14 @@ static bool floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
    dma_xfer(2, (addr_t)dma_buffer, bytes, !read);
    
    if(read) {
-      floppy_send_byte(READ_DATA | 0x40);
+      status = floppy_send_byte(READ_DATA | 0x40);
    }
    else {
-      floppy_send_byte(WRITE_DATA | 0x40);
+      status = floppy_send_byte(WRITE_DATA | 0x40);
+   }
+   
+   if(status) {
+      goto exit;
    }
    
    /* Send address information */

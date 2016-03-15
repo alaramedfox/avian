@@ -15,6 +15,15 @@ typedef struct __CHS
 
 } chs_t;
 
+enum __FLOPPY_ERR
+{
+   FDC_OK    = 0, // Sucessful execution
+   FDC_IOERR = 1, // I/O Failure
+   FDC_UNSUP = 2, // Floppy device not supported
+   FDC_TMO   = 3, // IRQ timed out
+   FDC_STATUS = 4, // Bad status value
+};
+
 #define GAP3 0x1B
 
 /* Function called by Interrupt Controller */
@@ -22,8 +31,8 @@ void floppy_handler(void);
  
 /* Public API */
 void floppy_init(void);
-bool floppy_read_block(word, byte*, size_t);
-bool floppy_write_block(word, byte*, size_t);
+int floppy_read_block(word, byte*, size_t);
+int floppy_write_block(word, byte*, size_t);
 
 
 

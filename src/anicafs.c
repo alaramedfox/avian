@@ -28,12 +28,8 @@ enum __ANICA_DEFS
 static void  anica_format_sb(lsuper_t*, size_t,size_t,size_t);
 static bool  anica_mkdir(volume_t*,char*, word);
 
-#define NEW_SEARCH 1
-#if NEW_SEARCH
 static dword anica_find_block(volume_t*, size_t);
-#else
-static dword anica_find_block(volume_t*);
-#endif
+static word  anica_find_superblock(void);
 
 static char* anica_filename(const char path[]);
 static addr_t  anica_read_node(volume_t*, lentry_t*, lnode_t*);
@@ -64,9 +60,12 @@ void anica_dump_entry(volume_t* vol, int i)
 
 bool anica_read_superblock(byte device, lsuper_t* superblock)
 {
+   word sb_sector = anica_find_superblock();
+
    byte* block = (byte*) calloc(512, 1);
-   floppy_read_block(0, block, 512);
+   floppy_read_block(sb_sector, block, 512);
    memcpy(superblock, block, sizeof(lsuper_t));
+   superblock->hidden = sb_sector;
    
    free(block);
    return true;
@@ -75,9 +74,9 @@ bool anica_read_superblock(byte device, lsuper_t* superblock)
 bool anica_write_superblock(byte device, lsuper_t* superblock)
 {
    byte* block = (byte*) calloc(512, 1);
-   floppy_read_block(0, block, 512);
+   floppy_read_block(superblock->hidden, block, 512);
    memcpy(block, superblock, sizeof(lsuper_t));
-   floppy_write_block(0, block, 512);
+   floppy_write_block(superblock->hidden, block, 512);
    free(block);
    return true;
 }
@@ -224,17 +223,28 @@ int anica_write_file(volume_t* vol, byte* data, lnode_t* node)
 //           Private functions                                              //
 // ======================================================================== //
 
+static word anica_find_superblock(void)
+{
+   byte* mbr = (byte*) malloc(512);
+   floppy_read_block(0, mbr, 512);
+   word offset=0;
+   if(mbr[0] != 'A') {
+      /* Found a FAT filesystem */
+      memcpy(&offset, mbr+0x13, 2);
+   }
+   free(mbr);
+   return offset;
+}
+
 static addr_t anica_write_data(volume_t* vol, addr_t addr, byte* data, size_t bytes)
 {
-   print("Writing "); iprint(bytes,DEC); print("bytes to address "); iprint(addr,HEX);
-   print("\n");
    dword sector = addr / vol->sb.sector_size;
    dword offset = addr % vol->sb.sector_size;
    
-   byte* block = (byte*) malloc(1024);
-   floppy_read_block(sector, block, 1024);
+   byte* block = (byte*) malloc(512);
+   floppy_read_block(sector, block, 512);
    memcpy(block+offset, data, bytes);
-   floppy_write_block(sector, block, 1024);
+   floppy_write_block(sector, block, 512);
    free(block);
    
    return addr;
@@ -242,15 +252,11 @@ static addr_t anica_write_data(volume_t* vol, addr_t addr, byte* data, size_t by
 
 static addr_t anica_read_data(volume_t* vol, addr_t addr, byte* data, size_t bytes)
 {
-   print("Reading "); //iprint(bytes,DEC); 
-   //print(" bytes from address "); //iprint(addr,HEX);
-   print("\n");
-   //char longinstruction[] = "This is a long instruction, lets see what will happen!\n";
    dword sector = addr / vol->sb.sector_size;
    dword offset = addr % vol->sb.sector_size;
    
-   byte* block = (byte*) malloc(1024);
-   floppy_read_block(sector, block, 1024);
+   byte* block = (byte*) malloc(512);
+   floppy_read_block(sector, block, 512);
    memcpy(data, block+offset, bytes);
    free(block);
    
@@ -288,28 +294,18 @@ static char* anica_filename(const char path[])
 
 static void anica_format_sb(lsuper_t* superblock, size_t sec, size_t bps, size_t res)
 {
+   word start = anica_find_superblock();
    
    memcpy(superblock->uuid, "AnicaFS", 7);
    memcpy(superblock->label, "(No Label      )", 16);
    superblock->volume_size = sec;
    superblock->sector_size = bps;
+   superblock->hidden = start;
    superblock->reserved = res;
-   superblock->table_addr = res+1;
+   superblock->table_addr = res+start+1;
    superblock->table_size = 64;
    superblock->root = 0;
    superblock->entries = 0;
-/*
-   memcpy(superblock->uuid, "AnicaFS", 7);
-   memcpy(superblock->label, "(No Label      )", 16);
-   superblock->volume_size = sec - res;
-   superblock->sector_size = bps;
-   superblock->reserved = res;
-   superblock->table_addr = res+1;
-   superblock->table_size = 64;
-   superblock->root = 0;
-   superblock->entries = 0;
-*/
-   //anica_write_superblock(0, superblock);
 }
 
 static bool anica_mkdir(volume_t* vol, char* name, word parent)
@@ -370,9 +366,7 @@ int anica_write_itable(volume_t* vol)
    byte* block = (byte*) malloc(512);
    memcpy(block, vol->itable, 512);
    
-   if(!floppy_write_block(sector, block, 512)) {
-      print("Failed to write block\n");
-   }
+   floppy_write_block(sector, block, 512);
    free(block);
    return ANICA_OK;
 }
