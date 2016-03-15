@@ -51,11 +51,11 @@ int      strtol(const char *str, char **endptr, int base);
  *      MEMORY - Defined in mman.c
  */
 #define  new(T) (T*)malloc(sizeof(T))
-void*      calloc(size_t nitems, size_t size) __attribute__ ((malloc));
-void      free(void *ptr);
-void*      malloc(size_t size) __attribute__ ((malloc));
-void*      realloc(void *ptr, size_t size);
-size_t     ptrsize(void *ptr);
+void*    calloc(size_t, size_t)  __attribute__ ((malloc));
+void     free(void*);
+void*    malloc(size_t)          __attribute__ ((malloc));
+void*    realloc(void*, size_t);
+size_t   ptrsize(void*);
 
 typedef struct __DIV
 {

@@ -12,13 +12,6 @@
 #include <vga.h>
 #include <time.h>
 
-
-static const char spin_chars[] = { '|', '/', '-', '\\', };
-static int spin_state=0;
-static bool waiting=false;
-static int loc;
-static char ch;
-
 #define psizeof(T)            \
    vga_setcolor(0x02);        \
    print(#T);                 \
@@ -39,7 +32,7 @@ void types_test(void)
    vga_tabsize(5);
 }
 
-void trace_function(char* function)
+void trace_function(const char function[])
 {
    print("[ ");            
    vga_setcolor(0x05);     

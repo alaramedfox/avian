@@ -28,7 +28,7 @@ void print_time(void);
 void wait_spin(bool);
 void types_test(void);
 
-void trace_function(char* function);
+void trace_function(const char function[]);
 void notify(const char[]);
 void notify_progress(const char[], int, int);
  

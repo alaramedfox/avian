@@ -13,6 +13,7 @@
 #include <buildcount.h>
 #include <util.h>
 #include <stdlib.h>
+#include <trace.h>
 
 #define FAULT(str)   print("\n\tError: "); print(str);
 #define VALUE(val)   print("\n\tStack: "); iprint(val,16);
@@ -44,11 +45,12 @@ static void line_panic_screen(void)
    print("\n");
    int row = vga_getrow();
    vga_setcolor(C_BLUESCR);
-   foreach(i, VGA_COL*2) {
+   foreach(i, VGA_COL*3) {
       print(" ");
    }
    vga_movexy(row, 0);
    print("\tAVIAN Kernel - " TIMESTAMP);
+   print("\n\tIn function `"); print(get_last_function()); print("'");
 }
 
 void catch_exception(void)
@@ -64,6 +66,8 @@ void catch_double_fault(int arg)
    FAULT("Double Fault");
    VALUE(arg);
    while(true);
+   
+   panic_screen();
 }
 
 void catch_zero_divide(void)

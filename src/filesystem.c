@@ -6,6 +6,7 @@
 // ======================================================================== */
 
 #include <filesystem.h>
+#include <trace.h>
 
 #include <stdlib.h>
 #include <util.h>
@@ -20,7 +21,8 @@ enum __PARTITIONS
 };
 
 volume_t* mount(device_t device)
-{
+{  function_call();
+   
    volume_t* volume = new(volume_t);
    anica_read_superblock(device, &volume->sb);
    volume->itable = (lentry_t*) malloc(volume->sb.table_size * 8);
@@ -29,7 +31,8 @@ volume_t* mount(device_t device)
 }
 
 file_t* open(volume_t* device, const char path[], byte mode)
-{
+{  function_call();
+
    file_t* file = new(file_t);
    lnode_t* filenode = new(lnode_t);
    file->node = filenode;
@@ -41,23 +44,29 @@ file_t* open(volume_t* device, const char path[], byte mode)
 }
 
 size_t read(file_t* file)
-{
+{  function_call();
+
    anica_read_file(file->vol, file->data, file->node);
+   return 0;
 }
 
 size_t write(file_t* file, void* data)
-{
+{  function_call();
+
    byte* bdata = (byte*) data;
    anica_write_file(file->vol, bdata, file->node);
+   return 0;
 }
 
 void close(file_t* file)
-{
+{  function_call();
+
    free(file);
 }
 
 void unmount(volume_t* volume)
-{
+{  function_call();
+
    anica_write_superblock(0, &volume->sb);
    anica_write_itable(volume);
    free(volume->itable);

@@ -6,6 +6,8 @@
 // ======================================================================== */
 
 #include <anicafs.h>
+#include <trace.h>
+
 #include <stdlib.h>
 #include <vga.h>
 #include <util.h>
@@ -13,6 +15,7 @@
 #include <floppy.h>
 
 #include <util.h>
+#include <time.h>
 
 enum __ANICA_DEFS
 {
@@ -42,7 +45,8 @@ static addr_t anica_write_data(volume_t*, addr_t, byte*, size_t);
 // ======================================================================== //
 
 void anica_dump_entry(volume_t* vol, int i)
-{
+{  function_call();
+
    vga_setcolor(0x06);
    print("Entry "); iprint(i,DEC); print(": Type=");
    switch(vol->itable[i].type)
@@ -59,7 +63,8 @@ void anica_dump_entry(volume_t* vol, int i)
 }
 
 bool anica_read_superblock(byte device, lsuper_t* superblock)
-{
+{  function_call();
+
    word sb_sector = anica_find_superblock();
 
    byte* block = (byte*) calloc(512, 1);
@@ -72,7 +77,8 @@ bool anica_read_superblock(byte device, lsuper_t* superblock)
 }
 
 bool anica_write_superblock(byte device, lsuper_t* superblock)
-{
+{  function_call();
+
    byte* block = (byte*) calloc(512, 1);
    floppy_read_block(superblock->hidden, block, 512);
    memcpy(block, superblock, sizeof(lsuper_t));
@@ -82,7 +88,7 @@ bool anica_write_superblock(byte device, lsuper_t* superblock)
 }
 
 bool anica_format_device(size_t sec, size_t bps, size_t res)
-{
+{  function_call();
    
    /* Format the superblock */
    print("Formatting superblock\n");
@@ -103,7 +109,8 @@ bool anica_format_device(size_t sec, size_t bps, size_t res)
 }
 
 int anica_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file)
-{
+{  function_call();
+
    int status;
    
    /* For now, assume path is in root directory */
@@ -170,7 +177,7 @@ int anica_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file)
       /* Write data to disk */
       anica_write_node(vol, file_entry, node);
       char* message = new_str("Empty File");
-      anica_write_file(vol, message, node);
+      anica_write_file(vol, (byte*)message, node);
       
       /* De-allocate used memory */
       free(message);
@@ -185,7 +192,7 @@ int anica_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file)
 }
 
 int anica_read_file(volume_t* vol, byte* data, lnode_t* node)
-{
+{  function_call();
 
    size_t bytes = vol->itable[node->data].size;
    dword address = vol->itable[node->data].addr;
@@ -201,7 +208,8 @@ int anica_read_file(volume_t* vol, byte* data, lnode_t* node)
 }
 
 int anica_write_file(volume_t* vol, byte* data, lnode_t* node)
-{  
+{  function_call();
+
    size_t bytes = vol->itable[node->data].size;
    dword address = vol->itable[node->data].addr;
    
@@ -224,7 +232,8 @@ int anica_write_file(volume_t* vol, byte* data, lnode_t* node)
 // ======================================================================== //
 
 static word anica_find_superblock(void)
-{
+{  function_call();
+
    byte* mbr = (byte*) malloc(512);
    floppy_read_block(0, mbr, 512);
    word offset=0;
@@ -237,7 +246,8 @@ static word anica_find_superblock(void)
 }
 
 static addr_t anica_write_data(volume_t* vol, addr_t addr, byte* data, size_t bytes)
-{
+{  function_call();
+
    dword sector = addr / vol->sb.sector_size;
    dword offset = addr % vol->sb.sector_size;
    
@@ -251,7 +261,8 @@ static addr_t anica_write_data(volume_t* vol, addr_t addr, byte* data, size_t by
 }
 
 static addr_t anica_read_data(volume_t* vol, addr_t addr, byte* data, size_t bytes)
-{
+{  function_call();
+
    dword sector = addr / vol->sb.sector_size;
    dword offset = addr % vol->sb.sector_size;
    
@@ -274,7 +285,8 @@ static addr_t anica_write_node(volume_t* vol, lentry_t* entry, lnode_t* node)
 }
 
 static char* anica_filename(const char path[])
-{
+{  function_call();
+
    /* Calculate the length of the file name */
    int name_size = 0;
    while(path[name_size] != '.' && name_size < strlen(path)) 
@@ -293,7 +305,8 @@ static char* anica_filename(const char path[])
 }
 
 static void anica_format_sb(lsuper_t* superblock, size_t sec, size_t bps, size_t res)
-{
+{  function_call();
+
    word start = anica_find_superblock();
    
    memcpy(superblock->uuid, "AnicaFS", 7);
@@ -309,7 +322,8 @@ static void anica_format_sb(lsuper_t* superblock, size_t sec, size_t bps, size_t
 }
 
 static bool anica_mkdir(volume_t* vol, char* name, word parent)
-{
+{  function_call();
+
    bool status = true;
    
    print("Creating directory node\n");
@@ -349,7 +363,8 @@ static bool anica_mkdir(volume_t* vol, char* name, word parent)
  */
 
 int anica_read_itable(volume_t* vol)
-{
+{  function_call();
+
    int sector = vol->sb.table_addr;
    //print("Reading table from sector "); iprint((sector,DEC)); print("\n");
    byte* block = (byte*) malloc(512);
@@ -360,7 +375,8 @@ int anica_read_itable(volume_t* vol)
 }
 
 int anica_write_itable(volume_t* vol)
-{
+{  function_call();
+
    int sector = vol->sb.table_addr;
    //print("Writing table to sector "); iprint((sector,DEC)); print("\n");
    byte* block = (byte*) malloc(512);
@@ -380,7 +396,8 @@ int anica_write_itable(volume_t* vol)
  */
  
 static bool anica_is_addr_free(volume_t* vol, addr_t addr)
-{
+{  function_call();
+
    addr_t start, end;
    foreach(i, vol->sb.entries)
    {
@@ -396,7 +413,8 @@ static bool anica_is_addr_free(volume_t* vol, addr_t addr)
 }
  
 static bool anica_block_fits(volume_t* vol, addr_t addr, size_t size)
-{
+{  function_call();
+   
    size_t bs = 0;
    addr_t max = vol->sb.volume_size * vol->sb.sector_size;
    
@@ -409,7 +427,8 @@ static bool anica_block_fits(volume_t* vol, addr_t addr, size_t size)
 }
 
 static dword anica_find_block(volume_t* vol, size_t size)
-{
+{  function_call();
+
    addr_t search_start = (512*vol->sb.table_addr + vol->sb.table_size*sizeof(lentry_t));
    addr_t max = vol->sb.volume_size * vol->sb.sector_size - vol->sb.sector_size;
    

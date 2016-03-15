@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <trace.h>
 
 #include <vga.h>
 #include <envar.h>
@@ -26,7 +27,9 @@ void bootscreen(void);
 
 void init(void) 
 {
-   types_test();
+   function_call();
+   
+   //types_test();
    exceptions_init();
    hide_cursor();
    vga_setcolor(0x07);
@@ -48,22 +51,22 @@ void avian_main(void)
    print("AnicaFS: Allocation of Nodes by Indexed Cluster Addresses\n");
    int time = clock();
    
-   //anica_format_device(2880, 512, 1);
+   anica_format_device(2880, 512, 1);
    
-   //volume_t* floppy = mount(fda);
-   //file_t* file = open(floppy, "TEST.TXT", ANICA_WRITE);
+   volume_t* floppy = mount(fda);
+   file_t* file = open(floppy, "TEST.TXT", ANICA_WRITE);
    
-   //read(file);
-   //print("Contents of file: `"); print(file->data); print("'\n");
+   read(file);
+   print("Contents of file: `"); print(file->data); print("'\n");
    
-   //char* newcontent = new_str("This is the new file content");
-   //write(file, newcontent);
-   //free(newcontent);
+   char* newcontent = new_str("This is the new file content");
+   write(file, newcontent);
+   free(newcontent);
    
-   //read(file);
-   //print("Contents of file: `"); print(file->data); print("'\n");
+   read(file);
+   print("Contents of file: `"); print(file->data); print("'\n");
    
-   //unmount(floppy);
+   unmount(floppy);
    
    print("\nTest complete after "); iprint(clock()-time,DEC); print("ms\n");
 

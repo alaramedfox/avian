@@ -17,10 +17,10 @@
 
 static mtable_t* const mtable = (mtable_t*)HEAP_START;
 
-static size_t   mtable_index(addr_t);
-static bool      is_addr_free(addr_t);
+static size_t  mtable_index(addr_t);
+static bool    is_addr_free(addr_t);
 static bool    block_fits(addr_t,size_t);
-static void      mtable_delete(size_t);
+static void    mtable_delete(size_t);
 static size_t  block_end(size_t);
 
 // ======================================================================== */

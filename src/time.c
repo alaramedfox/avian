@@ -6,6 +6,7 @@
 // ======================================================================== */
  
 #include <time.h>
+#include <trace.h>
 #include <pic.h>
 #include <idt.h>
 #include <asmfunc.h>
@@ -23,7 +24,8 @@ enum __PIT_PORTS
 };
 
 void time_init(word frequency)
-{
+{  function_call();
+
    /* Calculate the target frequency */
    word f = 1193180 / frequency;
    

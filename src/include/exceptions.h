@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+
 typedef enum __CPU_EXCEPTIONS
 {
    X_ZERO_DIVIDE=0, X_DOUBLE_FAULT=8, X_RANGE_BOUND=5, 
@@ -17,7 +19,6 @@ typedef enum __CPU_EXCEPTIONS
 } exception_t;
 
 void exceptions_init(void);
-
 extern void throw_exception(void);
 
 /* -- Exception handlers --    |  -- Exceptions thrown via ASM -- */

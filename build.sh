@@ -145,7 +145,7 @@ function update {
    LOCAL="0"
    printf "$INFO Writing kernel image to floppy\n"
    #dd if=bin/kernel-alpha of=boot-floppy.img seek=200 conv=notrunc
-   sudo mount -o loop test.img /media/floppy
+   sudo mount -o loop temp.img /media/floppy
    sudo cp bin/kernel-alpha /media/floppy/boot/kernel-alpha
    sudo umount /media/floppy
 }
@@ -156,7 +156,7 @@ function run {
       qemu-system-i386 -kernel bin/kernel-alpha -fda test.img --no-kvm
    else
 	   printf "$INFO Executing grub-test.img with QEMU...\n"
-	   qemu-system-i386 -fda boot-floppy.img --no-kvm
+	   qemu-system-i386 -fda temp.img --no-kvm
 	fi
 	return
 }

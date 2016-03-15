@@ -9,12 +9,14 @@
 #include <floppy.h>
 #include <stdlib.h>
 #include <string.h>
+#include <trace.h>
 
 #include <asmfunc.h>
 #include <pic.h>
 #include <time.h>
 #include <idt.h>
 #include <dma.h>
+#include <vga.h>
 #include <util.h>
 
 enum __FLOPPY_DATA
@@ -126,6 +128,8 @@ void floppy_handler(void)
 
 void floppy_init(void)
 {
+   function_call();
+   
    /* Enable FDC irq signal */
    idt_add_handler((addr_t)floppy_irq, IRQ_FLOPPY);
    pic_enable_irq( IRQ_FLOPPY );
@@ -160,6 +164,8 @@ void floppy_init(void)
 
 static void floppy_reset(void)
 {
+   function_call();
+
    floppy_irq_recieved = false;
    
    /* Disable interrupts and shut off all motors */
@@ -183,6 +189,8 @@ static void floppy_reset(void)
 
 static void floppy_configure(void)
 {
+   function_call();
+   
    byte iseek = 1, nofifo = 0, poll = 0, thresh = 8, comp = 0;
    outportb(FDC_FIFO, CONFIGURE);
    outportb(FDC_FIFO, 0);
@@ -192,6 +200,8 @@ static void floppy_configure(void)
 
 static void floppy_specify(byte srt, byte hlt, byte hut)
 {
+   function_call();
+   
    /* 8 5 0 */
    outportb(FDC_FIFO, SPECIFY);
    outportb(FDC_FIFO, srt << 4 | hut);
@@ -200,6 +210,8 @@ static void floppy_specify(byte srt, byte hlt, byte hut)
 
 static void floppy_recalibrate(void)
 {
+   function_call();
+   
    floppy_start_motor(0);
    
    //outportb(FDC_FIFO, RECALIBRATE);
@@ -218,6 +230,8 @@ static void floppy_recalibrate(void)
 
 static int floppy_seek(byte track)
 {
+   function_call();   
+   
    if(!floppy_supported) return FDC_UNSUP;
    if(floppy_current_track == track) return FDC_OK;
    
@@ -261,6 +275,8 @@ static int floppy_seek(byte track)
 
 static void floppy_sense_interrupt(void)
 {
+   function_call();
+   
    outportb(FDC_FIFO, SENSEI);
    floppy_status = inportb(FDC_FIFO);
    floppy_current_track = inportb(FDC_FIFO);
@@ -273,10 +289,13 @@ static void floppy_sense_interrupt(void)
  */
 static bool floppy_command_wait(int ms)
 {
+   function_call(); 
+   
    int time = clock();
    
    while(!floppy_irq_recieved)
    {
+      //notify("Waiting for IRQ\r");
       if(clock() > time+ms) return false;
    }
    
@@ -290,6 +309,8 @@ static bool floppy_command_wait(int ms)
 
 static int floppy_read_byte(byte* data)
 {
+   function_call();
+   
    volatile byte msr;
    
    int time = clock();
@@ -307,6 +328,8 @@ static int floppy_read_byte(byte* data)
 
 static int floppy_send_byte(byte data)
 {
+   function_call();
+   
    volatile byte msr;
    
    int time = clock();
@@ -330,6 +353,8 @@ static int floppy_send_byte(byte data)
 #endif
 static int floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
 {
+   function_call();
+   
    bool status = FDC_OK;
    chs_t chs = lba_convert(lba);
    byte *dma_buffer = (byte*) malloc(bytes);
@@ -350,6 +375,7 @@ static int floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
    }
    
    /* Move to correct track */
+   //print("Seeking\n");
    int tries = 3;
    int seek_status;
    do {
@@ -390,6 +416,8 @@ static int floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
    floppy_send_byte(bytes/512);
    floppy_send_byte(GAP3);
    floppy_send_byte(0xFF);
+   
+   //print("Waiting for IRQ\n");
    
    floppy_command_wait(500);
    
