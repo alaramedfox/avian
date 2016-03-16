@@ -44,18 +44,12 @@ void init(void)
 
 void avian_main(void) 
 {  
-
    bootscreen();
    init();
    
-   print("Testing the delay function for a value of 1000\n");
-   sleep(5000);
-   print("\nComplete\n");
-   
-   
    print("AnicaFS: Allocation of Nodes by Indexed Cluster Addresses\n");
    
-   anica_format_device(2880, 512, 1);
+   //anica_format_device(2880, 512, 1);
    
    volume_t* floppy = mount(fda);
    file_t* file = open(floppy, "TEST.TXT", ANICA_WRITE);
@@ -83,8 +77,8 @@ void avian_main(void)
 
 bool main_loop(void)
 {  
-   sleep(1000);
-   print("One second has passed\n");
+   //sleep(1000);
+   //print("One second has passed\n");
    return true;
 }
 

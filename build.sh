@@ -8,7 +8,7 @@ BLK='\033[0m'
 INFO="${GRN}Info:${BLK}"
 WARN="${RED}Warning:${BLK}"
 
-VERSION="Popcorn Builder Tool v4.0"
+VERSION="Avian Builder Tool v5.0"
 OPTIONS=()
 TARGET=()
 ROOT="."

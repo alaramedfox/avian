@@ -134,7 +134,7 @@ void floppy_init(void)
    pic_enable_irq( IRQ_FLOPPY );
    
    /* Obtain controller version */
-   byte version;
+   byte version=0;
    floppy_send_byte(VERSION);
    floppy_read_byte(&version);
    
@@ -169,7 +169,7 @@ static void floppy_reset(void)
    /* Disable interrupts and shut off all motors */
    floppy_motor_count = 0;
    outportb(FDC_DOR, 0);
-   //sleep(4);
+   sleep(4);
    
    /* Reset datarate */
    outportb(FDC_DSR, 0);
@@ -206,11 +206,7 @@ static void floppy_specify(byte srt, byte hlt, byte hut)
 
 static void floppy_recalibrate(void)
 {  
-   
    floppy_start_motor(0);
-   
-   //outportb(FDC_FIFO, RECALIBRATE);
-   //outportb(FDC_FIFO, 0);
    floppy_send_byte(RECALIBRATE);
    floppy_send_byte(0);
    
@@ -220,7 +216,6 @@ static void floppy_recalibrate(void)
    
    floppy_sense_interrupt();
    floppy_stop_motor(0);
-   //floppy_specify(8,5,0);
 }
 
 static int floppy_seek(byte track)
@@ -278,7 +273,6 @@ static void floppy_sense_interrupt(void)
 static bool floppy_command_wait(int ms)
 {   
    bool status;
-   
    timeout_ms(status, ms, if(floppy_irq_recieved) break; );
    
    if(!status) return false;
@@ -344,7 +338,7 @@ static int floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
    print( read?" <-- ":" --> " ); print("sector ");
    
    iprint(lba,DEC);
-   print("\n");
+   print("\r");
 #endif
    
    floppy_start_motor(0);
@@ -418,7 +412,7 @@ static void floppy_start_motor(int drive)
    if(floppy_motor_count == 0) {
       floppy_dor_status = 0xFD;
       outportb(FDC_DOR, floppy_dor_status | drive);
-      sleep(20);
+      sleep(200);
    }
    floppy_motor_count++;
 }
