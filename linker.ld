@@ -13,6 +13,7 @@ MEMORY
 SECTIONS
  {
    . = 0x100000;
+   .mbh  : { *(.mbh)  }
    .text : { *(.text) }
    .data : { *(.data) }
    .bss  : { *(.bss)  }

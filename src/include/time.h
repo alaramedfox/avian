@@ -6,12 +6,14 @@
 //      Purpose:         Handle the PIT and time-related functions
 // ======================================================================== */
 
-#include <stdlib.h>
+#define timeout_ms(var, time, expr) \
+   var = 0;                         \
+   for(int i=0; i<time; i++) {      \
+      sleep(1);                     \
+      expr                          \
+   }                                
 
-void      time_init(word);
-
-uint32_t clock(void);
-void      sleep(uint32_t);   //Sleep for N ms
-void      pit_handler(void);
+void sleep(int);
+void usleep(int);
 
 #endif

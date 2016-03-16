@@ -9,7 +9,7 @@
 #include <stdlib.h>
 
 /* Define a list of usable ports for bus IO */
-typedef enum __PORTS
+enum __PORTS
 {
    /* Programmable Interrupt Controller */
    PIC1_CMD = 0x20, PIC1_DAT = 0x21, PIC2_CMD = 0xA0, PIC2_DAT = 0xA1,
@@ -21,11 +21,11 @@ typedef enum __PORTS
    FDC_SRA = 0x3f0, FDC_SRB = 0x3f1, FDC_MSR  = 0x3f4, FDC_DIR = 0x3f7,
    FDC_DSR = 0x3f4, FDC_CCR = 0x3f7, FDC_FIFO = 0x3f5, FDC_DOR = 0x3f2,
 
-} port_t;
+};
 
 /* Port IO, defined in portio.asm */
-extern byte inportb(port_t);
-extern void outportb(port_t, byte);
+extern byte inportb(word);
+extern void outportb(word, byte);
 
 /* Interrupt controllers, defined in interrupts.asm */
 extern void load_idt(int32_t*);

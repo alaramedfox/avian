@@ -9,7 +9,7 @@
 #include <floppy.h>
 #include <stdlib.h>
 #include <string.h>
-#include <trace.h>
+
 
 #include <asmfunc.h>
 #include <pic.h>
@@ -127,8 +127,7 @@ void floppy_handler(void)
 }
 
 void floppy_init(void)
-{
-   function_call();
+{  
    
    /* Enable FDC irq signal */
    idt_add_handler((addr_t)floppy_irq, IRQ_FLOPPY);
@@ -140,11 +139,11 @@ void floppy_init(void)
    floppy_read_byte(&version);
    
    if(version == 0x90) {
-      notify("Detected 82077AA floppy controller\n");
+      notify(this, "Detected 82077AA floppy controller\n");
       floppy_supported = true;
    }
    else {
-      notify("Unsupported floppy controller (");
+      notify(this, "Unsupported floppy controller (");
       iprint(version, HEX); print(")\n");
       floppy_supported = false;
       return;
@@ -159,19 +158,18 @@ void floppy_init(void)
    outportb(FDC_CCR,0x00);
    outportb(FDC_DSR,0x00);
    
-   notify("Started floppy controller\n");
+   notify(this, "Started floppy controller\n");
 }
 
 static void floppy_reset(void)
-{
-   function_call();
+{  
 
    floppy_irq_recieved = false;
    
    /* Disable interrupts and shut off all motors */
    floppy_motor_count = 0;
    outportb(FDC_DOR, 0);
-   sleep(4);
+   //sleep(4);
    
    /* Reset datarate */
    outportb(FDC_DSR, 0);
@@ -188,8 +186,7 @@ static void floppy_reset(void)
 }
 
 static void floppy_configure(void)
-{
-   function_call();
+{  
    
    byte iseek = 1, nofifo = 0, poll = 0, thresh = 8, comp = 0;
    outportb(FDC_FIFO, CONFIGURE);
@@ -199,8 +196,7 @@ static void floppy_configure(void)
 }
 
 static void floppy_specify(byte srt, byte hlt, byte hut)
-{
-   function_call();
+{  
    
    /* 8 5 0 */
    outportb(FDC_FIFO, SPECIFY);
@@ -209,8 +205,7 @@ static void floppy_specify(byte srt, byte hlt, byte hut)
 }
 
 static void floppy_recalibrate(void)
-{
-   function_call();
+{  
    
    floppy_start_motor(0);
    
@@ -220,7 +215,7 @@ static void floppy_recalibrate(void)
    floppy_send_byte(0);
    
    if(!floppy_command_wait(3000)) {
-      notify("Recalibration failed\n");
+      notify(this, "Recalibration failed\n");
    }
    
    floppy_sense_interrupt();
@@ -229,17 +224,12 @@ static void floppy_recalibrate(void)
 }
 
 static int floppy_seek(byte track)
-{
-   function_call();   
-   
+{     
    if(!floppy_supported) return FDC_UNSUP;
    if(floppy_current_track == track) return FDC_OK;
    
    floppy_start_motor(0);
    
-   //outportb(FDC_FIFO, SEEK);
-   //outportb(FDC_FIFO, 0);
-   //outportb(FDC_FIFO, track);
    floppy_send_byte(SEEK);
    floppy_send_byte(0);
    floppy_send_byte(track);
@@ -274,9 +264,7 @@ static int floppy_seek(byte track)
 }
 
 static void floppy_sense_interrupt(void)
-{
-   function_call();
-   
+{  
    outportb(FDC_FIFO, SENSEI);
    floppy_status = inportb(FDC_FIFO);
    floppy_current_track = inportb(FDC_FIFO);
@@ -288,33 +276,27 @@ static void floppy_sense_interrupt(void)
  *      the result bytes into the buffer.
  */
 static bool floppy_command_wait(int ms)
-{
-   function_call(); 
+{   
+   bool status;
    
-   int time = clock();
+   timeout_ms(status, ms, if(floppy_irq_recieved) break; );
    
-   while(!floppy_irq_recieved)
-   {
-      //notify("Waiting for IRQ\r");
-      if(clock() > time+ms) return false;
-   }
+   if(!status) return false;
    
    /* Read in the command result bytes */
    for(int i=0; i<7 && (bitcheck(inportb(FDC_MSR), CB)); i++) {
       floppy_read_byte(&floppy_io_buffer[i]);
    }
    floppy_irq_recieved = false;
-   return true;
+   return status;
 }
 
 static int floppy_read_byte(byte* data)
-{
-   function_call();
+{  
    
    volatile byte msr;
-   
-   int time = clock();
-   while(clock() < time+500) {
+   bool status;
+   timeout_ms(status, 500,
       msr = inportb(FDC_MSR);
    
       if((msr & 0xC0) == 0xc0) {
@@ -322,18 +304,17 @@ static int floppy_read_byte(byte* data)
          return FDC_OK;
       }
       floppy_reset();
-   }
+   );
+   if(!status) print("IO Error\n");
    return FDC_IOERR;
 }
 
 static int floppy_send_byte(byte data)
-{
-   function_call();
-   
+{  
    volatile byte msr;
    
-   int time = clock();
-   while(clock() < time+500) {
+   bool status;
+   timeout_ms(status, 500,
       msr = inportb(FDC_MSR);
    
       if((msr & 0xC0) == 0x80) {
@@ -341,7 +322,8 @@ static int floppy_send_byte(byte data)
          return FDC_OK;
       }
       floppy_reset();
-   }   
+   );
+   if(!status) print("IO Error\n");  
    return FDC_IOERR;
 }
 
@@ -353,8 +335,6 @@ static int floppy_send_byte(byte data)
 #endif
 static int floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
 {
-   function_call();
-   
    bool status = FDC_OK;
    chs_t chs = lba_convert(lba);
    byte *dma_buffer = (byte*) malloc(bytes);
@@ -433,20 +413,22 @@ static int floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
 }
 
 static void floppy_start_motor(int drive)
-{
+{  
+
    if(floppy_motor_count == 0) {
       floppy_dor_status = 0xFD;
-      outportb(FDC_DOR, floppy_dor_status);
+      outportb(FDC_DOR, floppy_dor_status | drive);
       sleep(20);
    }
    floppy_motor_count++;
 }
 
 static void floppy_stop_motor(int drive)
-{
+{  
+
    if(floppy_motor_count == 0) {
       floppy_dor_status = 0x0D;
-      outportb(FDC_DOR, floppy_dor_status);
+      outportb(FDC_DOR, floppy_dor_status | drive);
    }
    else floppy_motor_count--;
 }

@@ -26,7 +26,7 @@ typedef uint32_t   dword;    //32-bit value      4 bytes
 #define bitcheck(var,bit)   var & (1 << bit)
 
 /* This creates a `foreach' style loop */
-#define foreach(var, count)   for(int var=0; var<count; var++)
+#define foreach(var, count)   for(uint32_t var=0; var<count; var++)
       
 /* This compresses the packed attribute into something smaller */
 #define FLAT   __attribute__((packed))

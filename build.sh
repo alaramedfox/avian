@@ -15,10 +15,10 @@ ROOT="."
 OBJ="obj"
 BIN="bin"
 
-CFLAGS=" -m32 -ffreestanding -fno-exceptions -std=c99 "
+CFLAGS=" -mtune=i386 -m32 -ffreestanding -fno-exceptions -std=c99 "
 CINC=" -Isrc/include -Isrc/asm "
-#CWARN=" -Wall -Werror -Wfatal-errors "
-CWARN=" -Wfatal-errors "
+CWARN=" -Wall -Wextra -Werror -Wfatal-errors "
+#CWARN=" -Wfatal-errors "
 
 SOURCES=(" src src/asm")
 
@@ -153,10 +153,10 @@ function update {
 function run {
    if [ $LOCAL = "1" ]; then
       printf "$INFO Executing kernel-alpha with QEMU...\n"
-      qemu-system-i386 -kernel bin/kernel-alpha -fda test.img --no-kvm
+      qemu-system-i386 -kernel bin/kernel-alpha -fda test.img -rtc base=localtime,clock=host,driftfix=slew
    else
 	   printf "$INFO Executing grub-test.img with QEMU...\n"
-	   qemu-system-i386 -fda temp.img --no-kvm
+	   qemu-system-i386 -fda temp.img -no-shutdown -rtc base=localtime,clock=host,driftfix=slew
 	fi
 	return
 }

@@ -19,21 +19,27 @@ section .text
 	extern	pit_handler
 
 	load_idt:
+	   cli
 		mov	edx, [esp + 4]
 		lidt [edx]
 		sti	;<-- THIS CRASHES THE KERNEL
 		ret
 	
-	keyboard_irq:                 
+	keyboard_irq:
+	   ;cli          
 		call	 keyboard_handler
+		;sti
 		iretd
 		
 	floppy_irq:
+	   ;cli
 		call	floppy_handler
+		;sti
 		iretd
 		
-	pit_irq:
-		call	pit_handler
-		iretd
+	;pit_irq:
+	;   ;cli
+	;	call	pit_handler
+	;	iretd
 
 ; END .text

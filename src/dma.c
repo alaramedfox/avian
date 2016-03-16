@@ -36,7 +36,8 @@ static const byte CountPort[8] = { 0x01, 0x03, 0x05, 0x07, 0xC2, 0xC6, 0xCA, 0xC
 static void __dma_xfer(byte channel, byte page, uint32_t offset, uint32_t length, byte mode);
 
 void dma_xfer(byte channel, addr_t address, size_t length, bool read)
-{
+{  
+
    byte page=0, mode=0;
    uint32_t offset = 0;
    

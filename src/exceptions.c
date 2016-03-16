@@ -7,37 +7,19 @@
  
 #include <exceptions.h>
 
-#include <color.h>
 #include <idt.h>
 #include <vga.h>
 #include <buildcount.h>
 #include <util.h>
 #include <stdlib.h>
-#include <trace.h>
 
 #define FAULT(str)   print("\n\tError: "); print(str);
-#define VALUE(val)   print("\n\tStack: "); iprint(val,16);
 
 void exceptions_init(void)
 {
    foreach(i, 13) {
       idt_add_exception((addr_t)throw_exception, i);
    }
-   
-   idt_add_exception((addr_t)throw_zero_divide, X_ZERO_DIVIDE);
-   idt_add_exception((addr_t)throw_double_fault, X_DOUBLE_FAULT);
-}
-
-static void panic_screen(void)
-{
-   vga_setcolor(C_BLUESCR);   //Famous Windows bluescreen
-   vga_clear();
-   
-   /* Print kernel information */
-   print("\n\
-   \tAVIAN Kernel - " TIMESTAMP "\n\n\
-   \tAn unhandled exception has occured,\n\
-   \tand execution was unable to continue.\n");
 }
 
 static void line_panic_screen(void)
@@ -50,30 +32,43 @@ static void line_panic_screen(void)
    }
    vga_movexy(row, 0);
    print("\tAVIAN Kernel - " TIMESTAMP);
-   print("\n\tIn function `"); print(get_last_function()); print("'");
 }
 
-void catch_exception(void)
+static char* get_error_id(byte err)
+{
+   switch(err)
+   {
+      case 0:  return "Divide by Zero";               break;
+      case 1:  return "Debug";                        break;
+      case 2:  return "Non-maskable interrupt";       break;
+      case 3:  return "Breakpoint";                   break;
+      case 4:  return "Overflow";                     break;
+      case 5:  return "Bound Range Exceeded";         break;
+      case 6:  return "Invalid Opcode";               break;
+      case 7:  return "Device Not Available (IRQ7)";  break;
+      case 8:  return "Double Fault";                 break;
+      case 9:  return "Segment Overrun";              break;
+      case 10: return "Invalid TSS";                  break;
+      case 11: return "Segment Not Present";          break;
+      case 12: return "Stack-Segment Fault";          break;
+      case 13: return "General Protection Fault";     break;
+      case 14: return "Page Fault";                   break;
+      case 15: return "Reserved (IRQ15)";             break;
+      case 16: return "Floating-Point Exception";     break;
+      case 17: return "Alignment Check";              break;
+      case 18: return "Machine Check";                break;
+      case 19: return "SIMD Exception";               break;
+      default: return "Invalid IRQ";                  break;
+   }
+}
+
+void catch_exception(dword eip, byte exception)
 {
    line_panic_screen();
-   FAULT("Unknown exception");
+   FAULT(get_error_id(exception));
+   print("\n\tEIP: "); iprint(eip,HEX);
+   print("\tIRQ: "); iprint(exception,HEX);
    while(true);
 }
 
-void catch_double_fault(int arg)
-{
-   line_panic_screen();
-   FAULT("Double Fault");
-   VALUE(arg);
-   while(true);
-   
-   panic_screen();
-}
-
-void catch_zero_divide(void)
-{
-   line_panic_screen();
-   FAULT("Divide by zero");
-   while(true);
-}
 

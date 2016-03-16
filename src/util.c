@@ -6,6 +6,7 @@
 // ======================================================================== */
 
 #include <util.h>
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -41,18 +42,10 @@ void trace_function(const char function[])
    print(" ] ");          
 }
 
-void print_time(void)
+void notify(const char function[], const char str[])
 {
-   print("[ ");
-   vga_setcolor(0x02);
-   iprint(clock(),DEC);
-   vga_setcolor(0x07);
-   print(" ] ");
-}
-
-void notify(const char str[])
-{
-   print_time();
+   trace_function(function);
+   vga_movexy(vga_getrow(),25);
    print(str);
 }
 

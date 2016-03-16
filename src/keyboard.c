@@ -61,7 +61,7 @@ void kb_init(void)
    pic_enable_irq(IRQ_KEYBOARD);
    stdin = new_stack(128);
    
-   notify("Started keyboard driver\n");
+   notify(this, "Started keyboard driver\n");
 }
 
 /* Special character handlidng */

@@ -10,7 +10,7 @@
 
 typedef enum __BASE
 {
-   DEC=10, HEX=16, OCT=8, BIN=2, BYTES=1, BOOLEAN=0,
+   DEC=10, HEX=16, OCT=8, BIN=2, BYTES=254, BOOLEAN=255,
    
 } base_t;
 
