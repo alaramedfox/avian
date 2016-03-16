@@ -7,6 +7,7 @@
 
 #include <filesystem.h>
 
+
 #include <stdlib.h>
 #include <util.h>
 #include <string.h>
@@ -20,16 +21,19 @@ enum __PARTITIONS
 };
 
 volume_t* mount(device_t device)
-{
+{  
+   
    volume_t* volume = new(volume_t);
    anica_read_superblock(device, &volume->sb);
    volume->itable = (lentry_t*) malloc(volume->sb.table_size * 8);
    anica_read_itable(volume);
+   
    return volume;
 }
 
 file_t* open(volume_t* device, const char path[], byte mode)
-{
+{  
+
    file_t* file = new(file_t);
    lnode_t* filenode = new(lnode_t);
    file->node = filenode;
@@ -40,47 +44,35 @@ file_t* open(volume_t* device, const char path[], byte mode)
    return file;
 }
 
-static size_t file_io(file_t* file, void* data, size_t bytes, bool read)
-{
-   size_t bc = 0; // Number of bytes transferred
+size_t read(file_t* file)
+{  
 
-   if(read) {
-      anica_read_file(file->vol, (byte*)data, file->node);
-   }
-   else {
-      
-   }
-   return bc;
+   anica_read_file(file->vol, file->data, file->node);
+   return 0;
 }
 
-size_t read(file_t* file, void* data, size_t bytes)
-{
-   return file_io(file, data, bytes, true);
-}
+size_t write(file_t* file, void* data)
+{  
 
-size_t write(file_t* file, void* data, size_t bytes)
-{
-   return file_io(file, data, bytes, false);
+   byte* bdata = (byte*) data;
+   anica_write_file(file->vol, bdata, file->node);
+   return 0;
 }
 
 void close(file_t* file)
-{
+{  
+
    free(file);
 }
 
 void unmount(volume_t* volume)
-{
+{  
+
    anica_write_superblock(0, &volume->sb);
    anica_write_itable(volume);
    free(volume->itable);
    free(volume);
 }
-
-char* fserr(int err)
-{
-   return "?";
-}
-
 
 
 

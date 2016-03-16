@@ -5,13 +5,16 @@
 ; */
 bits 32							; NASM directive - 32 bit
 
-section .text
+section .mbh
 	align 4						; Multiboot spec
 	dd 	0x1BADB002        ; Magic
 	dd 	0x00              ; Flags
 	dd - (0x1BADB002+0x00)	; Checksum - m+f+c should be zero
+; END .mbh
 
-	global 	start				; Bootloader entry point
+section .text
+
+   global 	start				; Bootloader entry point
 	extern 	avian_main	   ; Kernel entry point
 
 	start:
@@ -22,7 +25,7 @@ section .text
 ; END .text
 	
 section .bss
-	resb 8192					; 8KB for stack
+	resb 8192					; 8 KiB for stack
 	
 	__stack:
 

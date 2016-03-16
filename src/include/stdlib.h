@@ -26,7 +26,7 @@ typedef uint32_t   dword;    //32-bit value      4 bytes
 #define bitcheck(var,bit)   var & (1 << bit)
 
 /* This creates a `foreach' style loop */
-#define foreach(var, count)   for(int var=0; var<count; var++)
+#define foreach(var, count)   for(uint32_t var=0; var<count; var++)
       
 /* This compresses the packed attribute into something smaller */
 #define FLAT   __attribute__((packed))
@@ -51,10 +51,11 @@ int      strtol(const char *str, char **endptr, int base);
  *      MEMORY - Defined in mman.c
  */
 #define  new(T) (T*)malloc(sizeof(T))
-void*      calloc(size_t nitems, size_t size) __attribute__ ((malloc));
-void      free(void *ptr);
-void*      malloc(size_t size) __attribute__ ((malloc));
-void*      realloc(void *ptr, size_t size);
+void*    calloc(size_t, size_t)  __attribute__ ((malloc));
+void     free(void*);
+void*    malloc(size_t)          __attribute__ ((malloc));
+void*    realloc(void*, size_t);
+size_t   ptrsize(void*);
 
 typedef struct __DIV
 {

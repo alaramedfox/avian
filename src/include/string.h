@@ -10,9 +10,11 @@
 
 typedef enum __BASE
 {
-   DEC=10, HEX=16, OCT=8, BIN=2, BYTES=1, BOOLEAN=0,
+   DEC=10, HEX=16, OCT=8, BIN=2, BYTES=254, BOOLEAN=255,
    
 } base_t;
+
+char* new_str(const char[]);
 
 void* memchr(const void *str, int c, size_t n);
 int   memcmp(const void *str1, const void *str2, size_t n);

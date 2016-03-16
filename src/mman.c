@@ -8,6 +8,7 @@
 #include <mman.h>
 
 #include <stdlib.h>
+//#include <string.h>
 #include <util.h>
 
 // ======================================================================== */
@@ -16,15 +17,26 @@
 
 static mtable_t* const mtable = (mtable_t*)HEAP_START;
 
-static size_t   mtable_index(addr_t);
-static bool      is_addr_free(addr_t);
+static size_t  mtable_index(addr_t);
+static bool    is_addr_free(addr_t);
 static bool    block_fits(addr_t,size_t);
-static void      mtable_delete(size_t);
+static void    mtable_delete(size_t);
 static size_t  block_end(size_t);
 
 // ======================================================================== */
 //       Public API (Note: prototypes are in stdlib.h)
 // ======================================================================== */
+
+size_t ptrsize(void* ptr)
+{
+   /* Search the table for this pointer */
+   foreach(i, mtable->blocks) {
+      if((addr_t)ptr == mtable->entry[i].start) {
+         return mtable->entry[i].size;
+      }
+   }
+   return 0;
+}
 
 void free(void* ptr)
 {
@@ -59,6 +71,17 @@ void* malloc(const size_t size)
       }
    }
    return 0;
+}
+
+void* realloc(void* ptr, size_t size)
+{
+   byte* newptr = (byte*) malloc(size);
+   byte* oldptr = (byte*) ptr;
+   foreach(i, sizeof(oldptr)) {
+      newptr[i] = oldptr[i];
+   }
+   free(oldptr);
+   return (void*)newptr;
 }
 
 void* memcpy(void *str1, const void *str2, size_t n)

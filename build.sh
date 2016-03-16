@@ -8,17 +8,17 @@ BLK='\033[0m'
 INFO="${GRN}Info:${BLK}"
 WARN="${RED}Warning:${BLK}"
 
-VERSION="Popcorn Builder Tool v4.0"
+VERSION="Avian Builder Tool v5.0"
 OPTIONS=()
 TARGET=()
 ROOT="."
 OBJ="obj"
 BIN="bin"
 
-CFLAGS=" -m32 -ffreestanding -fno-exceptions -std=c99 "
-CINC=" -Isrc/drivers -Isrc/include -Isrc/asm "
-#CWARN=" -Wall -Werror -Wfatal-errors "
-CWARN=" -Wfatal-errors "
+CFLAGS=" -mtune=i386 -m32 -ffreestanding -fno-exceptions -std=c99 "
+CINC=" -Isrc/include -Isrc/asm "
+CWARN=" -Wall -Wextra -Werror -Wfatal-errors "
+#CWARN=" -Wfatal-errors "
 
 SOURCES=(" src src/asm")
 
@@ -69,7 +69,9 @@ function main {
 			"-h") OPTIONS+=" -h " ;;
 			"-l") OPTIONS+=" -l " ;;
 			"-make") OPTIONS+=" -make " ;;
+			"-write") OPTIONS+=" -write " ;;
 			"-run") OPTIONS+=" -run " ;;
+			"-dev") OPTIONS+=" -dev " ;;
 			*) TARGET+=" $i " ;;
 		esac
 	done
@@ -81,7 +83,9 @@ function main {
 			"-h") printhelp ;;
 			"-l") link ;;
 			"-make") make_all;;
+			"-write") update ;;
 			"-run") run ;;
+			"-dev") DEV="1" ;;
 			*) printf "$WARN Unknown option '$i'\n" ;;
 		esac
 	done
@@ -128,7 +132,7 @@ function link {
 			OLDSIZE=0
 		fi
 		#BINARY=`echo $i | grep "alpha\|beta\|stable"`
-		ld -m elf_i386 -A i386 -T linker.ld -o bin/kernel-alpha obj/*.o
+		ld -m elf_i386 -A i386 -T linker.ld -o bin/kernel-alpha obj/*.o -Map kernel.map
 		NEWSIZE=$(stat -c%s "bin/kernel-alpha")
 		
 		printf "$INFO Generated binary bin/kernel-alpha ($NEWSIZE bytes)\n"
@@ -136,10 +140,24 @@ function link {
 		#return
 	#done
 }
+LOCAL="1"
+function update {
+   LOCAL="0"
+   printf "$INFO Writing kernel image to floppy\n"
+   #dd if=bin/kernel-alpha of=boot-floppy.img seek=200 conv=notrunc
+   sudo mount -o loop temp.img /media/floppy
+   sudo cp bin/kernel-alpha /media/floppy/boot/kernel-alpha
+   sudo umount /media/floppy
+}
 
 function run {
-	printf "$INFO Executing kernel-alpha with QEMU...\n"
-	qemu-system-i386 -kernel bin/kernel-alpha -fda test.img --no-kvm
+   if [ $LOCAL = "1" ]; then
+      printf "$INFO Executing kernel-alpha with QEMU...\n"
+      qemu-system-i386 -kernel bin/kernel-alpha -fda test.img -rtc base=localtime,clock=host,driftfix=slew
+   else
+	   printf "$INFO Executing grub-test.img with QEMU...\n"
+	   qemu-system-i386 -fda temp.img -no-shutdown -rtc base=localtime,clock=host,driftfix=slew
+	fi
 	return
 }
 

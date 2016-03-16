@@ -1,0 +1,11 @@
+timeout 1000
+password hoge
+
+title a
+kernel /a abcdefghijklmnopqrstuvwxzyABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+
+
+title b
+kernel /b
+
+title c
+kernel /c

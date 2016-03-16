@@ -7,7 +7,6 @@
 // ======================================================================== */
  
 #include <stdlib.h>
-#include <color.h>
 #include <asmfunc.h>
 #include <string.h>
 
@@ -17,11 +16,21 @@ enum __VGA_LIMITS
    VGA_BYTES=4000,
 };
 
+enum __COLOR_DEFS
+{
+   BLACK=0x0, BLUE=0x1, GREEN=0x2, CYAN=0x3,
+   RED=0x4, MAGENTA=0x5, BROWN=0x6, GREY=0x7,
+   BOLD=1, NORMAL=0,
+   
+   C_TERMINAL=0x07, C_BLUESCR=0x1F, 
+   C_WARN=0x04, C_CRITICAL=0x47,
+};
+
 typedef struct __VGA
 {
    byte buffer[VGA_BYTES];
    size_t vptr;
-   color_t color;
+   byte color;
    
 } FLAT vga_t;
 
@@ -32,7 +41,8 @@ void hide_cursor(void);
 size_t vga_getcol   (void);          //Safely return the current column of the cursor
 size_t vga_getrow   (void);          //Safely return the current row of cursor
 size_t vga_getloc (void);            //Safely return the 1D vptr location
-void   vga_setcolor (color_t);
+void   vga_setcolor (byte);
+int    vga_tabsize  (int);
 
 /* Screen manipulation */
 void vga_scroll   (void);            //Scrolling screen support
@@ -46,12 +56,13 @@ char vga_char_at  (byte,byte);       //Return character at 2D point
 
 /* Printing */
 void vga_write   (char);             //Safely write to vram[vptr]
-void vga_color   (color_t);          //Safely write to vram[vptr+1]
+void vga_color   (byte);          //Safely write to vram[vptr+1]
 
-__attribute__((hot)) void addch(char);
-__attribute__((hot)) void print(const char[]);
-__attribute__((hot)) void println(const char[]);
-__attribute__((hot)) void iprint(dword, byte);
+void addch(char);
+void print(const char[]);
+void println(const char[]);
+void iprint(dword, byte);
+void printxy(byte,byte,const char[]);
 
 /* Special characters */
 void vga_newline(void);            //Move to next line, starting in first column

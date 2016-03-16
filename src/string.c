@@ -7,13 +7,23 @@
 // ======================================================================== */
  
 #include <string.h>
+
 #include <stdlib.h>
 
 static const char place_value[] = "0123456789ABCDEF";
 static const char bytes_magnitude[] = "BKMGTP";
 
+char* new_str(const char str[])
+{  
+
+   char* newstr = (char*) malloc(strlen(str));
+   memcpy(newstr, str, strlen(str));
+   return newstr;
+}  
+
 static inline void itoa_bytes(int number, char str[])
-{
+{  
+
    int magnitude = 0;
    
    while(number > 1024) {
@@ -28,16 +38,17 @@ static inline void itoa_bytes(int number, char str[])
 }
 
 void reverse(char s[])
- {
-     int i, j;
-     char c;
- 
-     for (i = 0, j = strlen(s)-1; i<j; i++, j--) {
-         c = s[i];
-         s[i] = s[j];
-         s[j] = c;
-     }
- }
+{  //
+   if(strlen(s) <= 1) return;
+   int i, j;
+   char c;
+
+   for (i = 0, j = strlen(s)-1; i<j; i++, j--) {
+      c = s[i];
+      s[i] = s[j];
+      s[j] = c;
+   }
+}
 #define KR 0
 #if KR
 /* itoa:  convert n to characters in s */
@@ -58,23 +69,27 @@ void reverse(char s[])
  }
 #else
 void itoa(uint32_t number, base_t base, char str[])
-{
+{  //
+
    if(base == BYTES) {
       itoa_bytes(number, str);
+      return;
    }
    else if(base == BOOLEAN) {
       str = number?"1":"0";
+      return;
    }
    else if(base == 0 || number == 0) {
       str[0] = '0';
       str[1] = '\0';
+      return;
    }
    else {
-      int pos=0;
+      int pos=0, i;
       
       while(number > 0)
       {
-         int i = number % base;
+         i = number % base;
          str[pos++] = place_value[i];
          number = number / base;
       }
@@ -83,7 +98,7 @@ void itoa(uint32_t number, base_t base, char str[])
          str[pos++] = '0';
       }
       str[pos] = 0;
-      reverse(str);
+      if(pos) reverse(str);
    }
 }
 #endif
@@ -177,10 +192,12 @@ char *strncpy(char *dest, const char *src, size_t count)
 }
 
 size_t strlen(const char* str)
-{
+{  //
+
    size_t size=0;
    while(str[size] != '\0') {
       ++size;
+      if(size > 255) return size;
    }
    return size;
 }

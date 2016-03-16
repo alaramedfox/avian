@@ -7,7 +7,7 @@
 // ======================================================================== */
 
 #include <stdlib.h>
-#include <lindafs.h>
+#include <anicafs.h>
 
 typedef enum __DEVICES
 {
@@ -24,13 +24,13 @@ typedef struct __FILE
 
 } FLAT file_t;
 
-volume_t*    mount(device_t);
-void         unmount(volume_t*);
-file_t*       open(volume_t*, const char[], byte);
-size_t       read(file_t*, void*, size_t);
-size_t       write(file_t*, void*, size_t);
-void          close(file_t*);
-char*       fserr(int);
+volume_t*  mount(device_t);
+void       unmount(volume_t*);
+file_t*    open(volume_t*, const char[], byte);
+size_t     read(file_t*);
+size_t     write(file_t*, void*);
+void       close(file_t*);
+char*      fserr(int);
 
 
 

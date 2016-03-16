@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 #include <vga.h>
 #include <envar.h>
 #include <idt.h>
@@ -19,19 +20,20 @@
 #include <floppy.h>
 #include <time.h>
 #include <filesystem.h>
-#include <lindafs.h>
 
 void init(void);
 bool main_loop(void);
 void bootscreen(void);
 
 void init(void) 
-{
+{  
+   
+   //types_test();
    exceptions_init();
    hide_cursor();
    vga_setcolor(0x07);
    pic_init();
-   time_init(1000);   //Init clock to measure milliseconds
+   //time_init();   //Init clock to measure ms
    ENVAR_init();      //Init global values
    kb_init();         //Init keyboard driver
    floppy_init();
@@ -41,36 +43,42 @@ void init(void)
 }
 
 void avian_main(void) 
-{
+{  
    bootscreen();
    init();
-
+   
    print("AnicaFS: Allocation of Nodes by Indexed Cluster Addresses\n");
-   int time = clock();
    
    //anica_format_device(2880, 512, 1);
-
+   
    volume_t* floppy = mount(fda);
-   file_t* file = open(floppy, "TEST.TXT", LINDA_WRITE);
+   file_t* file = open(floppy, "TEST.TXT", ANICA_WRITE);
    
-   char* str;
+   read(file);
+   print("Contents of file: `"); print((char*)file->data); print("'\n");
    
-   read(file, (char*)str, 15);
+   char* newcontent = new_str("This is the new file content");
+   write(file, newcontent);
+   free(newcontent);
    
-   print("Contents of file: "); print(str); print("\n");
+   read(file);
+   print("Contents of file: `"); print((char*)file->data); print("'\n");
+   
    unmount(floppy);
-   print("\nTest complete after "); iprint(clock()-time,DEC); print("ms\n");
-
+   
+   print("\nTest complete\n");
+   
    while(main_loop());
    
    
    vga_clear();
    print("Kernel has shut down\n");
-   
 }
 
 bool main_loop(void)
-{
+{  
+   //sleep(1000);
+   //print("One second has passed\n");
    return true;
 }
 

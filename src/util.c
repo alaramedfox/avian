@@ -6,31 +6,46 @@
 // ======================================================================== */
 
 #include <util.h>
+
 #include <stdlib.h>
 #include <string.h>
 
 #include <vga.h>
 #include <time.h>
 
+#define psizeof(T)            \
+   vga_setcolor(0x02);        \
+   print(#T);                 \
+   vga_setcolor(0x07);        \
+   print("\t(");              \
+   iprint(sizeof(T)*8,DEC);   \
+   print(")\t")
 
-static const char spin_chars[] = { '|', '/', '-', '\\', };
-static int spin_state=0;
-static bool waiting=false;
-static int loc;
-static char ch;
-
-void print_time(void)
+void types_test(void)
 {
-   print("[ ");
-   vga_setcolor(0x02);
-   iprint(clock(),DEC);
-   vga_setcolor(0x07);
-   print(" ] ");
+   vga_tabsize(10);
+   print(" C Standard:\tC Library:\tFixed-width:\tCustom Avian:\n");
+   print(" "); psizeof(char);  psizeof(size_t);    psizeof(int8_t);  psizeof(byte); print("\n");
+   print(" "); psizeof(short); psizeof(ptrdiff_t); psizeof(int16_t); psizeof(word); print("\n");
+   print(" "); psizeof(int);   psizeof(intptr_t);  psizeof(int32_t); psizeof(dword); print("\n");
+   print(" "); psizeof(long);  psizeof(intmax_t);  psizeof(int64_t); psizeof(addr_t); print("\n");
+   print("\n");
+   vga_tabsize(5);
 }
 
-void notify(const char str[])
+void trace_function(const char function[])
 {
-   print_time();
+   print("[ ");            
+   vga_setcolor(0x05);     
+   print(function);        
+   vga_setcolor(0x07);     
+   print(" ] ");          
+}
+
+void notify(const char function[], const char str[])
+{
+   trace_function(function);
+   vga_movexy(vga_getrow(),25);
    print(str);
 }
 

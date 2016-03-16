@@ -11,11 +11,15 @@
 /* Define allocatable memory ranges */
 enum __MMAP_DEFS
 {
-   ALLOC_START = 0x07E00,   //Memory block starting addr
-   ALLOC_SIZE    = 0x781FF,    //About 480 KiB of usable RAM
-   ALLOC_END   = 0x7FFFF,   //Ending address of free memory
+   ALLOC_START = 0x280000,    // 2.5 MB offset
+   ALLOC_SIZE  = 0x800000,    // 8 MB of RAM
+   ALLOC_END   = 0xA80000,    // Ending address of memory
    
-    HEAP_START   = 0x00500,   //Starting address of memory map
+   //ALLOC_START = 0x07E00,   //Memory block starting addr
+   //ALLOC_SIZE    = 0x781FF,    //About 480 KiB of usable RAM
+   //ALLOC_END   = 0x7FFFF,   //Ending address of free memory
+   
+   HEAP_START   = 0x00500,   //Starting address of memory map
    HEAP_SIZE   = 0x076FF,   //A bit less than 30 KiB
    HEAP_END      = 0x07BFF,   //Ending address of heap
    
