@@ -14,7 +14,7 @@
 #include <string.h>
 #include <floppy.h>
 
-#include <util.h>
+#include <errors.h>
 #include <time.h>
 
 enum __ANICA_DEFS
@@ -99,7 +99,6 @@ bool anica_format_device(size_t sec, size_t bps, size_t res)
    vol->itable = (lentry_t*) malloc(vol->sb.table_size * sizeof(lentry_t));
    
    /* Create root directory */
-   notify(this, "Creating root directory\n");
    anica_mkdir(vol, "ROOT", 0);
    
    anica_write_superblock(0, &vol->sb);
@@ -126,12 +125,12 @@ int anica_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file)
          /* Load the file node into memory */
          lnode_t node;
          anica_read_node(vol, &vol->itable[i], &node);
-         ASSERT(print("Found node named `"); print(node.name); print("'\n"));
+         //ASSERT(print("Found node named `"); print(node.name); print("'\n"));
          if(strcmp(filename, node.name) == 0) {
             /* Yay, we found the file! */
             *(file) = node;
             status = ANICA_OK;
-            print("Found the file!\n");
+            //print("Found the file!\n");
             break;
          }
       }
@@ -139,7 +138,7 @@ int anica_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file)
    
    /* File was not found, so lets create it */
    if(status != ANICA_OK && mode == ANICA_WRITE) {
-      ASSERT(print("File not found. Attempting to create\n"));
+      //ASSERT(print("File not found. Attempting to create\n"));
    
       /* Create file node */
       lnode_t* node = new(lnode_t);
@@ -328,7 +327,7 @@ static bool anica_mkdir(volume_t* vol, char* name, word parent)
 
    bool status = true;
    
-   print("Creating directory node\n");
+   //print("Creating directory node\n");
    /* Create the directory node */
    lnode_t dir;
    char _name[12] = "           /";
@@ -341,7 +340,7 @@ static bool anica_mkdir(volume_t* vol, char* name, word parent)
    dir.data = 0;
    dir.end = ';';
    
-   print("Creating table entry\n");
+   //print("Creating table entry\n");
    /* Create table entry for the directory */
    lentry_t entry;
    entry.type = ANICA_DIR;

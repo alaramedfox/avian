@@ -9,7 +9,7 @@
 
 
 #include <stdlib.h>
-#include <util.h>
+#include <errors.h>
 #include <string.h>
 
 #include <floppy.h>

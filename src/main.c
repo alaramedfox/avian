@@ -27,17 +27,14 @@ void bootscreen(void);
 
 void init(void) 
 {  
-   
-   //types_test();
+   types_test();
    exceptions_init();
    hide_cursor();
    vga_setcolor(0x07);
    pic_init();
-   //time_init();   //Init clock to measure ms
    ENVAR_init();      //Init global values
    kb_init();         //Init keyboard driver
    floppy_init();
-   ENVAR.FLAGS.listen = false;
    
    print("\nSystem booted.\n\n");
 }
@@ -57,7 +54,7 @@ void avian_main(void)
    read(file);
    print("Contents of file: `"); print((char*)file->data); print("'\n");
    
-   print("Enter the new content: `"); 
+   print("Enter the new content: "); 
    
    char* newcontent = (char*) malloc(128);
    scan(newcontent, 128);

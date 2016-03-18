@@ -28,7 +28,6 @@ void wait_spin(bool);
 void types_test(void);
 
 void trace_function(const char function[]);
-void notify(const char[], const char[]);
 void notify_progress(const char[], int, int);
  
 #endif

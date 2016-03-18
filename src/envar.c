@@ -6,7 +6,7 @@
 // ======================================================================== */
 
 #include <envar.h>
-#include <util.h>
+#include <errors.h>
 
 void ENVAR_init(void)
 {
@@ -16,5 +16,5 @@ void ENVAR_init(void)
    ENVAR.GLOBAL.echostate = ECHO;
    ENVAR.FLAGS.captain = false;
    ENVAR.GLOBAL.tabsize = 4;
-   notify(this, "Starting enviornment\n");
+   throw("Initialized enviornment",0);
 }

@@ -15,7 +15,7 @@
 #include <asmfunc.h>
 #include <pic.h>
 #include <idt.h>
-#include <util.h>
+#include <errors.h>
 #include <envar.h>
 #include <vga.h>
 
@@ -61,7 +61,7 @@ void kb_init(void)
    idt_add_handler((addr_t)keyboard_irq, IRQ_KEYBOARD);
    pic_enable_irq(IRQ_KEYBOARD);
    
-   notify(this, "Started keyboard driver\n");
+   throw("Started keyboard driver",0);
 }
 
 void keyboard_handler(void)

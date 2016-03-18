@@ -128,7 +128,6 @@ void floppy_handler(void)
 
 void floppy_init(void)
 {  
-   
    /* Enable FDC irq signal */
    idt_add_handler((addr_t)floppy_irq, IRQ_FLOPPY);
    pic_enable_irq( IRQ_FLOPPY );
@@ -139,17 +138,15 @@ void floppy_init(void)
    floppy_read_byte(&version);
    
    if(version == 0x90) {
-      notify(this, "Detected 82077AA floppy controller\n");
+      throw("Detected 82077AA floppy controller", 0);
       floppy_supported = true;
    }
    else {
-      notify(this, "Unsupported floppy controller (");
-      iprint(version, HEX); print(")\n");
+      throw("Unsupported floppy controller", 1);
       floppy_supported = false;
       return;
    }
    floppy_configure();
-   
    floppy_recalibrate();
    floppy_send_byte(LOCK);
    floppy_reset();
@@ -158,12 +155,11 @@ void floppy_init(void)
    outportb(FDC_CCR,0x00);
    outportb(FDC_DSR,0x00);
    
-   notify(this, "Started floppy controller\n");
+   throw("Started floppy controller",0);
 }
 
 static void floppy_reset(void)
 {  
-
    floppy_irq_recieved = false;
    
    /* Disable interrupts and shut off all motors */
@@ -179,15 +175,12 @@ static void floppy_reset(void)
    outportb(FDC_DOR, floppy_dor_status);
    
    /* Handle reset interrupt */
-   //floppy_irq_recieved = true;
    floppy_command_wait(500);
-   
    floppy_specify(8,5,0);
 }
 
 static void floppy_configure(void)
 {  
-   
    byte iseek = 1, nofifo = 0, poll = 0, thresh = 8, comp = 0;
    outportb(FDC_FIFO, CONFIGURE);
    outportb(FDC_FIFO, 0);
@@ -197,8 +190,6 @@ static void floppy_configure(void)
 
 static void floppy_specify(byte srt, byte hlt, byte hut)
 {  
-   
-   /* 8 5 0 */
    outportb(FDC_FIFO, SPECIFY);
    outportb(FDC_FIFO, srt << 4 | hut);
    outportb(FDC_FIFO, hlt << 1 | 0 );
@@ -211,7 +202,7 @@ static void floppy_recalibrate(void)
    floppy_send_byte(0);
    
    if(!floppy_command_wait(3000)) {
-      notify(this, "Recalibration failed\n");
+      throw("Recalibration failed",1);
    }
    
    floppy_sense_interrupt();
@@ -239,7 +230,7 @@ static int floppy_seek(byte track)
       floppy_sense_interrupt();
       floppy_reset();
       floppy_stop_motor(0);
-      throw(this, FDC_TMO);
+      //throw(this, FDC_TMO);
       return FDC_TMO; // IRQ timed out
    }
    
@@ -249,11 +240,11 @@ static int floppy_seek(byte track)
    
    /* Ensure that the seek worked */
    if(floppy_current_track != track) {
-      throw(this, FDC_IOERR);
+      throw("FDC Track Align", 1);
       return FDC_IOERR; // Track align fail
    }
    else if(floppy_status != 0x20) {
-      throw(this, FDC_STATUS);
+      throw("FDC Bad Status", 1);
       return FDC_STATUS; // Bad status
    }
    else {
@@ -275,10 +266,13 @@ static void floppy_sense_interrupt(void)
  */
 static bool floppy_command_wait(int ms)
 {   
-   bool status;
-   timeout_ms(status, ms, if(floppy_irq_recieved) break; );
-   
-   if(!status) return false;
+   bool status = true;
+   timeout_ms(status, ms, 
+      if(floppy_irq_recieved) {
+         status = true;
+         break;
+      } 
+   );
    
    /* Read in the command result bytes */
    for(int i=0; i<7 && (bitcheck(inportb(FDC_MSR), CB)); i++) {
@@ -302,7 +296,7 @@ static int floppy_read_byte(byte* data)
       }
       floppy_reset();
    );
-   if(!status) throw(this, FDC_IOERR);
+   if(!status) throw("FDC I/O Error",2);
    return FDC_IOERR;
 }
 
@@ -320,29 +314,22 @@ static int floppy_send_byte(byte data)
       }
       floppy_reset();
    );
-   if(!status) throw(this, FDC_IOERR);  
+   if(!status) throw("FDC I/O Error",2);  
    return FDC_IOERR;
 }
 
-#define FLOPPY_IO_PRINT 1
-
-#if FLOPPY_IO_PRINT
 #include <vga.h>
-#include <util.h>
-#endif
 static int floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
 {
    bool status = FDC_OK;
    chs_t chs = lba_convert(lba);
    byte *dma_buffer = (byte*) malloc(bytes);
    
-#if FLOPPY_IO_PRINT
    print("Floppy: Buffer");
    print( read?" <-- ":" --> " ); print("sector ");
    
    iprint(lba,DEC);
    print("\r");
-#endif
    
    floppy_start_motor(0);
    
@@ -363,7 +350,7 @@ static int floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
    
    if(seek_status) {
       status = seek_status;
-      throw(this, status);
+      throw("FDC Seek Failed", 3);
       goto exit;
    }
    
@@ -397,7 +384,7 @@ static int floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
    
    //print("Waiting for IRQ\n");
    
-   floppy_command_wait(500);
+   floppy_command_wait(1000);
    
    /* Transfer data from track buffer to data buffer */
    if(read) {
@@ -412,7 +399,6 @@ static int floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
 
 static void floppy_start_motor(int drive)
 {  
-
    if(floppy_motor_count == 0) {
       floppy_dor_status = 0xFD;
       outportb(FDC_DOR, floppy_dor_status | drive);

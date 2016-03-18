@@ -7,7 +7,7 @@
 // ======================================================================= */
 
 #include <stdlib.h>
-#define USE_UPPER_MEMORY 0
+#define USE_UPPER_MEMORY 1
 
 /* Define allocatable memory ranges */
 enum __MMAP_DEFS

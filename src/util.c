@@ -11,7 +11,6 @@
 #include <string.h>
 
 #include <vga.h>
-#include <time.h>
 
 #define psizeof(T)            \
    vga_setcolor(0x02);        \
@@ -40,13 +39,6 @@ void trace_function(const char function[])
    print(function);        
    vga_setcolor(0x07);     
    print(" ] ");          
-}
-
-void notify(const char function[], const char str[])
-{
-   trace_function(function);
-   vga_movexy(vga_getrow(),25);
-   print(str);
 }
 
 void notify_progress(const char str[], int current, int target)
