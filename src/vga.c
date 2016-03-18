@@ -102,20 +102,21 @@ void vga_write(char value)
    vga_color(vga->color);
 }
 
-void vga_color(byte value) 
-{
-   vga->buffer[vga->vptr*2+1] = value; 
-}
-
 void addch(const char c)
 {
    vga_write(c);
    vga_increment();
 }
- 
+
+void vga_color(byte value) 
+{
+   vga->buffer[vga->vptr*2+1] = value; 
+}
+
 void print(const char str[])
 {
    for(size_t i=0; str[i] != '\0'; i++) {
+   //foreach(i, strlen(str)) {
       switch(str[i])
       {
          case '\n': vga_newline(); break;

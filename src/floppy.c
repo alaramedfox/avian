@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-
+#include <errors.h>
 #include <asmfunc.h>
 #include <pic.h>
 #include <time.h>
@@ -239,6 +239,7 @@ static int floppy_seek(byte track)
       floppy_sense_interrupt();
       floppy_reset();
       floppy_stop_motor(0);
+      throw(this, FDC_TMO);
       return FDC_TMO; // IRQ timed out
    }
    
@@ -248,9 +249,11 @@ static int floppy_seek(byte track)
    
    /* Ensure that the seek worked */
    if(floppy_current_track != track) {
+      throw(this, FDC_IOERR);
       return FDC_IOERR; // Track align fail
    }
    else if(floppy_status != 0x20) {
+      throw(this, FDC_STATUS);
       return FDC_STATUS; // Bad status
    }
    else {
@@ -299,7 +302,7 @@ static int floppy_read_byte(byte* data)
       }
       floppy_reset();
    );
-   if(!status) print("IO Error\n");
+   if(!status) throw(this, FDC_IOERR);
    return FDC_IOERR;
 }
 
@@ -317,7 +320,7 @@ static int floppy_send_byte(byte data)
       }
       floppy_reset();
    );
-   if(!status) print("IO Error\n");  
+   if(!status) throw(this, FDC_IOERR);  
    return FDC_IOERR;
 }
 
@@ -360,6 +363,7 @@ static int floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
    
    if(seek_status) {
       status = seek_status;
+      throw(this, status);
       goto exit;
    }
    

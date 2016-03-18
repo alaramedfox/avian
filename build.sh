@@ -153,10 +153,10 @@ function update {
 function run {
    if [ $LOCAL = "1" ]; then
       printf "$INFO Executing kernel-alpha with QEMU...\n"
-      qemu-system-i386 -kernel bin/kernel-alpha -fda test.img -rtc base=localtime,clock=host,driftfix=slew
+      qemu-system-i386 -kernel bin/kernel-alpha -fda test.img -m 1
    else
 	   printf "$INFO Executing grub-test.img with QEMU...\n"
-	   qemu-system-i386 -fda temp.img -no-shutdown -rtc base=localtime,clock=host,driftfix=slew
+	   qemu-system-i386 -fda temp.img -no-shutdown -m 1
 	fi
 	return
 }

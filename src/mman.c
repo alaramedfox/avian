@@ -8,6 +8,7 @@
 #include <mman.h>
 
 #include <stdlib.h>
+#include <errors.h>
 //#include <string.h>
 #include <util.h>
 
@@ -70,6 +71,7 @@ void* malloc(const size_t size)
          return (void*)address;
       }
    }
+   throw(this,64);
    return 0;
 }
 

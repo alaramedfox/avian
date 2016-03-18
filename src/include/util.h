@@ -8,7 +8,7 @@
 
 #include <stdlib.h>
 #define this __func__
-#define ASSERT(expr) trace_function(__func__); expr
+#define ASSERT(expr) trace_function(this); expr
 
 typedef union __PAIR16
 {

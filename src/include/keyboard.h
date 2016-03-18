@@ -6,14 +6,9 @@
 //      Purpose:         Header for keyboard driver
 // ======================================================================== */
  
-#include <stack.h>
-#include <asmfunc.h>
+#include <stdlib.h>
 
-char* kb_buffer(void);
 void kb_init(void);
-void kb_enter(void);
-void kb_backspace(void);
-void kb_undef_char(void);
 
 void keyboard_handler(void);
 

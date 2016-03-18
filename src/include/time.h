@@ -15,5 +15,6 @@
 
 void sleep(int);
 void usleep(int);
+short get_bios_ticks(void);
 
 #endif

@@ -8,6 +8,13 @@
 #include <time.h>
 #include <asmfunc.h>
 
+volatile short* const bios_ticks = (short*)0x046C;
+
+short get_bios_ticks(void)
+{
+   return *bios_ticks;
+}
+
 void usleep(int mcs)
 {
    for(int i=0; i<mcs; i++) {

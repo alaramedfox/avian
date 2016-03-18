@@ -12,7 +12,7 @@ MEMORY
 */
 SECTIONS
  {
-   . = 0x100000;
+   . = 0x7E00;
    .mbh  : { *(.mbh)  }
    .text : { *(.text) }
    .data : { *(.data) }

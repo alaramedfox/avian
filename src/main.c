@@ -7,7 +7,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-
+#include <stdio.h>
 
 #include <vga.h>
 #include <envar.h>
@@ -57,7 +57,13 @@ void avian_main(void)
    read(file);
    print("Contents of file: `"); print((char*)file->data); print("'\n");
    
-   char* newcontent = new_str("This is the new file content");
+   print("Enter the new content: `"); 
+   
+   char* newcontent = (char*) malloc(128);
+   scan(newcontent, 128);
+   chomp(newcontent);
+   print("\n");
+   
    write(file, newcontent);
    free(newcontent);
    
@@ -78,7 +84,7 @@ void avian_main(void)
 bool main_loop(void)
 {  
    //sleep(1000);
-   //print("One second has passed\n");
+   print("\rBios ticks: "); iprint(get_bios_ticks(),DEC);
    return true;
 }
 
