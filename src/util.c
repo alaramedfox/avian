@@ -9,16 +9,11 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include <vga.h>
 
-#define psizeof(T)            \
-   vga_setcolor(0x02);        \
-   print(#T);                 \
-   vga_setcolor(0x07);        \
-   print("\t(");              \
-   iprint(sizeof(T)*8,DEC);   \
-   print(")\t")
+#define psizeof(T)   printf("%#%s%#\t(%i)\t",0x02,#T,0x07,sizeof(T)*8)
 
 void types_test(void)
 {
@@ -34,20 +29,12 @@ void types_test(void)
 
 void trace_function(const char function[])
 {
-   print("[ ");            
-   vga_setcolor(0x05);     
-   print(function);        
-   vga_setcolor(0x07);     
-   print(" ] ");          
+   printf("[ %#%s%# ]",MAGENTA,function,GREY);
 }
 
 void notify_progress(const char str[], int current, int target)
 {
-   print(str);
-   print(" ("); iprint(current,DEC); print("/");
-   iprint(target,DEC); print(")");
-   if(current >= target) print("\n");
-   else print("\r");
+   printf("%s (%i/%i)%c", str, current, target, current==target?'\n':'\r');
 }
 
 

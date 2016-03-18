@@ -104,8 +104,17 @@ void vga_write(char value)
 
 void addch(const char c)
 {
-   vga_write(c);
-   vga_increment();
+   switch(c)
+   {
+      case '\n': vga_newline(); break;
+      case '\r': vga_creturn(); break;
+      case '\t': vga_tabchar(); break;
+      
+      default: 
+         vga_write(c);
+         vga_increment();
+         break;
+   }
 }
 
 void vga_color(byte value) 
@@ -116,15 +125,8 @@ void vga_color(byte value)
 void print(const char str[])
 {
    for(size_t i=0; str[i] != '\0'; i++) {
-   //foreach(i, strlen(str)) {
-      switch(str[i])
-      {
-         case '\n': vga_newline(); break;
-         case '\r': vga_creturn(); break;
-         case '\t': vga_tabchar(); break;
-         
-         default: addch(str[i]); break;
-      }
+      addch(str[i]);
+      
    }
 }
 

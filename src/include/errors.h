@@ -1,5 +1,5 @@
-#ifndef FILE_H_INCLUDED
-#define FILE_H_INCLUDED
+#ifndef ERRORS_H_INCLUDED
+#define ERRORS_H_INCLUDED
 // ======================================================================== */
 //    Avian Kernel   Bryan Webb (C) 2016                               
 //    File:          avian/include/errors.h                                    

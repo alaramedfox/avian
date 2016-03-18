@@ -9,6 +9,7 @@
 #include <floppy.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include <errors.h>
 #include <asmfunc.h>
@@ -325,11 +326,7 @@ static int floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
    chs_t chs = lba_convert(lba);
    byte *dma_buffer = (byte*) malloc(bytes);
    
-   print("Floppy: Buffer");
-   print( read?" <-- ":" --> " ); print("sector ");
-   
-   iprint(lba,DEC);
-   print("\r");
+   printf("Floppy: Buffer %s sector %i\r", read?"<--":"-->",lba);
    
    floppy_start_motor(0);
    

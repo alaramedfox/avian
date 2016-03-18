@@ -6,6 +6,7 @@
 // ======================================================================== */
 
 #include <stdio.h>
+#include <stdarg.h>
 #include <vga.h>
 #include <string.h>
 #include <envar.h>
@@ -19,6 +20,60 @@ extern volatile char key;
 // ========================================================================= //
 //       Public API Implementation                                           //
 // ========================================================================= //
+
+int printf(const char* format, ...)
+{
+   va_list args;
+   va_start(args, format);
+   bool escape = false;
+   char* str;
+   
+   foreach(i, strlen(format)) {
+
+      if(escape) {
+         switch(format[i])
+         {
+            case '#':
+               vga_setcolor(va_arg(args,int));
+               break;
+            case 'c': 
+               addch(va_arg(args,int)); 
+               break;
+            case 'd':
+            case 'i':
+               str = (char*) malloc(11);
+               itoa(va_arg(args,int), DEC, str);
+               print(str);
+               free(str);
+               break;
+            case 's':
+               str = va_arg(args,char*);
+               print(str);
+               break;
+            case 'x':
+            case 'X':
+               str = (char*) malloc(11);
+               itoa(va_arg(args,int), HEX, str);
+               print(str);
+               free(str);
+               break;
+            case '%':
+               addch('%');
+               break;
+            default: break;
+         }
+         escape = false;
+      }
+      else if(format[i] == '%') {
+         escape = true;
+      }
+      else {
+         addch(format[i]);
+      }
+   }
+   va_end(args);
+   return 1;
+}
 
 int scan(char* buffer, size_t len)
 {

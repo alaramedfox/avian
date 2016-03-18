@@ -61,7 +61,7 @@ void vga_color   (byte);          //Safely write to vram[vptr+1]
 void addch(char);
 void print(const char[]);
 void println(const char[]);
-void iprint(dword, byte);
+//void iprint(dword, byte);
 void printxy(byte,byte,const char[]);
 
 /* Special characters */

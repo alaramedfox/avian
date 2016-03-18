@@ -47,12 +47,12 @@ void avian_main(void)
    print("AnicaFS: Allocation of Nodes by Indexed Cluster Addresses\n");
    
    //anica_format_device(2880, 512, 1);
-   
+/*
    volume_t* floppy = mount(fda);
    file_t* file = open(floppy, "TEST.TXT", ANICA_WRITE);
    
    read(file);
-   print("Contents of file: `"); print((char*)file->data); print("'\n");
+   printf("Contents of file: `%s'\n",file->data);
    
    print("Enter the new content: "); 
    
@@ -65,10 +65,10 @@ void avian_main(void)
    free(newcontent);
    
    read(file);
-   print("Contents of file: `"); print((char*)file->data); print("'\n");
-   
+   printf("Contents of file: `%s'\n",file->data);
+    
    unmount(floppy);
-   
+*/  
    print("\nTest complete\n");
    
    while(main_loop());
@@ -81,7 +81,6 @@ void avian_main(void)
 bool main_loop(void)
 {  
    //sleep(1000);
-   print("\rBios ticks: "); iprint(get_bios_ticks(),DEC);
    return true;
 }
 
