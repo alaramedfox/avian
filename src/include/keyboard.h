@@ -30,7 +30,7 @@ enum __SPECIAL_KEYS
 {
    LSHIFT_DN=42, LSHIFT_UP=170,
    RSHIFT_DN=54, RSHIFT_UP=182,
-   CAPS_DN=11,
+   CAPS_DN=91,
 };
 
 struct __KEYMAP 

@@ -40,7 +40,7 @@ struct __KEYMAP KEYMAP = {
    },
    .uppercase = {
       '\0',
-      ESC,  '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '\b',
+      ESC,  '!', '@', '#', '$', '%', '^', '&', '*', '(', '!', '_', '+', '\b',
       '\t', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', '\n',
       CTRL, 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"', '~', LSHIFT, '|',
             'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?', 
@@ -79,7 +79,7 @@ void keyboard_handler(void)
       else if(keycode == LSHIFT_DN || keycode == RSHIFT_DN) { shift = true;  }
       else if(keycode == CAPS_DN) { caps = !caps; }
       else if(keycode < 127) {
-         if(shift) {
+         if(shift || caps) {
             ENVAR.FLAGS.keypress = true;
             key = KEYMAP.uppercase[keycode];
          }
