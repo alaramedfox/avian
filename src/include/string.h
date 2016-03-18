@@ -14,6 +14,7 @@ typedef enum __BASE
    
 } base_t;
 
+void  chomp(char[]);
 char* new_str(const char[]);
 
 void* memchr(const void *str, int c, size_t n);

@@ -16,12 +16,14 @@
 #include <pic.h>
 #include <idt.h>
 #include <util.h>
-#include <stack.h>
 #include <envar.h>
+#include <vga.h>
 
- 
-/* Create character buffer */
-stack * stdin;
+volatile char key;
+volatile bool press;
+
+static volatile bool shift;
+static volatile bool caps;
 
 /* Define the keyboard map */ 
 struct __KEYMAP KEYMAP = {
@@ -49,64 +51,41 @@ struct __KEYMAP KEYMAP = {
    }
 };
 
-char* kb_buffer(void)
-{
-   return stack_str(stdin);
-}
-
 
 void kb_init(void)
 {
-   idt_add_handler((addr_t)keyboard_handler, IRQ_KEYBOARD);
+   key = 0;
+   shift = false;
+   caps = false;
+   
+   idt_add_handler((addr_t)keyboard_irq, IRQ_KEYBOARD);
    pic_enable_irq(IRQ_KEYBOARD);
-   stdin = new_stack(128);
    
    notify(this, "Started keyboard driver\n");
 }
 
-/* Special character handlidng */
-void enter()          { push(stdin,'\n');   }
-void backspace()       { pop(stdin);          }
-void undef_char()    { push(stdin,'?');   }
-
 void keyboard_handler(void)
 {
+   //print("Caught KB IRQ\n");
    byte status = inportb(KB_STATUS);
    word keycode;
-   char key;
-   
-   //ASSERT("Caught keyboard IRQ",ENVAR.FLAGS.listen,status,HEX);
-   
-   /* Do not continue if system isn't listening */
-   if(ENVAR.FLAGS.listen == false) { return; }
 
    /* Lowest bit of status will be set if buffer is not empty */
    if (status & 0x01) {
-      ENVAR.FLAGS.keypress = true;
       keycode = inportb(KB_DATA);
       
       /* Consider keycodes */
-      if(keycode == LSHIFT_UP || keycode == RSHIFT_UP) {
-         ENVAR.FLAGS.shift = false;
-      }
-      else if(keycode == LSHIFT_DN || keycode == RSHIFT_DN) {
-         ENVAR.FLAGS.shift = true;
-      }
-      else if(keycode == CAPS_DN) {
-         ENVAR.FLAGS.caps = !ENVAR.FLAGS.caps;
-      }
+           if(keycode == LSHIFT_UP || keycode == RSHIFT_UP) { shift = false; }
+      else if(keycode == LSHIFT_DN || keycode == RSHIFT_DN) { shift = true;  }
+      else if(keycode == CAPS_DN) { caps = !caps; }
       else if(keycode < 127) {
-         if(ENVAR.FLAGS.shift) {
+         if(shift) {
+            ENVAR.FLAGS.keypress = true;
             key = KEYMAP.uppercase[keycode];
          }
          else {
+            ENVAR.FLAGS.keypress = true;
             key = KEYMAP.lowercase[keycode];
-         }
-         switch(key)
-         {
-            case '\b': backspace();    break;
-            case '\0':                   break;
-            default: push(stdin,key);   break;
          }
       }
    } /* if(status...) */

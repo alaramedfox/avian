@@ -13,6 +13,13 @@
 static const char place_value[] = "0123456789ABCDEF";
 static const char bytes_magnitude[] = "BKMGTP";
 
+void chomp(char str[])
+{
+   int i=0;
+   while(str[i++] != '\n');
+   str[i-1] = 0;
+}
+
 char* new_str(const char str[])
 {  
 
@@ -76,7 +83,7 @@ void itoa(uint32_t number, base_t base, char str[])
       return;
    }
    else if(base == BOOLEAN) {
-      str = number?"1":"0";
+      str = number?"true":"false";
       return;
    }
    else if(base == 0 || number == 0) {

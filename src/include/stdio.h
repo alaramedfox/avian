@@ -6,6 +6,12 @@
 //      Purpose:        C Standard Library - Input / Output
 // ======================================================================== */
 
-int printf(const char* format, void* obj);
+#include <stdlib.h>
+
+typedef uint32_t fpos_t;
+
+int printf(const char* format, ... );
+
+int scan(char* buffer, size_t len);
 
 #endif
