@@ -1,9 +1,9 @@
 #define MAIN_C_SOURCE
-/*  
- *      Avian Kernel - Bryan Webb
- *        File:      main.c
- *        Purpose:   Main loop, definitions, and primary entry point.
- */
+// ========================================================================= //
+//    Avian Kernel   Bryan Webb (C) 2016
+//    File:          main.c
+//    Purpose:       Kernel entry point and testing ground
+// ========================================================================= //
 
 #include <stdlib.h>
 #include <string.h>
@@ -23,12 +23,11 @@
 #include <filesystem.h>
 
 void init(void);
-bool main_loop(void);
 void bootscreen(void);
 
 void init(void) 
 {  
-   //types_test();
+   types_test();
    //colors_test();
    exceptions_init();
    hide_cursor();
@@ -45,46 +44,12 @@ void avian_main(void)
 {  
    bootscreen();
    init();
-   
-   //printf("AnicaFS: Allocation of Nodes by Indexed Cluster Addresses\n");
-   
-   //anica_format_device(2880, 512, 1);
-/*
-   volume_t* floppy = mount(fda);
-   file_t* file = open(floppy, "TEST.TXT", ANICA_WRITE);
-   
-   read(file);
-   printf("Contents of file: `%s'\n",file->data);
-   
-   print("Enter the new content: "); 
-   
-   char* newcontent = (char*) malloc(128);
-   scan(newcontent, 128);
-   chomp(newcontent);
-   print("\n");
-   
-   write(file, newcontent);
-   free(newcontent);
-   
-   read(file);
-   printf("Contents of file: `%s'\n",file->data);
     
-   unmount(floppy);
-*/  
    printf("Entering shell\n");
-   
-   //while(main_loop());
    shell();
-   
    
    vga_clear();
    printf("Kernel has shut down\n");
-}
-
-bool main_loop(void)
-{  
-   //sleep(1000);
-   return true;
 }
 
 void bootscreen(void)
@@ -92,7 +57,7 @@ void bootscreen(void)
    vga_setcolor(0x07);
    vga_clear();
    vga_setcolor(C_BLUESCR);
-
+   
    int location = vga_getloc();
    for(size_t i=0; i<80; i++)    { addch(HLINE1); }
    vga_moveptr(location+4);

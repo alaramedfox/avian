@@ -26,7 +26,7 @@ static const char bytes_sizes[2][6] = {
       "bkmgtp",
 };
 
-char** split(char delim, const char str[])
+char** split(char delim, char ignore, const char str[])
 {
    char** array = (char**) malloc(20);
    int pword = 0;
@@ -37,6 +37,9 @@ char** split(char delim, const char str[])
          pletter = 0;
          pword++;
          array[pword] = (char*) malloc(80);
+      }
+      else if(str[i] == ignore) {
+         /* Do nothing */
       }
       else {
          array[pword][pletter++] = str[i];
@@ -88,14 +91,6 @@ void reverse(char s[])
       s[j] = c;
    }
 }
-#define KR 0
-#if KR
-void itoa(uint32_t n, base_t b, char s[])
-{
-   int i,g;if((g=n)<0)n=-n;i=0;do{s[i++]=n%b+'0';}while((n/=b)>0);
-   if(g<0)s[i++]='-';s[i]='\0';reverse(s);
-}
-#else
 
 void itoa(uint32_t number, base_t base, char str[])
 {  
@@ -129,7 +124,7 @@ void itoa(uint32_t number, base_t base, char str[])
       if(pos) reverse(str);
    }
 }
-#endif
+
 char *strcat(char *dest, const char *src)
 {
    char *tmp = dest;

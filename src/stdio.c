@@ -26,6 +26,17 @@ static void print(const char str[])
    }
 }
 
+static void iprint(int num, int base, int chcase, bool prefix)
+{
+   itoa_case = chcase;
+   itoa_hex_prefix = prefix;
+   
+   char* str = (char*) malloc(11);
+   itoa(num, base, str);
+   print(str);
+   free(str);
+}
+
 // ========================================================================= //
 //       Public API Implementation                                           //
 // ========================================================================= //
@@ -35,51 +46,25 @@ int printf(const char* format, ...)
    va_list args;
    va_start(args, format);
    bool escape = false;
-   char* str;
+   bool long_escape = false;
    
    foreach(i, strlen(format)) {
       if(escape) {
          switch(format[i])
          {
-            case '#':
-               vga_setcolor(va_arg(args,int));
-               break;
-            case 'c': 
-               addch(va_arg(args,int)); 
-               break;
+            case '{': long_escape = true;                break;
+            case '}': long_escape = false;               break;
+            case '#': vga_setcolor(va_arg(args,int));    break;
+            case 'c': addch(va_arg(args,int));           break;
             case 'd':
-            case 'i':
-               str = (char*) malloc(11);
-               itoa(va_arg(args,int), DEC, str);
-               print(str);
-               free(str);
-               break;
-            case 's':
-               str = va_arg(args,char*);
-               print(str);
-               break;
-            case 'x':
-               itoa_hex_prefix = true;
-               itoa_case = LOWERCASE;
-               str = (char*) malloc(11);
-               itoa(va_arg(args,int), HEX, str);
-               print(str);
-               free(str);
-               break;
-            case 'X':
-               itoa_hex_prefix = false;
-               itoa_case = UPPERCASE;
-               str = (char*) malloc(11);
-               itoa(va_arg(args,int), HEX, str);
-               print(str);
-               free(str);
-               break;
-            case '%':
-               addch('%');
-               break;
+            case 'i': iprint(va_arg(args,int),DEC,0,0);  break;
+            case 's': print(va_arg(args,char*));         break;
+            case 'x': iprint(va_arg(args,int),HEX,1,1);  break;
+            case 'X': iprint(va_arg(args,int),HEX,0,0);  break;
+            case '%': addch('%');                        break;
             default: break;
          }
-         escape = false;
+         escape = false || long_escape;
       }
       else if(format[i] == '%') {
          escape = true;

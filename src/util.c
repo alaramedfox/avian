@@ -13,16 +13,16 @@
 
 #include <vga.h>
 
-#define psizeof(T)   printf("%#%s%#\t(%i)\t",0x02,#T,0x07,sizeof(T)*8)
+#define psizeof(T)   printf("%{#s#}\t(%i)\t",0x02,#T,0x07,sizeof(T)*8)
 
 void types_test(void)
 {
    vga_tabsize(10);
-   printf(" C Standard:\tC Library:\tFixed-width:\tCustom Avian:\n");
-   printf(" "); psizeof(char);  psizeof(size_t);    psizeof(int8_t);  psizeof(byte); printf("\n");
-   printf(" "); psizeof(short); psizeof(ptrdiff_t); psizeof(int16_t); psizeof(word); printf("\n");
-   printf(" "); psizeof(int);   psizeof(intptr_t);  psizeof(int32_t); psizeof(dword); printf("\n");
-   printf(" "); psizeof(long);  psizeof(intmax_t);  psizeof(int64_t); psizeof(addr_t); printf("\n");
+   printf("- C Standard:\tC Library:\tFixed-width:\tCustom Avian:\n");
+   printf("- "); psizeof(char);  psizeof(size_t);    psizeof(int8_t);  psizeof(byte); printf("\n");
+   printf("- "); psizeof(short); psizeof(ptrdiff_t); psizeof(int16_t); psizeof(word); printf("\n");
+   printf("- "); psizeof(int);   psizeof(intptr_t);  psizeof(int32_t); psizeof(dword); printf("\n");
+   printf("- "); psizeof(long);  psizeof(intmax_t);  psizeof(int64_t); psizeof(addr_t); printf("\n");
    printf("\n");
    vga_tabsize(5);
 }
@@ -33,8 +33,6 @@ void colors_test(void)
    foreach(i, 256) {
       if(i<16) printf("%#  #%X %#",i,i,0x07);
       else printf("%# #%X %#",i,i,0x07);
-      //if(i%16==0 && i) printf("\n");
-      
    }
    vga_setcolor(0x07);
    vga_tabsize(5);

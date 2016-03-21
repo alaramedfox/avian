@@ -19,7 +19,7 @@ enum __ITOA_CASES
    UPPERCASE = 0, LOWERCASE = 1,
 };
 
-char** split(char, const char[]);
+char** split(char, char, const char[]);
 void  chomp(char[]);
 char* new_str(const char[]);
 
