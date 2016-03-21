@@ -122,26 +122,6 @@ void vga_color(byte value)
    vga->buffer[vga->vptr*2+1] = value; 
 }
 
-void print(const char str[])
-{
-   for(size_t i=0; str[i] != '\0'; i++) {
-      addch(str[i]);
-      
-   }
-}
-
-void println(const char str[])
-{
-   print(str); print("\n");
-}
-
-void iprint(dword val, byte base)
-{
-   char str[9];
-   itoa(val, base, str);
-   print(str);
-}
-
 void printxy(byte row, byte col, const char str[])
 {
    for(size_t i=0; str[i] != '\0'; i++) {

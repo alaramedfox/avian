@@ -12,10 +12,19 @@
 #include <envar.h>
 
 extern volatile char key;
+extern volatile int itoa_case;
+extern volatile bool itoa_hex_prefix;
 
 // ========================================================================= //
 //       Private variables and function prototypes                           //
 // ========================================================================= //
+
+static void print(const char str[])
+{
+   for(size_t i=0; str[i] != '\0'; i++) {
+      addch(str[i]);
+   }
+}
 
 // ========================================================================= //
 //       Public API Implementation                                           //
@@ -29,7 +38,6 @@ int printf(const char* format, ...)
    char* str;
    
    foreach(i, strlen(format)) {
-
       if(escape) {
          switch(format[i])
          {
@@ -51,7 +59,16 @@ int printf(const char* format, ...)
                print(str);
                break;
             case 'x':
+               itoa_hex_prefix = true;
+               itoa_case = LOWERCASE;
+               str = (char*) malloc(11);
+               itoa(va_arg(args,int), HEX, str);
+               print(str);
+               free(str);
+               break;
             case 'X':
+               itoa_hex_prefix = false;
+               itoa_case = UPPERCASE;
                str = (char*) malloc(11);
                itoa(va_arg(args,int), HEX, str);
                print(str);
@@ -75,15 +92,17 @@ int printf(const char* format, ...)
    return 1;
 }
 
-int scan(char* buffer, size_t len)
+int scan(char* buffer)
 {
+   key = 0;
    ENVAR.FLAGS.listen = true;
    ENVAR.FLAGS.keypress = false;
    int vga_loc = vga_getloc();
    size_t loc=0;
    move_cursor(vga_getrow(), vga_getcol());
+   //buffer = (char*) calloc(BUFSIZE, 1);
    
-   while(key != '\n' && loc < len)
+   while(key != '\n' && loc < BUFSIZE)
    {
       while(!ENVAR.FLAGS.keypress);
       
@@ -91,6 +110,9 @@ int scan(char* buffer, size_t len)
          if(loc) {
             buffer[--loc] = 0;
          }
+      }
+      else if(key == '\0') {
+         continue;
       }
       else {
          buffer[loc++] = key;

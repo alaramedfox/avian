@@ -26,6 +26,7 @@ typedef union __PAIR32
 
 void wait_spin(bool);
 void types_test(void);
+void colors_test(void);
 
 void trace_function(const char function[]);
 void notify_progress(const char[], int, int);

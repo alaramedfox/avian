@@ -10,8 +10,40 @@
 
 #include <stdlib.h>
 
-static const char place_value[] = "0123456789ABCDEF";
-static const char bytes_magnitude[] = "BKMGTP";
+/* Flag for which case to use for itoa */
+volatile int itoa_case = UPPERCASE;
+
+/* Flag for whether or not to use the '0x' hex prefix */
+volatile bool itoa_hex_prefix = true;
+
+static const char place_value[2][16] = { 
+      "0123456789ABCDEF",
+      "0123456789abcdef",
+};
+
+static const char bytes_sizes[2][6] = {
+      "BKMGTP",
+      "bkmgtp",
+};
+
+char** split(char delim, const char str[])
+{
+   char** array = (char**) malloc(20);
+   int pword = 0;
+   int pletter = 0;
+   foreach(i, strlen(str)) {
+      if(str[i] == delim) {
+         array[pword] = (char*) realloc(array[pword], pletter);
+         pletter = 0;
+         pword++;
+         array[pword] = (char*) malloc(80);
+      }
+      else {
+         array[pword][pletter++] = str[i];
+      }
+   }
+   return array;
+}
 
 void chomp(char str[])
 {
@@ -40,7 +72,7 @@ static inline void itoa_bytes(int number, char str[])
    
    itoa(number,10, str);
    int len = strlen(str);
-   str[len-2] = bytes_magnitude[magnitude];
+   str[len-2] = bytes_sizes[itoa_case][magnitude];
    str[len-1] = '\0';
 }
 
@@ -58,26 +90,15 @@ void reverse(char s[])
 }
 #define KR 0
 #if KR
-/* itoa:  convert n to characters in s */
- void itoa(uint32_t n, base_t base, char s[])
- {
-     int i, sign;
- 
-     if ((sign = n) < 0)  /* record sign */
-         n = -n;          /* make n positive */
-     i = 0;
-     do {       /* generate digits in reverse order */
-         s[i++] = n % base + '0';   /* get next digit */
-     } while ((n /= base) > 0);     /* delete it */
-     if (sign < 0)
-         s[i++] = '-';
-     s[i] = '\0';
-     reverse(s);
- }
+void itoa(uint32_t n, base_t b, char s[])
+{
+   int i,g;if((g=n)<0)n=-n;i=0;do{s[i++]=n%b+'0';}while((n/=b)>0);
+   if(g<0)s[i++]='-';s[i]='\0';reverse(s);
+}
 #else
-void itoa(uint32_t number, base_t base, char str[])
-{  //
 
+void itoa(uint32_t number, base_t base, char str[])
+{  
    if(base == BYTES) {
       itoa_bytes(number, str);
       return;
@@ -97,10 +118,10 @@ void itoa(uint32_t number, base_t base, char str[])
       while(number > 0)
       {
          i = number % base;
-         str[pos++] = place_value[i];
+         str[pos++] = place_value[itoa_case][i];
          number = number / base;
       }
-      if(base == HEX) {
+      if(base == HEX && itoa_hex_prefix) {
          str[pos++] = 'x';
          str[pos++] = '0';
       }

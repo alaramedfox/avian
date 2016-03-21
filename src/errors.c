@@ -22,7 +22,7 @@ static void print_badge(int severity)
 
 void throw(const char message[], int severity)
 {
-   if(vga_getcol() != 0) print("\n");
+   if(vga_getcol() != 0) printf("\n");
    print_badge(severity);
-   println(message);
+   printf("%s\n",message);
 }

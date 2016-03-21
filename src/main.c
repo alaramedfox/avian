@@ -1,5 +1,5 @@
 #define MAIN_C_SOURCE
-/* 
+/*  
  *      Avian Kernel - Bryan Webb
  *        File:      main.c
  *        Purpose:   Main loop, definitions, and primary entry point.
@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#include <lex.h>
 #include <vga.h>
 #include <envar.h>
 #include <idt.h>
@@ -27,7 +28,8 @@ void bootscreen(void);
 
 void init(void) 
 {  
-   types_test();
+   //types_test();
+   //colors_test();
    exceptions_init();
    hide_cursor();
    vga_setcolor(0x07);
@@ -36,7 +38,7 @@ void init(void)
    kb_init();         //Init keyboard driver
    floppy_init();
    
-   print("\nSystem booted.\n\n");
+   printf("\nSystem booted.\n\n");
 }
 
 void avian_main(void) 
@@ -44,7 +46,7 @@ void avian_main(void)
    bootscreen();
    init();
    
-   print("AnicaFS: Allocation of Nodes by Indexed Cluster Addresses\n");
+   //printf("AnicaFS: Allocation of Nodes by Indexed Cluster Addresses\n");
    
    //anica_format_device(2880, 512, 1);
 /*
@@ -69,13 +71,14 @@ void avian_main(void)
     
    unmount(floppy);
 */  
-   print("\nTest complete\n");
+   printf("Entering shell\n");
    
-   while(main_loop());
+   //while(main_loop());
+   shell();
    
    
    vga_clear();
-   print("Kernel has shut down\n");
+   printf("Kernel has shut down\n");
 }
 
 bool main_loop(void)
@@ -93,7 +96,7 @@ void bootscreen(void)
    int location = vga_getloc();
    for(size_t i=0; i<80; i++)    { addch(HLINE1); }
    vga_moveptr(location+4);
-   print("[ Avian Kernel version " VERSION " ]\n\n");
+   printf("[ Avian Kernel version " VERSION " ]\n\n");
    
    vga_setcolor(0x07);
 }
