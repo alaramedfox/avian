@@ -10,21 +10,27 @@
 
 #include <stdlib.h>
 
-/* Flag for which case to use for itoa */
+/**
+ *    Avian_Documentation: 
+ *    Flags that determine which letter case itoa() uses,
+ *    as well as whether or not to use the long notation
+ *    for various number bases. In hex, the long notation
+ *    adds a '0x' -- for human-readable data sizes, it adds
+ *    the xiB to the end (like KiB or MiB)
+ *
+ *    If uppercase, itoa_bytes() uses base-10 byte magnitudes
+ *    (1 MB = 1000 B). Otherwise, itoa_bytes() uses base-2
+ *    magnitudes (1 MiB = 1024 B).
+ */ 
 volatile int itoa_case = UPPERCASE;
-
-/* Flag for whether or not to use the '0x' hex prefix */
-volatile bool itoa_hex_prefix = true;
+volatile bool itoa_long = true;
 
 static const char place_value[2][16] = { 
       "0123456789ABCDEF",
       "0123456789abcdef",
 };
 
-static const char bytes_sizes[2][6] = {
-      "BKMGTP",
-      "bkmgtp",
-};
+static const char bytes_sizes[6] = "BKMGTP";
 
 /**
  *    Avian_Documentation:
@@ -40,7 +46,10 @@ size_t split(char delim, char ignore, const char str[], char** array)
    int pletter = 0;
    array[0] = (char*) calloc(80,1);
    foreach(i, strlen(str)) {
-      if(str[i] == delim) {
+      if(str[i] == delim && pletter == 0) {
+         /* Do nothing */
+      }
+      else if(str[i] == delim) {
          array[pword++][pletter] = 0;
          pletter = 0;
          array[pword] = (char*) calloc(80,1);
@@ -71,22 +80,43 @@ char* new_str(const char str[])
 
 static inline void itoa_bytes(int number, char str[])
 {  
-
    int magnitude = 0;
+   int divisor = itoa_case?1000:1024;
+   int rem = number % divisor;
    
-   while(number > 1024) {
-      number = number/1024;
+   while(number > divisor) {
+      number = number/divisor;
       magnitude++;
    }
    
    itoa(number,10, str);
    int len = strlen(str);
-   str[len-2] = bytes_sizes[itoa_case][magnitude];
-   str[len-1] = '\0';
+   
+   //if(rem > 100 && rem < (divisor-100)) {
+   if(rem != 0) {
+      char fraction[5];
+      itoa(rem, DEC, fraction);
+      //if(itoa_long) {
+         str[len++] = '.';
+         str[len++] = fraction[0];
+         //str[len++] = fraction[1];
+      //}
+   }
+   
+   if(itoa_long) str[len++] = ' ';
+   
+   str[len++] = bytes_sizes[magnitude];
+   
+   if(itoa_long && magnitude) {
+      if(!itoa_case) { str[len++] = 'i'; }
+      str[len++] = 'B';
+      
+   }
+   str[len] = '\0';
 }
 
 void reverse(char s[])
-{  //
+{
    if(strlen(s) <= 1) return;
    int i, j;
    char c;
@@ -122,7 +152,7 @@ void itoa(uint32_t number, base_t base, char str[])
          str[pos++] = place_value[itoa_case][i];
          number = number / base;
       }
-      if(base == HEX && itoa_hex_prefix) {
+      if(base == HEX && itoa_long) {
          str[pos++] = 'x';
          str[pos++] = '0';
       }

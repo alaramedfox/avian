@@ -13,7 +13,7 @@
 
 extern volatile char key;
 extern volatile int itoa_case;
-extern volatile bool itoa_hex_prefix;
+extern volatile bool itoa_long;
 
 // ========================================================================= //
 //       Private variables and function prototypes                           //
@@ -29,7 +29,7 @@ static void print(const char str[])
 static void iprint(int num, int base, int chcase, bool prefix)
 {
    itoa_case = chcase;
-   itoa_hex_prefix = prefix;
+   itoa_long = prefix;
    
    char* str = (char*) malloc(11);
    itoa(num, base, str);
@@ -62,6 +62,8 @@ int printf(const char* format, ...)
             case 'x': iprint(va_arg(args,int),HEX,1,1);  break;
             case 'X': iprint(va_arg(args,int),HEX,0,0);  break;
             case '%': addch('%');                        break;
+            case 'h': iprint(va_arg(args,int),BYTES,0,1);break;
+            case 'H': iprint(va_arg(args,int),BYTES,1,1);break;
             default: break;
          }
          escape = false || long_escape;

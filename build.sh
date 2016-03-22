@@ -20,7 +20,7 @@ CINC=" -Isrc/include -Isrc/asm "
 CWARN=" -Wall -Wextra -Werror -Wfatal-errors "
 #CWARN=" -Wfatal-errors "
 
-SOURCES=(" src src/asm")
+SOURCES=(" src src/asm src/lex ")
 
 function increment_file {
 	file=$1

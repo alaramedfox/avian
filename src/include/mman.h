@@ -53,7 +53,7 @@ typedef struct __TABLE_MAP
  *    static methods.
  */
 
-__attribute__((hot)) size_t   mem_blocks(void); 
+__attribute__((hot)) size_t     mem_blocks(void); 
 __attribute__((hot)) uint32_t   mem_used(void);
 __attribute__((hot)) uint32_t   mem_free(void);
 
