@@ -19,7 +19,7 @@
 #include <envar.h>
 #include <vga.h>
 
-volatile char key;
+volatile word key;
 volatile bool press;
 
 static volatile bool shift;

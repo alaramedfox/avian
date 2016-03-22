@@ -66,9 +66,12 @@ size_t split(char delim, char ignore, const char str[], char** array)
 
 void chomp(char str[])
 {
-   int i=0;
-   while(str[i++] != '\n');
-   str[i-1] = 0;
+   foreach(i, strlen(str)) {
+      if(str[i] == '\n') {
+         str[i] = 0;
+         break;
+      }
+   }
 }
 
 char* new_str(const char str[])
@@ -92,15 +95,11 @@ static inline void itoa_bytes(int number, char str[])
    itoa(number,10, str);
    int len = strlen(str);
    
-   //if(rem > 100 && rem < (divisor-100)) {
-   if(rem != 0) {
+   if(magnitude && rem > 100 && rem < (divisor-100)) {
       char fraction[5];
       itoa(rem, DEC, fraction);
-      //if(itoa_long) {
-         str[len++] = '.';
-         str[len++] = fraction[0];
-         //str[len++] = fraction[1];
-      //}
+      str[len++] = '.';
+      str[len++] = fraction[0];
    }
    
    if(itoa_long) str[len++] = ' ';

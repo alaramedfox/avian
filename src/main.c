@@ -45,14 +45,6 @@ void avian_main(void)
 {  
    bootscreen();
    init();
-   //word* ticks = (word*)0x046C;
-   //srand(*ticks);
-   
-   for(int i=0; i<8; i++) {
-      int r = rand();
-      printf("%i=`%h' ",r,r);
-   }
-   printf("\n");
     
    printf("Entering shell\n");
    shell();

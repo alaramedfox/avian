@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <mman.h>
+#include <util.h>
 
 // ========================================================================= //
 //       Private variables and function prototypes                           //
@@ -20,6 +21,7 @@ static void lex_list_help(void);
 static void lex_list_dir(void);
 static void lex_list_memory(void);
 static void lex_list_unknown(char);
+static void lex_list_vars(void);
 
 // ========================================================================= //
 //       Public API Implementation                                           //
@@ -35,6 +37,7 @@ void lex_list(int argc, char* argv[])
             case 'h': lex_list_help(); break;
             case 'm': lex_list_memory(); break;
             case 'd': lex_list_dir(); break;
+            case 'v': lex_list_vars(); break;
             
             default: lex_list_unknown(argv[1][0]); break;
          }
@@ -56,15 +59,21 @@ static void lex_list_help(void)
    printf("m     Memory usage statistics\n");
    printf("d     Contents of current directory\n");
    printf("h     Print this help information\n");
+   printf("v     Print the size of internal variables\n");
    printf("-- more to come --\n");
 }
 
 static void lex_list_memory(void)
 {
-   printf("Total RAM        %h\t(%i bytes)\n",ALLOC_SIZE, ALLOC_SIZE);
-   printf("Memory used      %h\t(%i bytes)\n",mem_used(), mem_used());
-   printf("Memory free      %h\t(%i bytes)\n",mem_free(), mem_free());
-   printf("Blocks allocated   %i\n",mem_blocks());
+   printf("  Total     %h\t(%i bytes)\n",ALLOC_SIZE, ALLOC_SIZE);
+   printf("  Used      %h\t(%i bytes)\n",mem_used(), mem_used());
+   printf("  Free      %h\t(%i bytes)\n",mem_free(), mem_free());
+   printf("  Blocks    %i\n\n",mem_blocks());
+}
+
+static void lex_list_vars(void)
+{
+   types_test();
 }
 
 static void lex_list_dir(void)

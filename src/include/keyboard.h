@@ -21,7 +21,7 @@ enum __EXTENDED_CHARS
 
 enum __EXTENDED_KEYS 
 {
-   ESC, ALT, CAPS, CTRL, LSHIFT, RSHIFT, F1, F2, F3, F4, F5, F6, F7, F8,
+   ESC=256, ALT, CAPS, CTRL, LSHIFT, RSHIFT, F1, F2, F3, F4, F5, F6, F7, F8,
    F9, F10, F11, F12, NUM, SCR, HOME, UARROW, DARROW, LARROW, RARROW,
    PGUP, PGDN, END, INS, DEL, LGUI, RGUI, APPS,
 };
@@ -35,8 +35,8 @@ enum __SPECIAL_KEYS
 
 struct __KEYMAP 
 {
-   unsigned char lowercase[93];
-   unsigned char uppercase[93];
+   word lowercase[93];
+   word uppercase[93];
 };
 
 

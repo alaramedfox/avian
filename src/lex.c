@@ -63,18 +63,18 @@ int shell(void)
       /* Gather and chomp the input */
       input = (char*) calloc(80,1);
       scan(input);
+      printf("\nA");
       chomp(input);
+      //printf("\n");
       
       /* Splice the command and args from input */
+      printf("B");
       char** argv = (char**) malloc(20);
+      printf("C");
       int argc = split(' ', 0, input, argv);
       
-      foreach(i, argc) {
-         printf("[%s] ",argv[i]);
-      }
-      printf("\n");
-      
       /* Send the list to the command processor */
+      printf("D\n");
       lex_execute(argc, argv);
       
       /* Clean up */
