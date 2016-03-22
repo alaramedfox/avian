@@ -12,7 +12,7 @@
 //       Public API Prototypes                                               //
 // ========================================================================= //
 
-void lex_add_command(char*, void (*function)(char[])); 
+void lex_add_command(char*, void (*function)(int argc, char* argv[])); 
 int shell(void);
 
 #endif

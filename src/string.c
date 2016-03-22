@@ -26,17 +26,24 @@ static const char bytes_sizes[2][6] = {
       "bkmgtp",
 };
 
-char** split(char delim, char ignore, const char str[])
+/**
+ *    Avian_Documentation:
+ *    Splits the given string @str according to the provided
+ *    delimiter @delim. If the character given by @ignore appears,
+ *    it is ignored. The resulting array of substrings is written
+ *    to the provided array @array
+ *    The function returns the number of elements split.
+ */
+size_t split(char delim, char ignore, const char str[], char** array)
 {
-   char** array = (char**) malloc(20);
    int pword = 0;
    int pletter = 0;
+   array[0] = (char*) calloc(80,1);
    foreach(i, strlen(str)) {
       if(str[i] == delim) {
-         array[pword] = (char*) realloc(array[pword], pletter);
+         array[pword++][pletter] = 0;
          pletter = 0;
-         pword++;
-         array[pword] = (char*) malloc(80);
+         array[pword] = (char*) calloc(80,1);
       }
       else if(str[i] == ignore) {
          /* Do nothing */
@@ -45,7 +52,7 @@ char** split(char delim, char ignore, const char str[])
          array[pword][pletter++] = str[i];
       }
    }
-   return array;
+   return pword+1;
 }
 
 void chomp(char str[])
@@ -57,7 +64,6 @@ void chomp(char str[])
 
 char* new_str(const char str[])
 {  
-
    char* newstr = (char*) malloc(strlen(str));
    memcpy(newstr, str, strlen(str));
    return newstr;

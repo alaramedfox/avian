@@ -16,28 +16,27 @@
 //       Private variables and function prototypes                           //
 // ========================================================================= //
 
-static void lex_execute(char*,char*);
-
-static void lex_test(char args[])
-{
-   printf("The arguments are: %s\n",args);
-}
-
-static const char prompt[] = "Lex: ";
+static void lex_execute(int, char**);
 
 typedef struct __LEX_INDEX
 {
    char* cmd;
-   void (*function)(char args[]);
+   void (*function)(int argc, char* argv[]);
 
 } lex_index_t;
 
+static const char prompt[] = "Lex: ";
 static lex_index_t command_index[256];
 static size_t lex_index_size = 0;
 
 // ========================================================================= //
 //       Public API Implementation                                           //
 // ========================================================================= //
+
+void lex_init(void)
+{
+   
+}
 
 /**
  *    Main Shell Loop
@@ -47,8 +46,6 @@ static size_t lex_index_size = 0;
  */
 int shell(void)
 {
-   lex_add_command("test",lex_test);
-   
    char* input;
    while(true)
    {
@@ -60,19 +57,28 @@ int shell(void)
       chomp(input);
       
       /* Splice the command and args from input */
-      char* command = split(' ', 0, input)[0];
-      char* args = (input+strlen(command)+1);
+      char** argv = (char**) malloc(20);
+      int argc = split('-', ' ', input, argv);
+      
+      foreach(i, argc) {
+         printf("[%s] ",argv[i]);
+      }
+      printf("\n");
       
       /* Send the list to the command processor */
-      lex_execute(command, args);
+      lex_execute(argc, argv);
       
-      //printf("`%s'\n",input);
+      /* Clean up */
+      foreach(i, argc) {
+         free(argv[i]);
+      }
+      free(argv);
       free(input);
    }
    return 0;
 }
 
-void lex_add_command(char cmd[], void (*function)(char args[]))
+void lex_add_command(char cmd[], void (*function)(int argc, char* argv[]))
 {
    command_index[lex_index_size].cmd = cmd;
    command_index[lex_index_size].function = function;
@@ -83,15 +89,15 @@ void lex_add_command(char cmd[], void (*function)(char args[]))
 //       Private functions                                                   //
 // ========================================================================= //
 
-static void lex_execute(char* cmd, char* args)
+static void lex_execute(int argc, char* argv[])
 {
    foreach(i, lex_index_size) {
-      if(strcmp(cmd, command_index[i].cmd) == 0) {
-         command_index[i].function(args);
+      if(strcmp(argv[0], command_index[i].cmd) == 0) {
+         command_index[i].function(argc, argv);
          return;
       }
    }
-   printf("Unknown command `%s'\n",cmd);
+   printf("Unknown command `%s'\n",argv[0]);
 }
 
 

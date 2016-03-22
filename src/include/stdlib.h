@@ -11,11 +11,12 @@
 #include <stdbool.h>
 
 /* custom datatypes */
-typedef uint16_t    index_t;
-typedef uintptr_t addr_t;
-typedef uint8_t   byte;      //8-bit value      1 byte
-typedef uint16_t   word;      //16-bit value      2 bytes
-typedef uint32_t   dword;    //32-bit value      4 bytes
+typedef uint16_t   index_t;
+typedef uintptr_t  addr_t;
+typedef uint8_t    byte;     //8-bit value    1 byte
+typedef uint16_t   word;     //16-bit value   2 bytes
+typedef uint32_t   dword;    //32-bit value   4 bytes
+typedef uint64_t   qword;    //64-bit value   8 bytes
 
 /* Convert a symbol to a string */
 #define QW(str)   #str
@@ -26,7 +27,8 @@ typedef uint32_t   dword;    //32-bit value      4 bytes
 #define bitcheck(var,bit)   var & (1 << bit)
 
 /* This creates a `foreach' style loop */
-#define foreach(var, count)   for(uint32_t var=0; var<count; var++)
+#define typeof(T) __typeof__(T)
+#define foreach(var, count)   for(typeof(count) var=0; var<count; var++)
       
 /* This compresses the packed attribute into something smaller */
 #define FLAT   __attribute__((packed))
