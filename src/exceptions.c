@@ -19,6 +19,7 @@ void exceptions_init(void)
    foreach(i, 13) {
       idt_add_exception((addr_t)throw_exception, i);
    }
+   idt_add_exception((addr_t)throw_zero_divide, 0);
 }
 
 static void line_panic_screen(void)
@@ -67,6 +68,11 @@ void catch_exception(dword eip, byte exception)
    printf("\n\tError: %s",get_error_id(exception));
    printf("\n\tEIP: %x\t%x",eip,exception); 
    while(true);
+}
+
+void catch_zero_divide(dword eip)
+{
+   catch_exception(eip, 0);
 }
 
 

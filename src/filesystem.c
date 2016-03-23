@@ -81,6 +81,4 @@ void unmount(volume_t* volume)
 
 
 
-
-
 /* End File Allocation Table driver */

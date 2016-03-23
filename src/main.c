@@ -18,9 +18,7 @@
 #include <util.h>
 #include <buildcount.h>
 #include <floppy.h>
-#include <time.h>
 #include <filesystem.h>
-#include <random.h>
 
 void init(void);
 void bootscreen(void);

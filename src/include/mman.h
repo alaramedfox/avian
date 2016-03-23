@@ -32,7 +32,7 @@ enum __MMAP_DEFS
 typedef struct __TABLE_ENTRY 
 {
    addr_t    start;   //Starting address of memory block
-   size_t    size;      //Size of memory block in bytes
+   size_t    size;    //Size of memory block in bytes
    
 } FLAT mentry_t;
 
