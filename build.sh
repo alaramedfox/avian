@@ -15,7 +15,7 @@ ROOT="."
 OBJ="obj"
 BIN="bin"
 
-CFLAGS=" -mtune=i386 -m32 -ffreestanding -fno-exceptions -std=c99 "
+CFLAGS=" -mtune=i386 -m32 -ffreestanding -fno-exceptions -std=c99 -nostdlib "
 CINC=" -Isrc/include -Isrc/asm "
 CWARN=" -Wall -Wextra -Wfatal-errors "
 #CWARN=" -Wfatal-errors "

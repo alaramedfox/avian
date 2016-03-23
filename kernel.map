@@ -2,9 +2,9 @@
 Allocating common symbols
 Common symbol       size              file
 
-ENVAR               0x3               obj/envar.o
+listen              0x1               obj/keyboard.o
 key                 0x2               obj/keyboard.o
-press               0x1               obj/keyboard.o
+keypress            0x1               obj/keyboard.o
 
 Memory Configuration
 
@@ -19,310 +19,301 @@ Linker script and memory map
  *(.mbh)
  .mbh           0x0000000000100000        0xc obj/boot.o
 
-.rodata         0x0000000000100020      0xb20
+.rodata         0x0000000000100020      0xb00
  .rodata        0x0000000000100020       0x36 obj/anicafs.o
  .rodata        0x0000000000100056       0x30 obj/dma.o
- .rodata        0x0000000000100086       0x18 obj/envar.o
- .rodata        0x000000000010009e       0x30 obj/errors.o
- *fill*         0x00000000001000ce        0x2 
- .rodata        0x00000000001000d0      0x201 obj/exceptions.o
- *fill*         0x00000000001002d1        0x3 
- .rodata        0x00000000001002d4       0xd2 obj/floppy.o
- .rodata        0x00000000001003a6       0x18 obj/keyboard.o
- *fill*         0x00000000001003be        0x2 
- .rodata        0x00000000001003c0      0x152 obj/lex-list.o
- *fill*         0x0000000000100512        0x2 
- .rodata        0x0000000000100514       0xef obj/lex-term.o
- *fill*         0x0000000000100603        0x1 
- .rodata        0x0000000000100604      0x236 obj/lex.o
- *fill*         0x000000000010083a        0x2 
- .rodata        0x000000000010083c       0x5e obj/main.o
- *fill*         0x000000000010089a        0x2 
- .rodata        0x000000000010089c        0xb obj/mman.o
- *fill*         0x00000000001008a7        0x1 
- .rodata        0x00000000001008a8      0x16e obj/stdio.o
- *fill*         0x0000000000100a16        0xa 
- .rodata        0x0000000000100a20       0x31 obj/string.o
- *fill*         0x0000000000100a51        0x3 
- .rodata        0x0000000000100a54        0x4 obj/time.o
-                0x0000000000100a54                bios_ticks
- .rodata        0x0000000000100a58       0xe1 obj/util.o
- *fill*         0x0000000000100b39        0x3 
- .rodata        0x0000000000100b3c        0x4 obj/vga.o
+ .rodata        0x0000000000100086       0x30 obj/errors.o
+ *fill*         0x00000000001000b6        0x2 
+ .rodata        0x00000000001000b8      0x201 obj/exceptions.o
+ *fill*         0x00000000001002b9        0x3 
+ .rodata        0x00000000001002bc       0xd2 obj/floppy.o
+ .rodata        0x000000000010038e       0x18 obj/keyboard.o
+ *fill*         0x00000000001003a6        0x2 
+ .rodata        0x00000000001003a8      0x152 obj/lex-list.o
+ *fill*         0x00000000001004fa        0x2 
+ .rodata        0x00000000001004fc       0xef obj/lex-term.o
+ *fill*         0x00000000001005eb        0x1 
+ .rodata        0x00000000001005ec      0x236 obj/lex.o
+ *fill*         0x0000000000100822        0x2 
+ .rodata        0x0000000000100824       0x5e obj/main.o
+ *fill*         0x0000000000100882        0x2 
+ .rodata        0x0000000000100884        0xb obj/mman.o
+ *fill*         0x000000000010088f        0x1 
+ .rodata        0x0000000000100890      0x16e obj/stdio.o
+ *fill*         0x00000000001009fe        0x2 
+ .rodata        0x0000000000100a00       0x31 obj/string.o
+ *fill*         0x0000000000100a31        0x3 
+ .rodata        0x0000000000100a34        0x4 obj/time.o
+                0x0000000000100a34                bios_ticks
+ .rodata        0x0000000000100a38       0xe1 obj/util.o
+ *fill*         0x0000000000100b19        0x3 
+ .rodata        0x0000000000100b1c        0x4 obj/vga.o
 
-.eh_frame       0x0000000000100b40     0x14a4
- .eh_frame      0x0000000000100b40      0x29c obj/anicafs.o
- .eh_frame      0x0000000000100ddc       0x40 obj/dma.o
+.eh_frame       0x0000000000100b20     0x1484
+ .eh_frame      0x0000000000100b20      0x29c obj/anicafs.o
+ .eh_frame      0x0000000000100dbc       0x40 obj/dma.o
                                          0x58 (size before relaxing)
- .eh_frame      0x0000000000100e1c       0x20 obj/envar.o
-                                         0x38 (size before relaxing)
- .eh_frame      0x0000000000100e3c       0x40 obj/errors.o
+ .eh_frame      0x0000000000100dfc       0x40 obj/errors.o
                                          0x58 (size before relaxing)
- .eh_frame      0x0000000000100e7c       0x7c obj/exceptions.o
+ .eh_frame      0x0000000000100e3c       0x7c obj/exceptions.o
                                          0x94 (size before relaxing)
- .eh_frame      0x0000000000100ef8       0xc0 obj/filesystem.o
+ .eh_frame      0x0000000000100eb8       0xc0 obj/filesystem.o
                                          0xd8 (size before relaxing)
- .eh_frame      0x0000000000100fb8      0x224 obj/floppy.o
+ .eh_frame      0x0000000000100f78      0x224 obj/floppy.o
                                         0x23c (size before relaxing)
- .eh_frame      0x00000000001011dc       0x80 obj/idt.o
+ .eh_frame      0x000000000010119c       0x80 obj/idt.o
                                          0x98 (size before relaxing)
- .eh_frame      0x000000000010125c       0x40 obj/keyboard.o
+ .eh_frame      0x000000000010121c       0x40 obj/keyboard.o
                                          0x58 (size before relaxing)
- .eh_frame      0x000000000010129c       0xc4 obj/lex-list.o
+ .eh_frame      0x000000000010125c       0xc4 obj/lex-list.o
                                          0xdc (size before relaxing)
- .eh_frame      0x0000000000101360       0xa0 obj/lex-term.o
+ .eh_frame      0x0000000000101320       0xa0 obj/lex-term.o
                                          0xb8 (size before relaxing)
- .eh_frame      0x0000000000101400       0x9c obj/lex.o
+ .eh_frame      0x00000000001013c0       0x9c obj/lex.o
                                          0xb4 (size before relaxing)
- .eh_frame      0x000000000010149c       0x60 obj/main.o
+ .eh_frame      0x000000000010145c       0x60 obj/main.o
                                          0x78 (size before relaxing)
- .eh_frame      0x00000000001014fc       0x60 obj/math.o
+ .eh_frame      0x00000000001014bc       0x60 obj/math.o
                                          0x78 (size before relaxing)
- .eh_frame      0x000000000010155c      0x1c4 obj/mman.o
-                                        0x1dc (size before relaxing)
- .eh_frame      0x0000000000101720       0xe8 obj/pic.o
+ .eh_frame      0x000000000010151c      0x1a4 obj/mman.o
+                                        0x1bc (size before relaxing)
+ .eh_frame      0x00000000001016c0       0xe8 obj/pic.o
                                         0x100 (size before relaxing)
- .eh_frame      0x0000000000101808       0x40 obj/random.o
+ .eh_frame      0x00000000001017a8       0x40 obj/random.o
                                          0x58 (size before relaxing)
- .eh_frame      0x0000000000101848      0x120 obj/stack.o
+ .eh_frame      0x00000000001017e8      0x120 obj/stack.o
                                         0x138 (size before relaxing)
- .eh_frame      0x0000000000101968       0x88 obj/stdio.o
+ .eh_frame      0x0000000000101908       0x88 obj/stdio.o
                                          0xa0 (size before relaxing)
- .eh_frame      0x00000000001019f0      0x24c obj/string.o
-                                        0x264 (size before relaxing)
- .eh_frame      0x0000000000101c3c       0x60 obj/time.o
+ .eh_frame      0x0000000000101990      0x26c obj/string.o
+                                        0x284 (size before relaxing)
+ .eh_frame      0x0000000000101bfc       0x60 obj/time.o
                                          0x78 (size before relaxing)
- .eh_frame      0x0000000000101c9c       0x80 obj/util.o
+ .eh_frame      0x0000000000101c5c       0x80 obj/util.o
                                          0x98 (size before relaxing)
- .eh_frame      0x0000000000101d1c      0x2c8 obj/vga.o
+ .eh_frame      0x0000000000101cdc      0x2c8 obj/vga.o
                                         0x2e0 (size before relaxing)
 
-.text           0x0000000000101ff0     0x42ed
+.text           0x0000000000101fb0     0x426d
  *(.text)
- .text          0x0000000000101ff0      0xc91 obj/anicafs.o
-                0x0000000000101ff0                anica_read_superblock
-                0x0000000000102070                anica_write_superblock
-                0x0000000000102108                anica_format_device
-                0x00000000001021ac                anica_open_file
-                0x0000000000102434                anica_read_file
-                0x00000000001024e2                anica_write_file
-                0x0000000000102a6f                anica_read_itable
-                0x0000000000102ad9                anica_write_itable
- *fill*         0x0000000000102c81        0xf 
- .text          0x0000000000102c90        0xc obj/boot.o
-                0x0000000000102c90                start
- .text          0x0000000000102c9c      0x1ba obj/dma.o
-                0x0000000000102c9c                dma_xfer
- .text          0x0000000000102e56       0x5e obj/envar.o
-                0x0000000000102e56                ENVAR_init
- .text          0x0000000000102eb4       0xad obj/errors.o
-                0x0000000000102f26                throw
- .text          0x0000000000102f61      0x1a1 obj/exceptions.o
-                0x0000000000102f61                exceptions_init
-                0x00000000001030b8                catch_exception
- .text          0x0000000000103102      0x165 obj/filesystem.o
-                0x0000000000103102                mount
-                0x0000000000103155                open
-                0x00000000001031b6                read
-                0x00000000001031e4                write
-                0x0000000000103215                close
-                0x0000000000103228                unmount
- .text          0x0000000000103267      0x95f obj/floppy.o
-                0x0000000000103267                floppy_write_block
-                0x0000000000103298                floppy_read_block
-                0x00000000001032c9                floppy_handler
-                0x00000000001032e4                floppy_init
- .text          0x0000000000103bc6       0xdc obj/idt.o
-                0x0000000000103bc6                idt_add_handler
-                0x0000000000103bf0                idt_add_exception
- *fill*         0x0000000000103ca2        0xe 
- .text          0x0000000000103cb0       0x16 obj/interrupts.o
-                0x0000000000103cb0                load_idt
-                0x0000000000103cba                keyboard_irq
-                0x0000000000103cc0                floppy_irq
- .text          0x0000000000103cc6      0x14f obj/keyboard.o
-                0x0000000000103cc6                kb_init
-                0x0000000000103d1a                keyboard_handler
- .text          0x0000000000103e15      0x1aa obj/lex-list.o
-                0x0000000000103e15                lex_list
- .text          0x0000000000103fbf      0x1c0 obj/lex-term.o
-                0x0000000000103fbf                lex_term
- .text          0x000000000010417f      0x303 obj/lex.o
-                0x000000000010417f                lex_init
-                0x0000000000104200                shell
- .text          0x0000000000104482       0xeb obj/main.o
-                0x0000000000104482                init
-                0x00000000001044c5                avian_main
-                0x00000000001044f9                bootscreen
- .text          0x000000000010456d       0x92 obj/math.o
-                0x000000000010456d                div
-                0x000000000010459e                ldiv
-                0x00000000001045cf                pow
- .text          0x00000000001045ff      0x33d obj/mman.o
-                0x00000000001045ff                ptrsize
-                0x0000000000104645                free
-                0x0000000000104675                calloc
-                0x00000000001046b5                malloc
-                0x0000000000104739                realloc
-                0x0000000000104789                memcpy
-                0x00000000001047c8                mem_blocks
-                0x00000000001047d4                mem_used
-                0x000000000010480d                mem_free
- .text          0x000000000010493c      0x1ff obj/pic.o
-                0x000000000010493c                pic_init
-                0x00000000001049a0                pic_send_eoi
-                0x00000000001049d6                pic_enable_irq
-                0x0000000000104a32                pic_disable_irq
-                0x0000000000104afc                pic_remap
- *fill*         0x0000000000104b3b        0x5 
- .text          0x0000000000104b40       0x10 obj/portio.o
-                0x0000000000104b40                inportb
-                0x0000000000104b46                outportb
- .text          0x0000000000104b50       0x5b obj/random.o
-                0x0000000000104b50                rand
-                0x0000000000104b9e                srand
- .text          0x0000000000104bab      0x193 obj/stack.o
-                0x0000000000104bab                stack_str
-                0x0000000000104bb6                push_str
-                0x0000000000104bf4                new_stack
-                0x0000000000104c33                delete_stack
-                0x0000000000104c54                push
-                0x0000000000104ca0                pop
-                0x0000000000104cec                peek
-                0x0000000000104d1a                empty
-                0x0000000000104d29                full
- .text          0x0000000000104d3e      0x3d8 obj/stdio.o
-                0x0000000000104dd1                printf
-                0x0000000000104fc8                scan
- .text          0x0000000000105116      0x7da obj/string.o
-                0x0000000000105116                split
-                0x000000000010522e                chomp
-                0x000000000010526d                new_str
-                0x00000000001053f9                reverse
-                0x0000000000105467                itoa
-                0x00000000001055f6                atoi
-                0x0000000000105679                strcat
-                0x00000000001056b5                strncat
-                0x0000000000105709                strchr
-                0x0000000000105732                strcmp
-                0x0000000000105784                strncmp
-                0x00000000001057de                strcpy
-                0x000000000010580c                strncpy
-                0x0000000000105841                strlen
-                0x0000000000105874                memset
-                0x00000000001058a2                memcmp
- .text          0x00000000001058f0        0xd obj/throw.o
-                0x00000000001058f0                throw_exception
- .text          0x00000000001058fd       0x78 obj/time.o
-                0x00000000001058fd                get_bios_ticks
-                0x000000000010590a                usleep
-                0x0000000000105946                sleep
- .text          0x0000000000105975      0x451 obj/util.o
-                0x0000000000105975                types_test
-                0x0000000000105ccd                colors_test
-                0x0000000000105d5a                trace_function
-                0x0000000000105d85                notify_progress
- .text          0x0000000000105dc6      0x517 obj/vga.o
-                0x0000000000105dc6                move_cursor
-                0x0000000000105e4e                hide_cursor
-                0x0000000000105e6a                vga_tabsize
-                0x0000000000105e8c                vga_increment
-                0x0000000000105ea3                vga_decrement
-                0x0000000000105eba                vga_getcol
-                0x0000000000105ed8                vga_getrow
-                0x0000000000105ef4                vga_getloc
-                0x0000000000105f04                vga_setcolor
-                0x0000000000105f20                vga_newline
-                0x0000000000105f41                vga_creturn
-                0x0000000000105f61                vga_tabchar
-                0x0000000000105fd2                vga_movexy
-                0x0000000000106015                vga_moveptr
-                0x0000000000106042                vga_char_at
-                0x0000000000106076                vga_clear
-                0x00000000001060d8                vga_clear_row
-                0x000000000010612c                vga_write
-                0x0000000000106168                addch
-                0x00000000001061b2                vga_color
-                0x00000000001061db                printxy
-                0x000000000010623f                vga_scroll
+ .text          0x0000000000101fb0      0xc91 obj/anicafs.o
+                0x0000000000101fb0                anica_read_superblock
+                0x0000000000102030                anica_write_superblock
+                0x00000000001020c8                anica_format_device
+                0x000000000010216c                anica_open_file
+                0x00000000001023f4                anica_read_file
+                0x00000000001024a2                anica_write_file
+                0x0000000000102a2f                anica_read_itable
+                0x0000000000102a99                anica_write_itable
+ *fill*         0x0000000000102c41        0xf 
+ .text          0x0000000000102c50        0xc obj/boot.o
+                0x0000000000102c50                start
+ .text          0x0000000000102c5c      0x1ba obj/dma.o
+                0x0000000000102c5c                dma_xfer
+ .text          0x0000000000102e16       0xad obj/errors.o
+                0x0000000000102e88                throw
+ .text          0x0000000000102ec3      0x1a1 obj/exceptions.o
+                0x0000000000102ec3                exceptions_init
+                0x000000000010301a                catch_exception
+ .text          0x0000000000103064      0x165 obj/filesystem.o
+                0x0000000000103064                mount
+                0x00000000001030b7                open
+                0x0000000000103118                read
+                0x0000000000103146                write
+                0x0000000000103177                close
+                0x000000000010318a                unmount
+ .text          0x00000000001031c9      0x95f obj/floppy.o
+                0x00000000001031c9                floppy_write_block
+                0x00000000001031fa                floppy_read_block
+                0x000000000010322b                floppy_handler
+                0x0000000000103246                floppy_init
+ .text          0x0000000000103b28       0xdc obj/idt.o
+                0x0000000000103b28                idt_add_handler
+                0x0000000000103b52                idt_add_exception
+ *fill*         0x0000000000103c04        0xc 
+ .text          0x0000000000103c10       0x16 obj/interrupts.o
+                0x0000000000103c10                load_idt
+                0x0000000000103c1a                keyboard_irq
+                0x0000000000103c20                floppy_irq
+ .text          0x0000000000103c26      0x14e obj/keyboard.o
+                0x0000000000103c26                kb_init
+                0x0000000000103c88                keyboard_handler
+ .text          0x0000000000103d74      0x1aa obj/lex-list.o
+                0x0000000000103d74                lex_list
+ .text          0x0000000000103f1e      0x1c0 obj/lex-term.o
+                0x0000000000103f1e                lex_term
+ .text          0x00000000001040de      0x303 obj/lex.o
+                0x00000000001040de                lex_init
+                0x000000000010415f                shell
+ .text          0x00000000001043e1       0xe6 obj/main.o
+                0x00000000001043e1                init
+                0x000000000010441f                avian_main
+                0x0000000000104453                bootscreen
+ .text          0x00000000001044c7       0x92 obj/math.o
+                0x00000000001044c7                div
+                0x00000000001044f8                ldiv
+                0x0000000000104529                pow
+ .text          0x0000000000104559      0x2fe obj/mman.o
+                0x0000000000104559                ptrsize
+                0x000000000010459f                free
+                0x00000000001045cf                calloc
+                0x000000000010460f                malloc
+                0x0000000000104693                realloc
+                0x00000000001046e3                mem_blocks
+                0x00000000001046ef                mem_used
+                0x0000000000104728                mem_free
+ .text          0x0000000000104857      0x1ff obj/pic.o
+                0x0000000000104857                pic_init
+                0x00000000001048bb                pic_send_eoi
+                0x00000000001048f1                pic_enable_irq
+                0x000000000010494d                pic_disable_irq
+                0x0000000000104a17                pic_remap
+ *fill*         0x0000000000104a56        0xa 
+ .text          0x0000000000104a60       0x10 obj/portio.o
+                0x0000000000104a60                inportb
+                0x0000000000104a66                outportb
+ .text          0x0000000000104a70       0x5b obj/random.o
+                0x0000000000104a70                rand
+                0x0000000000104abe                srand
+ .text          0x0000000000104acb      0x193 obj/stack.o
+                0x0000000000104acb                stack_str
+                0x0000000000104ad6                push_str
+                0x0000000000104b14                new_stack
+                0x0000000000104b53                delete_stack
+                0x0000000000104b74                push
+                0x0000000000104bc0                pop
+                0x0000000000104c0c                peek
+                0x0000000000104c3a                empty
+                0x0000000000104c49                full
+ .text          0x0000000000104c5e      0x3b1 obj/stdio.o
+                0x0000000000104cf1                printf
+                0x0000000000104ee8                scan
+ .text          0x000000000010500f      0x819 obj/string.o
+                0x000000000010500f                split
+                0x0000000000105127                chomp
+                0x0000000000105166                new_str
+                0x00000000001052f2                reverse
+                0x0000000000105360                itoa
+                0x00000000001054ef                atoi
+                0x0000000000105572                strcat
+                0x00000000001055ae                strncat
+                0x0000000000105602                strchr
+                0x000000000010562b                strcmp
+                0x000000000010567d                strncmp
+                0x00000000001056d7                strcpy
+                0x0000000000105705                strncpy
+                0x000000000010573a                strlen
+                0x000000000010576d                memset
+                0x000000000010579b                memcmp
+                0x00000000001057e9                memcpy
+ *fill*         0x0000000000105828        0x8 
+ .text          0x0000000000105830        0xd obj/throw.o
+                0x0000000000105830                throw_exception
+ .text          0x000000000010583d       0x78 obj/time.o
+                0x000000000010583d                get_bios_ticks
+                0x000000000010584a                usleep
+                0x0000000000105886                sleep
+ .text          0x00000000001058b5      0x451 obj/util.o
+                0x00000000001058b5                types_test
+                0x0000000000105c0d                colors_test
+                0x0000000000105c9a                trace_function
+                0x0000000000105cc5                notify_progress
+ .text          0x0000000000105d06      0x517 obj/vga.o
+                0x0000000000105d06                move_cursor
+                0x0000000000105d8e                hide_cursor
+                0x0000000000105daa                vga_tabsize
+                0x0000000000105dcc                vga_increment
+                0x0000000000105de3                vga_decrement
+                0x0000000000105dfa                vga_getcol
+                0x0000000000105e18                vga_getrow
+                0x0000000000105e34                vga_getloc
+                0x0000000000105e44                vga_setcolor
+                0x0000000000105e60                vga_newline
+                0x0000000000105e81                vga_creturn
+                0x0000000000105ea1                vga_tabchar
+                0x0000000000105f12                vga_movexy
+                0x0000000000105f55                vga_moveptr
+                0x0000000000105f82                vga_char_at
+                0x0000000000105fb6                vga_clear
+                0x0000000000106018                vga_clear_row
+                0x000000000010606c                vga_write
+                0x00000000001060a8                addch
+                0x00000000001060f2                vga_color
+                0x000000000010611b                printxy
+                0x000000000010617f                vga_scroll
 
-.iplt           0x00000000001062e0        0x0
+.iplt           0x0000000000106220        0x0
  .iplt          0x0000000000000000        0x0 obj/anicafs.o
 
-.rel.dyn        0x00000000001062e0        0x0
+.rel.dyn        0x0000000000106220        0x0
  .rel.iplt      0x0000000000000000        0x0 obj/anicafs.o
  .rel.text      0x0000000000000000        0x0 obj/anicafs.o
 
-.data           0x00000000001062e0      0x17a
+.data           0x0000000000106220      0x17a
  *(.data)
- .data          0x00000000001062e0        0x0 obj/anicafs.o
- .data          0x00000000001062e0        0x0 obj/dma.o
- .data          0x00000000001062e0        0x0 obj/envar.o
- .data          0x00000000001062e0        0x0 obj/errors.o
- .data          0x00000000001062e0        0x0 obj/exceptions.o
- .data          0x00000000001062e0        0x0 obj/filesystem.o
- .data          0x00000000001062e0        0x0 obj/floppy.o
- .data          0x00000000001062e0        0x0 obj/idt.o
- .data          0x00000000001062e0      0x174 obj/keyboard.o
-                0x00000000001062e0                KEYMAP
- .data          0x0000000000106454        0x0 obj/lex-list.o
- .data          0x0000000000106454        0x0 obj/lex-term.o
- .data          0x0000000000106454        0x0 obj/lex.o
- .data          0x0000000000106454        0x0 obj/main.o
- .data          0x0000000000106454        0x0 obj/math.o
- .data          0x0000000000106454        0x0 obj/mman.o
- .data          0x0000000000106454        0x0 obj/pic.o
- .data          0x0000000000106454        0x4 obj/random.o
- .data          0x0000000000106458        0x0 obj/stack.o
- .data          0x0000000000106458        0x0 obj/stdio.o
- .data          0x0000000000106458        0x1 obj/string.o
-                0x0000000000106458                itoa_long
- .data          0x0000000000106459        0x0 obj/time.o
- .data          0x0000000000106459        0x0 obj/util.o
- .data          0x0000000000106459        0x1 obj/vga.o
+ .data          0x0000000000106220        0x0 obj/anicafs.o
+ .data          0x0000000000106220        0x0 obj/dma.o
+ .data          0x0000000000106220        0x0 obj/errors.o
+ .data          0x0000000000106220        0x0 obj/exceptions.o
+ .data          0x0000000000106220        0x0 obj/filesystem.o
+ .data          0x0000000000106220        0x0 obj/floppy.o
+ .data          0x0000000000106220        0x0 obj/idt.o
+ .data          0x0000000000106220      0x174 obj/keyboard.o
+                0x0000000000106220                KEYMAP
+ .data          0x0000000000106394        0x0 obj/lex-list.o
+ .data          0x0000000000106394        0x0 obj/lex-term.o
+ .data          0x0000000000106394        0x0 obj/lex.o
+ .data          0x0000000000106394        0x0 obj/main.o
+ .data          0x0000000000106394        0x0 obj/math.o
+ .data          0x0000000000106394        0x0 obj/mman.o
+ .data          0x0000000000106394        0x0 obj/pic.o
+ .data          0x0000000000106394        0x4 obj/random.o
+ .data          0x0000000000106398        0x0 obj/stack.o
+ .data          0x0000000000106398        0x0 obj/stdio.o
+ .data          0x0000000000106398        0x1 obj/string.o
+                0x0000000000106398                itoa_long
+ .data          0x0000000000106399        0x0 obj/time.o
+ .data          0x0000000000106399        0x0 obj/util.o
+ .data          0x0000000000106399        0x1 obj/vga.o
 
-.igot.plt       0x000000000010645c        0x0
+.igot.plt       0x000000000010639c        0x0
  .igot.plt      0x0000000000000000        0x0 obj/anicafs.o
 
-.bss            0x0000000000106460     0x2837
+.bss            0x00000000001063a0     0x2835
  *(.bss)
- .bss           0x0000000000106460        0x0 obj/anicafs.o
- .bss           0x0000000000106460     0x2000 obj/boot.o
- .bss           0x0000000000108460        0x0 obj/dma.o
- .bss           0x0000000000108460        0x0 obj/envar.o
- .bss           0x0000000000108460        0x0 obj/errors.o
- .bss           0x0000000000108460        0x0 obj/exceptions.o
- .bss           0x0000000000108460        0x0 obj/filesystem.o
- .bss           0x0000000000108460        0xd obj/floppy.o
- *fill*         0x000000000010846d       0x13 
- .bss           0x0000000000108480      0x800 obj/idt.o
- .bss           0x0000000000108c80        0x2 obj/keyboard.o
- .bss           0x0000000000108c82        0x0 obj/lex-list.o
- .bss           0x0000000000108c82        0x0 obj/lex-term.o
- *fill*         0x0000000000108c82        0x2 
- .bss           0x0000000000108c84        0x8 obj/lex.o
- .bss           0x0000000000108c8c        0x0 obj/main.o
- .bss           0x0000000000108c8c        0x0 obj/math.o
- .bss           0x0000000000108c8c        0x0 obj/mman.o
- .bss           0x0000000000108c8c        0x0 obj/pic.o
- .bss           0x0000000000108c8c        0x0 obj/random.o
- .bss           0x0000000000108c8c        0x0 obj/stack.o
- .bss           0x0000000000108c8c        0x0 obj/stdio.o
- .bss           0x0000000000108c8c        0x4 obj/string.o
-                0x0000000000108c8c                itoa_case
- .bss           0x0000000000108c90        0x0 obj/time.o
- .bss           0x0000000000108c90        0x0 obj/util.o
- .bss           0x0000000000108c90        0x0 obj/vga.o
- COMMON         0x0000000000108c90        0x3 obj/envar.o
-                0x0000000000108c90                ENVAR
- *fill*         0x0000000000108c93        0x1 
- COMMON         0x0000000000108c94        0x3 obj/keyboard.o
-                0x0000000000108c94                key
-                0x0000000000108c96                press
+ .bss           0x00000000001063a0        0x0 obj/anicafs.o
+ .bss           0x00000000001063a0     0x2000 obj/boot.o
+ .bss           0x00000000001083a0        0x0 obj/dma.o
+ .bss           0x00000000001083a0        0x0 obj/errors.o
+ .bss           0x00000000001083a0        0x0 obj/exceptions.o
+ .bss           0x00000000001083a0        0x0 obj/filesystem.o
+ .bss           0x00000000001083a0        0xd obj/floppy.o
+ *fill*         0x00000000001083ad       0x13 
+ .bss           0x00000000001083c0      0x800 obj/idt.o
+ .bss           0x0000000000108bc0        0x2 obj/keyboard.o
+ .bss           0x0000000000108bc2        0x0 obj/lex-list.o
+ .bss           0x0000000000108bc2        0x0 obj/lex-term.o
+ *fill*         0x0000000000108bc2        0x2 
+ .bss           0x0000000000108bc4        0x8 obj/lex.o
+ .bss           0x0000000000108bcc        0x0 obj/main.o
+ .bss           0x0000000000108bcc        0x0 obj/math.o
+ .bss           0x0000000000108bcc        0x0 obj/mman.o
+ .bss           0x0000000000108bcc        0x0 obj/pic.o
+ .bss           0x0000000000108bcc        0x0 obj/random.o
+ .bss           0x0000000000108bcc        0x0 obj/stack.o
+ .bss           0x0000000000108bcc        0x0 obj/stdio.o
+ .bss           0x0000000000108bcc        0x4 obj/string.o
+                0x0000000000108bcc                itoa_case
+ .bss           0x0000000000108bd0        0x0 obj/time.o
+ .bss           0x0000000000108bd0        0x0 obj/util.o
+ .bss           0x0000000000108bd0        0x0 obj/vga.o
+ COMMON         0x0000000000108bd0        0x5 obj/keyboard.o
+                0x0000000000108bd0                listen
+                0x0000000000108bd2                key
+                0x0000000000108bd4                keypress
 LOAD obj/anicafs.o
 LOAD obj/boot.o
 LOAD obj/dma.o
-LOAD obj/envar.o
 LOAD obj/errors.o
 LOAD obj/exceptions.o
 LOAD obj/filesystem.o
@@ -352,7 +343,6 @@ OUTPUT(bin/kernel-alpha elf32-i386)
  .comment       0x0000000000000000       0x2b obj/anicafs.o
                                          0x2c (size before relaxing)
  .comment       0x0000000000000000       0x2c obj/dma.o
- .comment       0x0000000000000000       0x2c obj/envar.o
  .comment       0x0000000000000000       0x2c obj/errors.o
  .comment       0x0000000000000000       0x2c obj/exceptions.o
  .comment       0x0000000000000000       0x2c obj/filesystem.o
@@ -380,8 +370,6 @@ OUTPUT(bin/kernel-alpha elf32-i386)
                 0x0000000000000000        0x0 obj/anicafs.o
  .note.GNU-stack
                 0x0000000000000000        0x0 obj/dma.o
- .note.GNU-stack
-                0x0000000000000000        0x0 obj/envar.o
  .note.GNU-stack
                 0x0000000000000000        0x0 obj/errors.o
  .note.GNU-stack

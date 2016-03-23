@@ -86,17 +86,6 @@ void* realloc(void* ptr, size_t size)
    return (void*)newptr;
 }
 
-void* memcpy(void *str1, const void *str2, size_t n)
-{
-   byte *source = (byte*)str2;
-   byte *dest = (byte*)str1;
-   
-   foreach(i, n) {
-      dest[i] = source[i];
-   }
-   return dest;
-}
-
 size_t mem_blocks(void)
 {
    return mtable->blocks;

@@ -9,8 +9,11 @@
 #include <stdlib.h>
 
 void kb_init(void);
-
 void keyboard_handler(void);
+
+extern volatile word key;
+extern volatile bool keypress;
+extern volatile bool listen;
 
 enum __EXTENDED_CHARS
 {

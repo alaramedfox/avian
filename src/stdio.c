@@ -9,10 +9,8 @@
 #include <stdarg.h>
 #include <vga.h>
 #include <string.h>
-#include <envar.h>
 #include <keyboard.h>
 
-extern volatile word key;
 extern volatile int itoa_case;
 extern volatile bool itoa_long;
 
@@ -83,8 +81,8 @@ int printf(const char* format, ...)
 int scan(char* buffer)
 {
    key = 0;
-   ENVAR.FLAGS.listen = true;
-   ENVAR.FLAGS.keypress = false;
+   listen = true;
+   keypress = false;
    int vga_loc = vga_getloc();
    size_t loc=0;
    move_cursor(vga_getrow(), vga_getcol());
@@ -92,7 +90,7 @@ int scan(char* buffer)
    
    while(loc < BUFSIZE)
    {
-      while(!ENVAR.FLAGS.keypress);
+      while(!keypress);
       
       if(key == '\b') {
          if(loc) {
@@ -103,7 +101,7 @@ int scan(char* buffer)
          continue;
       }
       else if(key == '\n') {
-         ENVAR.FLAGS.keypress = false;
+         keypress = false;
          break;
       }
       else {
@@ -116,10 +114,10 @@ int scan(char* buffer)
       move_cursor(vga_getrow(), vga_getcol());
       print(" ");
       
-      ENVAR.FLAGS.keypress = false;
+      keypress = false;
    }
    hide_cursor();
-   ENVAR.FLAGS.listen = false;
+   listen = false;
    return loc;
 }
 

@@ -11,7 +11,6 @@
 
 #include <lex.h>
 #include <vga.h>
-#include <envar.h>
 #include <idt.h>
 #include <exceptions.h>
 #include <pic.h>
@@ -28,13 +27,10 @@ void bootscreen(void);
 
 void init(void) 
 {  
-   //types_test();
-   //colors_test();
    exceptions_init();
    hide_cursor();
    vga_setcolor(0x07);
    pic_init();
-   ENVAR_init();      //Init global values
    kb_init();         //Init keyboard driver
    floppy_init();
    lex_init();

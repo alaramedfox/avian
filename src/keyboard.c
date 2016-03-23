@@ -16,11 +16,11 @@
 #include <pic.h>
 #include <idt.h>
 #include <errors.h>
-#include <envar.h>
 #include <vga.h>
 
 volatile word key;
-volatile bool press;
+volatile bool keypress;
+volatile bool listen;
 
 static volatile bool shift;
 static volatile bool caps;
@@ -57,6 +57,8 @@ void kb_init(void)
    key = 0;
    shift = false;
    caps = false;
+   listen = false;
+   keypress = false;
    
    idt_add_handler((addr_t)keyboard_irq, IRQ_KEYBOARD);
    pic_enable_irq(IRQ_KEYBOARD);
@@ -80,11 +82,11 @@ void keyboard_handler(void)
       else if(keycode == CAPS_DN) { caps = !caps; }
       else if(keycode < 127) {
          if(shift || caps) {
-            ENVAR.FLAGS.keypress = true;
+            keypress = true;
             key = KEYMAP.uppercase[keycode];
          }
          else {
-            ENVAR.FLAGS.keypress = true;
+            keypress = true;
             key = KEYMAP.lowercase[keycode];
          }
       }

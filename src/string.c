@@ -306,7 +306,16 @@ int memcmp(const void *cs, const void *ct, size_t count)
    return res;
 }
 
-
+void* memcpy(void *str1, const void *str2, size_t n)
+{
+   byte *source = (byte*)str2;
+   byte *dest = (byte*)str1;
+   
+   foreach(i, n) {
+      dest[i] = source[i];
+   }
+   return dest;
+}
 
 
 /* End string source code */
