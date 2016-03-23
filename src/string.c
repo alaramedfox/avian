@@ -7,7 +7,6 @@
 // ======================================================================== */
  
 #include <string.h>
-
 #include <stdlib.h>
 
 /**
@@ -158,6 +157,33 @@ void itoa(uint32_t number, base_t base, char str[])
       str[pos] = 0;
       if(pos) reverse(str);
    }
+}
+
+static char* make_numeric(const char* str)
+{
+   char* numeric = (char*) malloc(16);
+   int pos=0;
+   foreach(i, strlen(str)) {
+      if(str[i] >= '0' && str[i] <= '9') {
+         numeric[pos++] = str[i];
+      }
+   }
+   numeric[pos] = 0;
+   return numeric;
+}
+
+int atoi(const char* str)
+{
+   int num = 0;
+   char* numeric = make_numeric(str);
+   int len = strlen(numeric);
+  
+   foreach(i, len) {
+      num += (numeric[i]-'0') * pow(10, len-i-1);
+   }
+   
+   free(numeric);
+   return num;
 }
 
 char *strcat(char *dest, const char *src)

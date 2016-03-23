@@ -78,5 +78,6 @@ typedef struct __LDIV
  */
 div_t    div(int num, int den);
 ldiv_t    ldiv(int num, int denom);
+int     pow(int base, int exponent);
 
 #endif

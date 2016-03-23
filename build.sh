@@ -17,7 +17,7 @@ BIN="bin"
 
 CFLAGS=" -mtune=i386 -m32 -ffreestanding -fno-exceptions -std=c99 "
 CINC=" -Isrc/include -Isrc/asm "
-CWARN=" -Wall -Wextra -Werror -Wfatal-errors "
+CWARN=" -Wall -Wextra -Wfatal-errors "
 #CWARN=" -Wfatal-errors "
 
 SOURCES=(" src src/asm src/lex ")

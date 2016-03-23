@@ -34,7 +34,7 @@ void lex_list(int argc, char* argv[])
          switch(argv[1][i])
          {
             case ':': break;
-            case 'h': lex_list_help(); break;
+            case '?': lex_list_help(); break;
             case 'm': lex_list_memory(); break;
             case 'd': lex_list_dir(); break;
             case 'v': lex_list_vars(); break;
@@ -54,13 +54,11 @@ void lex_list(int argc, char* argv[])
 
 static void lex_list_help(void)
 {
-   printf("Usage: l :[category ...]\n");
-   printf("Valid categories:\n");
-   printf("m     Memory usage statistics\n");
-   printf("d     Contents of current directory\n");
-   printf("h     Print this help information\n");
-   printf("v     Print the size of internal variables\n");
-   printf("-- more to come --\n");
+   printf("Usage: l :[category ...]  - Lists items in the given category\n");
+   printf(" ?     Print this help information\n");
+   printf(" m     Memory usage statistics\n");
+   printf(" d     Contents of current directory\n");
+   printf(" v     Print the size of internal variables\n");
 }
 
 static void lex_list_memory(void)
