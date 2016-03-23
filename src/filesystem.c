@@ -74,6 +74,16 @@ void unmount(volume_t* volume)
    free(volume);
 }
 
+int ext2_read_sector(byte device, dword sector, byte* buffer)
+{
+   return device?1:floppy_read_block(sector, buffer, 512);
+}
+
+int ext2_write_sector(byte device, dword sector, byte* buffer)
+{
+   return device?1:floppy_write_block(sector, buffer, 512);
+}
+
 
 
 

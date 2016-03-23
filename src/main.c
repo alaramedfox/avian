@@ -10,6 +10,7 @@
 #include <stdio.h>
 
 #include <lex.h>
+#include <ext2.h>
 #include <vga.h>
 #include <idt.h>
 #include <exceptions.h>
@@ -39,7 +40,19 @@ void avian_main(void)
 {  
    bootscreen();
    init();
-
+   
+   ext2_super_t* sb = new(ext2_super_t);
+   ext2_read_superblock(sb);
+   
+   printf("Total Blocks:\t%i,\tTotal Inodes:\t%i,\tBlock Size:\t%i\n",
+      sb->blocks_total, sb->inodes_total, 1024<<sb->block_size);
+      
+   printf("Blocks/Group:\t%i,\tInodes/Group:\t%i,\tFrags/Group:\t%i\n",
+      sb->blocks_per_group, sb->inodes_per_group, sb->frags_per_group);
+      
+   printf("Blocks Free:\t%i,\tInodes Free:\t%i\n",
+      sb->blocks_free, sb->inodes_free);
+   
    printf("Entering shell\n");
    shell();
    
