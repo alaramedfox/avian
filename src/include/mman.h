@@ -7,21 +7,23 @@
 // ======================================================================= */
 
 #include <stdlib.h>
+#define USE_UPPER_MEMORY 1
 
 /* Define allocatable memory ranges */
 enum __MMAP_DEFS
 {
+#if USE_UPPER_MEMORY
    ALLOC_START = 0x280000,    // 2.5 MB offset
    ALLOC_SIZE  = 0x800000,    // 8 MB of RAM
    ALLOC_END   = 0xA80000,    // Ending address of memory
-   
-   //ALLOC_START = 0x07E00,   //Memory block starting addr
-   //ALLOC_SIZE    = 0x781FF,    //About 480 KiB of usable RAM
-   //ALLOC_END   = 0x7FFFF,   //Ending address of free memory
-   
-   HEAP_START   = 0x00500,   //Starting address of memory map
+#else
+   ALLOC_START = 0x17E00,
+   ALLOC_SIZE  = 0x681FF,
+   ALLOC_END   = 0x7FFFF,
+#endif
+   HEAP_START  = 0x00500,   //Starting address of memory map
    HEAP_SIZE   = 0x076FF,   //A bit less than 30 KiB
-   HEAP_END      = 0x07BFF,   //Ending address of heap
+   HEAP_END    = 0x07BFF,   //Ending address of heap
    
    BLOCK_MAX   = 0x01000,   //4 KiB maximum block size
    BLOCK_COUNT = 0x00EDF,  //Maximum number of blocks
@@ -30,7 +32,7 @@ enum __MMAP_DEFS
 typedef struct __TABLE_ENTRY 
 {
    addr_t    start;   //Starting address of memory block
-   size_t    size;      //Size of memory block in bytes
+   size_t    size;    //Size of memory block in bytes
    
 } FLAT mentry_t;
 
@@ -51,7 +53,7 @@ typedef struct __TABLE_MAP
  *    static methods.
  */
 
-__attribute__((hot)) size_t   mem_blocks(void); 
+__attribute__((hot)) size_t     mem_blocks(void); 
 __attribute__((hot)) uint32_t   mem_used(void);
 __attribute__((hot)) uint32_t   mem_free(void);
 

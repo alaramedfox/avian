@@ -1,16 +1,17 @@
 #define MAIN_C_SOURCE
-/* 
- *      Avian Kernel - Bryan Webb
- *        File:      main.c
- *        Purpose:   Main loop, definitions, and primary entry point.
- */
+// ========================================================================= //
+//    Avian Kernel   Bryan Webb (C) 2016
+//    File:          main.c
+//    Purpose:       Kernel entry point and testing ground
+// ========================================================================= //
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
-
+#include <lex.h>
+#include <ext2.h>
 #include <vga.h>
-#include <envar.h>
 #include <idt.h>
 #include <exceptions.h>
 #include <pic.h>
@@ -18,28 +19,21 @@
 #include <util.h>
 #include <buildcount.h>
 #include <floppy.h>
-#include <time.h>
 #include <filesystem.h>
 
 void init(void);
-bool main_loop(void);
 void bootscreen(void);
 
 void init(void) 
 {  
-   
-   //types_test();
    exceptions_init();
    hide_cursor();
    vga_setcolor(0x07);
    pic_init();
-   //time_init();   //Init clock to measure ms
-   ENVAR_init();      //Init global values
    kb_init();         //Init keyboard driver
    floppy_init();
-   ENVAR.FLAGS.listen = false;
-   
-   print("\nSystem booted.\n\n");
+   lex_init();
+   printf("\nSystem booted.\n\n");
 }
 
 void avian_main(void) 
@@ -47,39 +41,23 @@ void avian_main(void)
    bootscreen();
    init();
    
-   print("AnicaFS: Allocation of Nodes by Indexed Cluster Addresses\n");
+   ext2_super_t* sb = new(ext2_super_t);
+   ext2_read_superblock(sb);
    
-   //anica_format_device(2880, 512, 1);
+   printf("Total Blocks:\t%i,\tTotal Inodes:\t%i,\tBlock Size:\t%i\n",
+      sb->blocks_total, sb->inodes_total, 1024<<sb->block_size);
+      
+   printf("Blocks/Group:\t%i,\tInodes/Group:\t%i,\tFrags/Group:\t%i\n",
+      sb->blocks_per_group, sb->inodes_per_group, sb->frags_per_group);
+      
+   printf("Blocks Free:\t%i,\tInodes Free:\t%i\n",
+      sb->blocks_free, sb->inodes_free);
    
-   volume_t* floppy = mount(fda);
-   file_t* file = open(floppy, "TEST.TXT", ANICA_WRITE);
-   
-   read(file);
-   print("Contents of file: `"); print((char*)file->data); print("'\n");
-   
-   char* newcontent = new_str("This is the new file content");
-   write(file, newcontent);
-   free(newcontent);
-   
-   read(file);
-   print("Contents of file: `"); print((char*)file->data); print("'\n");
-   
-   unmount(floppy);
-   
-   print("\nTest complete\n");
-   
-   while(main_loop());
-   
+   printf("Entering shell\n");
+   shell();
    
    vga_clear();
-   print("Kernel has shut down\n");
-}
-
-bool main_loop(void)
-{  
-   //sleep(1000);
-   //print("One second has passed\n");
-   return true;
+   printf("Kernel has shut down\n");
 }
 
 void bootscreen(void)
@@ -87,11 +65,11 @@ void bootscreen(void)
    vga_setcolor(0x07);
    vga_clear();
    vga_setcolor(C_BLUESCR);
-
+   
    int location = vga_getloc();
    for(size_t i=0; i<80; i++)    { addch(HLINE1); }
    vga_moveptr(location+4);
-   print("[ Avian Kernel version " VERSION " ]\n\n");
+   printf("[ Avian Kernel version " VERSION " ]\n\n");
    
    vga_setcolor(0x07);
 }

@@ -6,16 +6,14 @@
 //      Purpose:         Header for keyboard driver
 // ======================================================================== */
  
-#include <stack.h>
-#include <asmfunc.h>
+#include <stdlib.h>
 
-char* kb_buffer(void);
 void kb_init(void);
-void kb_enter(void);
-void kb_backspace(void);
-void kb_undef_char(void);
-
 void keyboard_handler(void);
+
+extern volatile word key;
+extern volatile bool keypress;
+extern volatile bool listen;
 
 enum __EXTENDED_CHARS
 {
@@ -26,7 +24,7 @@ enum __EXTENDED_CHARS
 
 enum __EXTENDED_KEYS 
 {
-   ESC, ALT, CAPS, CTRL, LSHIFT, RSHIFT, F1, F2, F3, F4, F5, F6, F7, F8,
+   ESC=256, ALT, CAPS, CTRL, LSHIFT, RSHIFT, F1, F2, F3, F4, F5, F6, F7, F8,
    F9, F10, F11, F12, NUM, SCR, HOME, UARROW, DARROW, LARROW, RARROW,
    PGUP, PGDN, END, INS, DEL, LGUI, RGUI, APPS,
 };
@@ -35,13 +33,13 @@ enum __SPECIAL_KEYS
 {
    LSHIFT_DN=42, LSHIFT_UP=170,
    RSHIFT_DN=54, RSHIFT_UP=182,
-   CAPS_DN=11,
+   CAPS_DN=91,
 };
 
 struct __KEYMAP 
 {
-   unsigned char lowercase[93];
-   unsigned char uppercase[93];
+   word lowercase[93];
+   word uppercase[93];
 };
 
 

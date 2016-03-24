@@ -16,16 +16,6 @@ enum __VGA_LIMITS
    VGA_BYTES=4000,
 };
 
-enum __COLOR_DEFS
-{
-   BLACK=0x0, BLUE=0x1, GREEN=0x2, CYAN=0x3,
-   RED=0x4, MAGENTA=0x5, BROWN=0x6, GREY=0x7,
-   BOLD=1, NORMAL=0,
-   
-   C_TERMINAL=0x07, C_BLUESCR=0x1F, 
-   C_WARN=0x04, C_CRITICAL=0x47,
-};
-
 typedef struct __VGA
 {
    byte buffer[VGA_BYTES];
@@ -59,9 +49,6 @@ void vga_write   (char);             //Safely write to vram[vptr]
 void vga_color   (byte);          //Safely write to vram[vptr+1]
 
 void addch(char);
-void print(const char[]);
-void println(const char[]);
-void iprint(dword, byte);
 void printxy(byte,byte,const char[]);
 
 /* Special characters */

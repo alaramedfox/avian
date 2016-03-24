@@ -7,15 +7,74 @@
 // ======================================================================== */
  
 #include <string.h>
-
 #include <stdlib.h>
 
-static const char place_value[] = "0123456789ABCDEF";
-static const char bytes_magnitude[] = "BKMGTP";
+/**
+ *    Avian_Documentation: 
+ *    Flags that determine which letter case itoa() uses,
+ *    as well as whether or not to use the long notation
+ *    for various number bases. In hex, the long notation
+ *    adds a '0x' -- for human-readable data sizes, it adds
+ *    the xiB to the end (like KiB or MiB)
+ *
+ *    If uppercase, itoa_bytes() uses base-10 byte magnitudes
+ *    (1 MB = 1000 B). Otherwise, itoa_bytes() uses base-2
+ *    magnitudes (1 MiB = 1024 B).
+ */ 
+volatile int itoa_case = UPPERCASE;
+volatile bool itoa_long = true;
+
+static const char place_value[2][16] = { 
+      "0123456789ABCDEF",
+      "0123456789abcdef",
+};
+
+static const char bytes_sizes[6] = "BKMGTP";
+
+/**
+ *    Avian_Documentation:
+ *    Splits the given string @str according to the provided
+ *    delimiter @delim. If the character given by @ignore appears,
+ *    it is ignored. The resulting array of substrings is written
+ *    to the provided array @array
+ *    The function returns the number of elements split.
+ */
+size_t split(char delim, char ignore, const char str[], char** array)
+{
+   int pword = 0;
+   int pletter = 0;
+   array[0] = (char*) calloc(80,1);
+   foreach(i, strlen(str)) {
+      if(str[i] == delim && pletter == 0) {
+         /* Do nothing */
+      }
+      else if(str[i] == delim) {
+         array[pword++][pletter] = 0;
+         pletter = 0;
+         array[pword] = (char*) calloc(80,1);
+      }
+      else if(str[i] == ignore) {
+         /* Do nothing */
+      }
+      else {
+         array[pword][pletter++] = str[i];
+      }
+   }
+   return pword+1;
+}
+
+void chomp(char str[])
+{
+   foreach(i, strlen(str)) {
+      if(str[i] == '\n') {
+         str[i] = 0;
+         break;
+      }
+   }
+}
 
 char* new_str(const char str[])
 {  
-
    char* newstr = (char*) malloc(strlen(str));
    memcpy(newstr, str, strlen(str));
    return newstr;
@@ -23,22 +82,39 @@ char* new_str(const char str[])
 
 static inline void itoa_bytes(int number, char str[])
 {  
-
    int magnitude = 0;
+   int divisor = itoa_case?1000:1024;
+   int rem = number % divisor;
    
-   while(number > 1024) {
-      number = number/1024;
+   while(number > divisor) {
+      number = number/divisor;
       magnitude++;
    }
    
    itoa(number,10, str);
    int len = strlen(str);
-   str[len-2] = bytes_magnitude[magnitude];
-   str[len-1] = '\0';
+   
+   if(magnitude && rem > 100 && rem < (divisor-100)) {
+      char fraction[5];
+      itoa(rem, DEC, fraction);
+      str[len++] = '.';
+      str[len++] = fraction[0];
+   }
+   
+   if(itoa_long) str[len++] = ' ';
+   
+   str[len++] = bytes_sizes[magnitude];
+   
+   if(itoa_long && magnitude) {
+      if(!itoa_case) { str[len++] = 'i'; }
+      str[len++] = 'B';
+      
+   }
+   str[len] = '\0';
 }
 
 void reverse(char s[])
-{  //
+{
    if(strlen(s) <= 1) return;
    int i, j;
    char c;
@@ -49,34 +125,15 @@ void reverse(char s[])
       s[j] = c;
    }
 }
-#define KR 0
-#if KR
-/* itoa:  convert n to characters in s */
- void itoa(uint32_t n, base_t base, char s[])
- {
-     int i, sign;
- 
-     if ((sign = n) < 0)  /* record sign */
-         n = -n;          /* make n positive */
-     i = 0;
-     do {       /* generate digits in reverse order */
-         s[i++] = n % base + '0';   /* get next digit */
-     } while ((n /= base) > 0);     /* delete it */
-     if (sign < 0)
-         s[i++] = '-';
-     s[i] = '\0';
-     reverse(s);
- }
-#else
-void itoa(uint32_t number, base_t base, char str[])
-{  //
 
+void itoa(uint32_t number, base_t base, char str[])
+{  
    if(base == BYTES) {
       itoa_bytes(number, str);
       return;
    }
    else if(base == BOOLEAN) {
-      str = number?"1":"0";
+      str = number?"true":"false";
       return;
    }
    else if(base == 0 || number == 0) {
@@ -90,10 +147,10 @@ void itoa(uint32_t number, base_t base, char str[])
       while(number > 0)
       {
          i = number % base;
-         str[pos++] = place_value[i];
+         str[pos++] = place_value[itoa_case][i];
          number = number / base;
       }
-      if(base == HEX) {
+      if(base == HEX && itoa_long) {
          str[pos++] = 'x';
          str[pos++] = '0';
       }
@@ -101,7 +158,34 @@ void itoa(uint32_t number, base_t base, char str[])
       if(pos) reverse(str);
    }
 }
-#endif
+
+static char* make_numeric(const char* str)
+{
+   char* numeric = (char*) malloc(16);
+   int pos=0;
+   foreach(i, strlen(str)) {
+      if(str[i] >= '0' && str[i] <= '9') {
+         numeric[pos++] = str[i];
+      }
+   }
+   numeric[pos] = 0;
+   return numeric;
+}
+
+int atoi(const char* str)
+{
+   int num = 0;
+   char* numeric = make_numeric(str);
+   int len = strlen(numeric);
+  
+   foreach(i, len) {
+      num += (numeric[i]-'0') * pow(10, len-i-1);
+   }
+   
+   free(numeric);
+   return num;
+}
+
 char *strcat(char *dest, const char *src)
 {
    char *tmp = dest;
@@ -222,7 +306,16 @@ int memcmp(const void *cs, const void *ct, size_t count)
    return res;
 }
 
-
+void* memcpy(void *str1, const void *str2, size_t n)
+{
+   byte *source = (byte*)str2;
+   byte *dest = (byte*)str1;
+   
+   foreach(i, n) {
+      dest[i] = source[i];
+   }
+   return dest;
+}
 
 
 /* End string source code */

@@ -8,6 +8,7 @@
 #include <mman.h>
 
 #include <stdlib.h>
+#include <errors.h>
 //#include <string.h>
 #include <util.h>
 
@@ -70,6 +71,7 @@ void* malloc(const size_t size)
          return (void*)address;
       }
    }
+   throw(this,64);
    return 0;
 }
 
@@ -82,17 +84,6 @@ void* realloc(void* ptr, size_t size)
    }
    free(oldptr);
    return (void*)newptr;
-}
-
-void* memcpy(void *str1, const void *str2, size_t n)
-{
-   byte *source = (byte*)str2;
-   byte *dest = (byte*)str1;
-   
-   foreach(i, n) {
-      dest[i] = source[i];
-   }
-   return dest;
 }
 
 size_t mem_blocks(void)

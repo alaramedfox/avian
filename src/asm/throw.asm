@@ -9,13 +9,23 @@ section .text
 	global throw_exception
 	extern catch_exception
 	
+	global throw_zero_divide
+	extern catch_zero_divide
+	
 	throw_exception:
 	   ;call iptr
 	   cli
 	   mov eax, [esp]
-	   push gs
+	   push 255
 	   push eax
 		call catch_exception
 		iret
+		
+   throw_zero_divide:
+      cli
+      mov eax, [esp]
+      push eax
+      call catch_zero_divide
+      iret
 	
 ; END .text

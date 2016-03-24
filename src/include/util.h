@@ -8,7 +8,7 @@
 
 #include <stdlib.h>
 #define this __func__
-#define ASSERT(expr) trace_function(__func__); expr
+#define ASSERT(expr) trace_function(this); expr
 
 typedef union __PAIR16
 {
@@ -26,9 +26,9 @@ typedef union __PAIR32
 
 void wait_spin(bool);
 void types_test(void);
+void colors_test(void);
 
 void trace_function(const char function[]);
-void notify(const char[], const char[]);
 void notify_progress(const char[], int, int);
  
 #endif

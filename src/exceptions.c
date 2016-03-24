@@ -8,30 +8,30 @@
 #include <exceptions.h>
 
 #include <idt.h>
+#include <stdio.h>
 #include <vga.h>
 #include <buildcount.h>
 #include <util.h>
 #include <stdlib.h>
-
-#define FAULT(str)   print("\n\tError: "); print(str);
 
 void exceptions_init(void)
 {
    foreach(i, 13) {
       idt_add_exception((addr_t)throw_exception, i);
    }
+   idt_add_exception((addr_t)throw_zero_divide, 0);
 }
 
 static void line_panic_screen(void)
 {
-   print("\n");
+   printf("\n");
    int row = vga_getrow();
    vga_setcolor(C_BLUESCR);
    foreach(i, VGA_COL*3) {
-      print(" ");
+      printf(" ");
    }
    vga_movexy(row, 0);
-   print("\tAVIAN Kernel - " TIMESTAMP);
+   printf("\tAVIAN Kernel - " TIMESTAMP);
 }
 
 static char* get_error_id(byte err)
@@ -65,10 +65,14 @@ static char* get_error_id(byte err)
 void catch_exception(dword eip, byte exception)
 {
    line_panic_screen();
-   FAULT(get_error_id(exception));
-   print("\n\tEIP: "); iprint(eip,HEX);
-   print("\tIRQ: "); iprint(exception,HEX);
+   printf("\n\tError: %s",get_error_id(exception));
+   printf("\n\tEIP: %x\t%x",eip,exception); 
    while(true);
+}
+
+void catch_zero_divide(dword eip)
+{
+   catch_exception(eip, 0);
 }
 
 

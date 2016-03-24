@@ -102,41 +102,24 @@ void vga_write(char value)
    vga_color(vga->color);
 }
 
-void vga_color(byte value) 
-{
-   vga->buffer[vga->vptr*2+1] = value; 
-}
-
 void addch(const char c)
 {
-   vga_write(c);
-   vga_increment();
-}
- 
-void print(const char str[])
-{
-   for(size_t i=0; str[i] != '\0'; i++) {
-      switch(str[i])
-      {
-         case '\n': vga_newline(); break;
-         case '\r': vga_creturn(); break;
-         case '\t': vga_tabchar(); break;
-         
-         default: addch(str[i]); break;
-      }
+   switch(c)
+   {
+      case '\n': vga_newline(); break;
+      case '\r': vga_creturn(); break;
+      case '\t': vga_tabchar(); break;
+      
+      default: 
+         vga_write(c);
+         vga_increment();
+         break;
    }
 }
 
-void println(const char str[])
+void vga_color(byte value) 
 {
-   print(str); print("\n");
-}
-
-void iprint(dword val, byte base)
-{
-   char str[9];
-   itoa(val, base, str);
-   print(str);
+   vga->buffer[vga->vptr*2+1] = value; 
 }
 
 void printxy(byte row, byte col, const char str[])

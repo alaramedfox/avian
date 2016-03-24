@@ -7,6 +7,7 @@
 // ======================================================================== */
 
 #include <stdlib.h>
+#define floppy_   FDC_
  
 /* Floppy CHS Address datatype */
 typedef struct __CHS

@@ -11,5 +11,6 @@
 
 void exceptions_init(void);
 extern void throw_exception(void);
+extern void throw_zero_divide(void);
 
 #endif

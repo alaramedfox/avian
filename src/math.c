@@ -22,3 +22,12 @@ ldiv_t ldiv(int num, int den)
    result.rem = num % den;
    return result;
 }
+
+int pow(int base, int exponent)
+{
+   int num = 1;
+   for(int i=0; i<exponent; i++) {
+      num = num * base;
+   }
+   return num;
+}
