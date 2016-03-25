@@ -43,6 +43,7 @@ void avian_main(void)
    
    ext2_super_t* sb = new(ext2_super_t);
    ext2_read_superblock(sb);
+   //ext2_cache_t* cache = ext2_read_cache(sb, 0);
    
    printf("Total Blocks:\t%i,\tTotal Inodes:\t%i,\tBlock Size:\t%i\n",
       sb->blocks_total, sb->inodes_total, 1024<<sb->block_size);
@@ -52,6 +53,8 @@ void avian_main(void)
       
    printf("Blocks Free:\t%i,\tInodes Free:\t%i\n",
       sb->blocks_free, sb->inodes_free);
+      
+   
    
    printf("Entering shell\n");
    shell();

@@ -59,6 +59,7 @@ void* calloc(size_t items, size_t size)
 
 void* malloc(const size_t size)
 {
+   if(size == 0) { throw("Cannot allocate 0 bytes",2); return NULL; }
    /* Loop through memory until a free block is found */
    for(addr_t address = ALLOC_START; address<ALLOC_END; address+=size) 
    {
@@ -71,8 +72,8 @@ void* malloc(const size_t size)
          return (void*)address;
       }
    }
-   throw(this,64);
-   return 0;
+   throw("Failed to allocate memory",2);
+   return NULL;
 }
 
 void* realloc(void* ptr, size_t size)
