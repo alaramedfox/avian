@@ -22,7 +22,7 @@ typedef struct __FILE
    volume_t* vol;     // Linda filesystem
    byte* data;       // All the data contents
 
-} FLAT file_t;
+} packed file_t;
 
 volume_t*  mount(device_t);
 void       unmount(volume_t*);

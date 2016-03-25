@@ -31,7 +31,7 @@ typedef uint64_t   qword;    //64-bit value   8 bytes
 #define foreach(var, count)   for(typeof(count) var=0; var<count; var++)
       
 /* This compresses the packed attribute into something smaller */
-#define FLAT   __attribute__((packed))
+#define packed   __attribute__((packed))
 
 /* This enables code tracing, if a flag is set */
 #if 1

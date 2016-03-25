@@ -16,7 +16,7 @@ typedef struct __IDT_ENTRY
    byte type_attr;
    word higher;
    
-} FLAT idt_entry_t;
+} packed idt_entry_t;
 
 // ======================================================================== */
 //       Static prototypes

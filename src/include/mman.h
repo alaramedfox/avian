@@ -34,14 +34,14 @@ typedef struct __TABLE_ENTRY
    addr_t    start;   //Starting address of memory block
    size_t    size;    //Size of memory block in bytes
    
-} FLAT mentry_t;
+} packed mentry_t;
 
 typedef struct __TABLE_MAP
 {
    size_t    blocks;
    mentry_t   entry[BLOCK_COUNT];
 
-} FLAT mtable_t;
+} packed mtable_t;
  
 /* Public API */
 

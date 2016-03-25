@@ -64,7 +64,7 @@ typedef struct __ANICA_ENTRY
    addr_t  addr;    // Byte address of cluster
    char    end;     // Ending byte
 
-} FLAT lentry_t;
+} packed lentry_t;
 
 typedef struct __ANICA_NODE
 {
@@ -75,7 +75,7 @@ typedef struct __ANICA_NODE
    index_t data;     // Index of content data
    char end;
 
-} FLAT lnode_t;
+} packed lnode_t;
 
 /**
  *      Structure containing the Linda FS superblock data
@@ -97,14 +97,14 @@ typedef struct __ANICA_SUPERBLOCK
    dword  root;         // Table index of the root directory (should be 0)
    dword  entries;      // Number of index entries
    
-} FLAT lsuper_t;
+} packed lsuper_t;
 
 typedef struct __ANICA_VOLUME
 {
    lsuper_t sb;
    lentry_t *itable;
 
-} FLAT volume_t;
+} packed volume_t;
 
 // ======================================================================= //
 //           Public API functions                                          //

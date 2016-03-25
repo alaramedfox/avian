@@ -97,6 +97,9 @@ function make_all {
 	assemble
 	compile
 	link
+	sudo mount -o loop bin/kernel.img /media/floppy
+	sudo cp bin/kernel-alpha /media/floppy/boot/avian.bin
+	sudo umount /media/floppy
 }
 
 function assemble {

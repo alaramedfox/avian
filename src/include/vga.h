@@ -22,7 +22,7 @@ typedef struct __VGA
    size_t vptr;
    byte color;
    
-} FLAT vga_t;
+} packed vga_t;
 
 void move_cursor(byte,byte);
 void hide_cursor(void);
