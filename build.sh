@@ -115,7 +115,7 @@ function compile {
 			NAME=`echo "$SRC" | cut -d'.' -f1`
 			if [ -f $DIR/$NAME.c ]; then
 				printf "$INFO Compiling $SRC\n"
-				colorgcc -c $DIR/$NAME.c -o $OBJ/$NAME.o $CINC $CFLAGS $CWARN
+				gcc -c $DIR/$NAME.c -o $OBJ/$NAME.o $CINC $CFLAGS $CWARN
 			fi
 		done
 	done
