@@ -150,12 +150,6 @@ typedef struct __EXT_GROUP
 
 } FLAT ext2_group_t;
 
-typedef struct __EXT_TABLE
-{
-   ext2_group_t* table;
-   
-} FLAT ext2_table_t;
-
 typedef struct __EXT_INODE
 {
    word info;
@@ -189,6 +183,15 @@ typedef struct __EXT_DIRECTORY
 
 } FLAT ext2_dir_t;
 
+typedef struct __EXT_CACHE
+{
+   ext2_group_t* group_table;
+   ext2_inode_t* inode_table;
+   byte* block_bitmap;
+   byte* inode_bitmap;
+   
+} FLAT ext2_cache_t;
+
 
 // ========================================================================= //
 //       Public API Prototypes                                               //
@@ -201,7 +204,7 @@ int    ext2_write_sector(byte device, dword sector, byte* buffer);
 int    ext2_read_superblock(ext2_super_t* block);
 size_t ext2_block_groups(ext2_super_t* block);
 
-ext2_table_t* ext2_read_table(ext2_super_t* super);
+ext2_cache_t* ext2_read_cache(ext2_super_t* super, dword group);
 byte*  ext2_read_block(ext2_super_t* super, dword index);
 
 #endif
