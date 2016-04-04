@@ -21,6 +21,8 @@ CINC=" -Isrc/include -Isrc/asm "
 CWARN=" -Wall -Wextra -Werror -Wfatal-errors -Wno-unused "
 #CWARN=" -Wfatal-errors "
 
+QFLAGS=" -ctrl-grab -fda $IMAGE -m 16 "
+
 SOURCES=(" src src/asm src/lex ")
 
 function increment_file {
@@ -157,10 +159,10 @@ function update {
 function run {
    if [ $LOCAL = "1" ]; then
       printf "$INFO Executing kernel-alpha with QEMU...\n"
-      qemu-system-i386 -kernel bin/kernel-alpha -fda $IMAGE -m 16
+      qemu-system-i386 -kernel bin/kernel-alpha $QFLAGS
    else
 	   printf "$INFO Executing grub-test.img with QEMU...\n"
-	   qemu-system-i386 -fda $IMAGE -no-shutdown -m 16
+	   qemu-system-i386 $QFLAGS
 	fi
 	return
 }

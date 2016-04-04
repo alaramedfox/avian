@@ -78,7 +78,7 @@ static void lex_list_memory(bool detailed)
    if(detailed) {
       int tabs = vga_tabsize(0);
       vga_tabsize(10);
-      
+      foreach(i,79) printf("-");
       char format[] = "\r-%s\t%s\t%s\t%s\t%s\t%s\n";
       printf(format,"Index","Start","End","Offset","Size","Caller");
       foreach(i, mem_blocks()) {

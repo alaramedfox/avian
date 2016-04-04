@@ -85,6 +85,16 @@ int printf(const char* format, ...)
    return 1;
 }
 
+int getch(void)
+{
+   listen = true;
+   keypress = false;
+   while(!keypress);
+   keypress = false;
+   listen = false;
+   return key;
+}
+
 int scan(char* buffer)
 {
    key = 0;

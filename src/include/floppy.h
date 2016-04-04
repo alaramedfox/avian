@@ -7,7 +7,6 @@
 // ======================================================================== */
 
 #include <stdlib.h>
-#define floppy_   FDC_
  
 /* Floppy CHS Address datatype */
 typedef struct __CHS
@@ -25,6 +24,13 @@ enum __FLOPPY_ERR
    FDC_STATUS = 4, // Bad status value
 };
 
+enum __FLOPPY_CACHE_BEHAVIOR
+{
+   FDC_CACHE_DISABLE = 0,
+   FDC_CACHE_CAP = 1,
+   FDC_CACHE_EXPAND = 2,
+};
+
 #define GAP3 0x1B
 
 /* Function called by Interrupt Controller */
@@ -32,7 +38,7 @@ void floppy_handler(void);
  
 /* Public API */
 void floppy_sync_cache(void);
-void floppy_flush_cache(void);
+void floppy_clear_cache(void);
 void floppy_init(void);
 int floppy_read_block(word, byte*, size_t);
 int floppy_write_block(word, byte*, size_t);

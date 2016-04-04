@@ -51,7 +51,7 @@ void lex_init(void)
    lex_add_command("l", "list", lex_list);
    lex_add_command("t", "term", lex_term);
    lex_add_command("?", "help", lex_help);
-   lex_add_command("m", "manf", lex_manf);
+   lex_add_command("fs", "manfs", lex_manf);
    
    throw("Initialized Lex shell",0);
 }
@@ -106,7 +106,7 @@ static void lex_help(int argc, char* argv[])
    printf(" e      edit     :[mode]   [object]    Edit files, variables, etc\n");
    printf(" x      exec     :[mode]   [program]   Execute a program\n");
    printf(" t      term     :[var...] [val...]    Manipulate the terminal\n");
-   printf(" m      manf     :[opt...] [val...]    Manage the filesystem\n");
+   printf(" fs     manfs    :[opt...] [val...]    Manage the filesystem\n");
    printf("\n");
    printf("For more details on a command, type `[command] :?'\n");
 }

@@ -30,7 +30,7 @@ void init(void);
 void bootscreen(void);
 
 void init(void) 
-{  
+{
    exceptions_init();
    hide_cursor();
    vga_setcolor(0x07);

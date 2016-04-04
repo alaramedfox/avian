@@ -45,7 +45,7 @@ void vga_tabchar(void)
    
    foreach(i, spaces) {
       if(vga_getcol() == 79) break;
-      vga_write(' ');
+      //vga_write(' ');
       vga_increment();
    }
 }
