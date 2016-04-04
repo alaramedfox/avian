@@ -48,18 +48,24 @@ void free(void* ptr)
    else mtable_delete(index);
 }
 
-void* calloc(size_t items, size_t size)
+/* NOTE: #define calloc(num, size) --> _calloc(__func__, num, size) */ 
+
+void* _calloc(const char* func, size_t items, size_t size)
 {
-   byte* pointer = (byte*) malloc(items * size);
+   byte* pointer = (byte*) _malloc(func, items * size);
    foreach(i, items*size) {
       pointer[i] = 0;
    }
    return (void*) pointer;
 }
 
-void* malloc(const size_t size)
+/* NOTE: #define malloc(size) -->  _malloc(__func__, size) */
+
+void* _malloc(const char* func, const size_t size)
 {
-   if(size == 0) { throw("Cannot allocate 0 bytes",2); return NULL; }
+   if(size == 0) { 
+      return NULL; 
+   }
    /* Loop through memory until a free block is found */
    for(addr_t address = ALLOC_START; address<ALLOC_END; address+=size) 
    {
@@ -68,6 +74,7 @@ void* malloc(const size_t size)
          /* Reserve new memory block and push it to mtable */
          mtable->entry[mtable->blocks].start = address;
          mtable->entry[mtable->blocks].size  = size;
+         strcpy(mtable->entry[mtable->blocks].caller, func);
          mtable->blocks++;
          return (void*)address;
       }
@@ -76,9 +83,10 @@ void* malloc(const size_t size)
    return NULL;
 }
 
-void* realloc(void* ptr, size_t size)
+/* NOTE: #define realloc(ptr, size) --> _realloc(__func__, ptr, size) */
+void* _realloc(const char* func, void* ptr, size_t size)
 {
-   byte* newptr = (byte*) malloc(size);
+   byte* newptr = (byte*) _malloc(func, size);
    byte* oldptr = (byte*) ptr;
    foreach(i, sizeof(oldptr)) {
       newptr[i] = oldptr[i];
@@ -87,11 +95,23 @@ void* realloc(void* ptr, size_t size)
    return (void*)newptr;
 }
 
+// ======================================================================== //
+//       Memory Usage Statistics                                            //
+// ======================================================================== //
+
+/**
+ *    Avian_Documentation:
+ *    Returns the total number of blocks allocated
+ */
 size_t mem_blocks(void)
 {
    return mtable->blocks;
 }   
 
+/**
+ *    Avian_Documentation:
+ *    Returns the total number of bytes used in memory
+ */
 uint32_t mem_used(void)
 {
    uint32_t used=0;
@@ -101,9 +121,31 @@ uint32_t mem_used(void)
    return used;
 }
 
+/**
+ *    Avian_Documentation:
+ *    Returns the total number of unused bytes in memory
+ */
 uint32_t mem_free(void)
 {
    return ALLOC_SIZE-mem_used();
+}
+
+/**
+ *    Avian_Documentation:
+ *    Sets the given address pointer and size pointer to the
+ *    respective starting address and size of the memory block
+ *    associated with the table index given. If the index is 
+ *    not valid, the function returns a nonzero value.
+ */
+int mem_block_info(size_t index, addr_t* addr, size_t* size, char* caller)
+{
+   if(index < mtable->blocks) {
+      *addr = mtable->entry[index].start;
+      *size = mtable->entry[index].size;
+      strcpy(caller, mtable->entry[index].caller);
+      return 0;
+   }
+   else return 1;
 }
 
 // ======================================================================== */

@@ -201,6 +201,7 @@ typedef struct __EXT_CACHE
 int    ext2_read_sector(byte device, dword sector, byte* buffer);
 int    ext2_write_sector(byte device, dword sector, byte* buffer);
 
+/* Ext2 functions */
 int    ext2_read_superblock(ext2_super_t* block);
 size_t ext2_block_groups(ext2_super_t* block);
 

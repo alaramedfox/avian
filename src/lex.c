@@ -28,6 +28,7 @@ typedef struct __LEX_INDEX
 /* Forward-declare LEX commands */
 extern void lex_list(int, char**);
 extern void lex_term(int, char**);
+extern void lex_manf(int, char**);
 
 /* Static functions */
 static void lex_help(int, char**);
@@ -50,6 +51,7 @@ void lex_init(void)
    lex_add_command("l", "list", lex_list);
    lex_add_command("t", "term", lex_term);
    lex_add_command("?", "help", lex_help);
+   lex_add_command("m", "manf", lex_manf);
    
    throw("Initialized Lex shell",0);
 }

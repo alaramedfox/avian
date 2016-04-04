@@ -85,7 +85,8 @@ typedef struct __ANICA_NODE
  *
  */
 typedef struct __ANICA_SUPERBLOCK
-{   
+{
+   char   jump[3];   
    char   uuid[7];      // "AnicaFS"
    char   label[16];    // String containing the filesystem label
    dword  volume_size;  // Size of volume in blocks

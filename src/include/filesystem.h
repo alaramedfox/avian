@@ -14,7 +14,17 @@ typedef enum __DEVICES
    fda=0, fdb, hda, hdb, hdc, hdd,
    sda, sdb, sdc, sdd,
    
+   NO_DEV,
+   
 } device_t;
+
+typedef enum __FILESYSTEM
+{
+   AnicaFS, Ext2, FAT12, FAT16,
+   
+   NO_FS,
+
+} format_t;
 
 typedef struct __FILE
 {
@@ -24,6 +34,14 @@ typedef struct __FILE
 
 } packed file_t;
 
+char*      read_fs(device_t);
+
+device_t   str_to_dev(char*);
+char*      dev_to_str(device_t);
+
+format_t   str_to_fs(char*);
+char*      fs_to_str(format_t);
+void       format_device(device_t, format_t);
 volume_t*  mount(device_t);
 void       unmount(volume_t*);
 file_t*    open(volume_t*, const char[], byte);

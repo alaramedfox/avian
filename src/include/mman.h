@@ -27,19 +27,22 @@ enum __MMAP_DEFS
    
    BLOCK_MAX   = 0x01000,   //4 KiB maximum block size
    BLOCK_COUNT = 0x00EDF,  //Maximum number of blocks
+   
+   FUNC_LEN    = 24,       // Length of function name records
 };
 
 typedef struct __TABLE_ENTRY 
 {
-   addr_t    start;   //Starting address of memory block
-   size_t    size;    //Size of memory block in bytes
+   addr_t    start;             //Starting address of memory block
+   size_t    size;              //Size of memory block in bytes
+   char      caller[FUNC_LEN];  // Function that allocated the block
    
 } packed mentry_t;
 
 typedef struct __TABLE_MAP
 {
    size_t    blocks;
-   mentry_t   entry[BLOCK_COUNT];
+   mentry_t  entry[BLOCK_COUNT];
 
 } packed mtable_t;
  
@@ -53,10 +56,10 @@ typedef struct __TABLE_MAP
  *    static methods.
  */
 
-__attribute__((hot)) size_t     mem_blocks(void); 
-__attribute__((hot)) uint32_t   mem_used(void);
-__attribute__((hot)) uint32_t   mem_free(void);
-
+size_t     mem_blocks(void); 
+uint32_t   mem_used(void);
+uint32_t   mem_free(void);
+int        mem_block_info(size_t, addr_t*, size_t*, char*);
 
 
 #endif

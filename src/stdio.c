@@ -36,6 +36,13 @@ static void iprint(int num, int base, int chcase, bool prefix)
    free(str);
 }
 
+static void iaddch(int num, int base, int chcase, bool prefix, char* str)
+{
+   itoa_case = chcase;
+   itoa_long = prefix;
+   itoa(num, base, str);
+}
+
 // ========================================================================= //
 //       Public API Implementation                                           //
 // ========================================================================= //

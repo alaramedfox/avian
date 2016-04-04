@@ -31,6 +31,8 @@ enum __FLOPPY_ERR
 void floppy_handler(void);
  
 /* Public API */
+void floppy_sync_cache(void);
+void floppy_flush_cache(void);
 void floppy_init(void);
 int floppy_read_block(word, byte*, size_t);
 int floppy_write_block(word, byte*, size_t);
