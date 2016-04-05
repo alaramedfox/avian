@@ -16,7 +16,7 @@ OBJ="obj"
 BIN="bin"
 IMAGE="test.img"
 
-CFLAGS=" -m32 -ffreestanding -fno-exceptions -std=c99 -nostdlib "
+CFLAGS=" -march=pentium3 -m32 -ffreestanding -fno-exceptions -std=c99 -nostdlib "
 CINC=" -Isrc/include -Isrc/asm "
 CWARN=" -Wall -Wextra -Werror -Wfatal-errors -Wno-unused "
 #CWARN=" -Wfatal-errors "
@@ -149,11 +149,7 @@ function link {
 LOCAL="1"
 function update {
    LOCAL="0"
-   printf "$INFO Writing kernel image to floppy\n"
-   #dd if=bin/kernel-alpha of=boot-floppy.img seek=200 conv=notrunc
-   sudo mount -o loop $IMAGE /media/floppy
-   sudo cp bin/kernel-alpha /media/floppy/boot/kernel-alpha
-   sudo umount /media/floppy
+   cp bin/kernel.img $IMAGE
 }
 
 function run {

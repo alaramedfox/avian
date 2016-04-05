@@ -13,6 +13,7 @@
 #include <util.h>
 #include <filesystem.h>
 #include <floppy.h>
+#include <vga.h>
 
 // ========================================================================= //
 //       Private variables and function prototypes                           //
@@ -22,6 +23,7 @@ extern volatile byte floppy_cache_state;
 extern volatile byte floppy_cache_value;
 
 static void lex_fs_format(char* dev, char* fs);
+static void lex_fs_dump(char* dev, char* sec);
 static void lex_fs_cache(char* val);
 static void lex_fs_help(void);
 
@@ -45,6 +47,11 @@ void lex_manf(int argc, char* argv[])
                lex_fs_format(dev,fs); 
                break;
             case 'c': lex_fs_cache(ARGV(a)); break;
+            case 'd':
+               dev = ARGV(a);
+               fs = ARGV(a);
+               lex_fs_dump(dev,fs);
+               break;
             
             default: break;
          }
@@ -76,9 +83,40 @@ static void lex_fs_help(void)
    printf("Usage: fs :[opt...] [val...]  - Manage a filesystem\n");
    printf(" ?                       Print this help text\n");
    printf(" f [device] [filesystem] Formats a device with the given filesystem\n");
-   printf(" c [param]               Manage filesystem caching\n\n");
+   printf(" c [param]               Manage filesystem caching\n");
+   printf(" d [device] [sector]     Dump the raw data from the given sector\n");
    
    printf("Use `fs :[opt] help' for details on a particular command\n");
+}
+
+static void lex_fs_dump(char* fmt, char* sec)
+{
+   if(fmt == NULL || sec == NULL) {
+      printf("Missing or invalid parameter\n");
+      return;
+   }
+   int format=0;
+   if(strcmp(fmt,"hex")==0) format = 1;
+   else if(strcmp(fmt,"char")==0) format = 2;
+   else printf("Invalid dump format\n");
+   
+   int sector = atoi(sec);
+   byte* data = (byte*) malloc(512);
+   floppy_read_block(sector, data, 512);
+   
+   foreach(i, 512) {
+      if(format == 1) {
+         if(i && i%4==0) printf(" ");
+         if(i%32==0) printf("\n%#+%i%#\t",GREEN,i,C_TERM);
+         printf(data[i]<=0xf?"0%X":"%X",data[i]);
+      }
+      else if(format == 2) {
+         if(i%64==0) printf("\n%#+%i%#\t",GREEN,i,C_TERM);
+         printf("%c",data[i]<32?249:data[i]);
+      }
+   }
+   printf("\n\n");
+   free(data);
 }
 
 static void lex_fs_cache(char* option)
