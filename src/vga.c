@@ -38,6 +38,11 @@ void    vga_setcolor(byte c)     { vga->color = c; }
 void    vga_newline(void)        { vga_movexy(vga_getrow()+1,0); }
 void    vga_creturn(void)        { vga_movexy(vga_getrow(), 0); }
 
+char vga_getchar(void)
+{
+   return vga->buffer[vga->vptr*2];
+}
+
 void vga_tabchar(void) 
 {
    byte spaces = TABSIZE - (vga_getcol() % TABSIZE);
