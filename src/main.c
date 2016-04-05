@@ -46,8 +46,6 @@ void avian_main(void)
    bootscreen();
    init();
    
-   //anica_format_device(2880,512,0);
-   
    printf("Entering shell\n");
    shell();
    
