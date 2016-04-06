@@ -137,6 +137,8 @@ static void lex_history_down(char* buffer)
 static void lex_add_history(char* line)
 {
    if(history.size < history.max) {
+      /* Do not add if this command is identical to the previous one */
+      if(strcmp(history.record[history.size-1], line) == 0) return;
       history.record[history.size] = (char*) malloc(strlen(line));
       strcpy(history.record[history.size], line);
       history.size++;

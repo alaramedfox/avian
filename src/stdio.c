@@ -189,7 +189,11 @@ int scan(char* buffer)
       
       if(key == '\b') {
          if(loc) {
-            buffer[--loc] = 0;
+            loc--;
+            for(int i=loc; buffer[i] != 0; i++) {
+               buffer[i] = buffer[i+1];
+            }
+            //buffer[loc] = 0;
          }
       }
       else if(key == '\0') {
@@ -199,15 +203,25 @@ int scan(char* buffer)
          keypress = false;
          break;
       }
+      else if(key == LARROW) {
+         if(loc) loc--;
+      }
+      else if(key == RARROW) {
+         if(loc<strlen(buffer)) loc++;
+      }
       else {
+         for(size_t i=strlen(buffer); i>loc; i--) {
+            buffer[i] = buffer[i-1];
+         }
          buffer[loc++] = key;
-         buffer[loc] = 0;
+         //buffer[loc] = 0;
       }
       
       echo_buffer:
       vga_moveptr(vga_loc);
       print(buffer);
-      move_cursor(vga_getrow(), vga_getcol());
+      move_cursor((loc+vga_loc)/VGA_COL, (loc+vga_loc)%VGA_COL);
+      
       while(vga_getchar() != (char)STRING_END)
       {
          printf("%c",STRING_END);
