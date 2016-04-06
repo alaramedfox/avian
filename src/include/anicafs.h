@@ -64,18 +64,18 @@ typedef struct __ANICA_ENTRY
    addr_t  addr;    // Byte address of cluster
    char    end;     // Ending byte
 
-} packed lentry_t;
+} packed aentry_t;
 
 typedef struct __ANICA_NODE
 {
    char name[12];    // ASCII Name of node
-   word permit;  // Access permissions
+   word permit;      // Access permissions
    index_t parent;   // Index of parent directory
    index_t self;     // Index of this object
    index_t data;     // Index of content data
    char end;
 
-} packed lnode_t;
+} packed anode_t;
 
 /**
  *      Structure containing the Linda FS superblock data
@@ -103,7 +103,7 @@ typedef struct __ANICA_SUPERBLOCK
 typedef struct __ANICA_VOLUME
 {
    lsuper_t sb;
-   lentry_t *itable;
+   aentry_t *itable;
 
 } packed volume_t;
 
@@ -111,12 +111,13 @@ typedef struct __ANICA_VOLUME
 //           Public API functions                                          //
 // ======================================================================= //
 
+bool anica_mkdir(volume_t* vol, const char path[]);
 bool anica_read_superblock(byte device, lsuper_t* superblock);
 bool anica_write_superblock(byte device, lsuper_t* superblock);
 bool anica_format_device(size_t, size_t, size_t);
-int  anica_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file);
-int  anica_write_file(volume_t* vol, byte* data, lnode_t* node);
-int  anica_read_file(volume_t* vol, byte* data, lnode_t* node);
+int  anica_open_file(volume_t* vol, const char path[], byte mode, anode_t* file);
+int  anica_write_file(volume_t* vol, byte* data, anode_t* node);
+int  anica_read_file(volume_t* vol, byte* data, anode_t* node);
 
 int  anica_read_itable(volume_t*);
 int  anica_write_itable(volume_t*);

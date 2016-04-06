@@ -28,7 +28,7 @@ typedef enum __FILESYSTEM
 
 typedef struct __FILE
 {
-   lnode_t* node;     // Linda file node
+   anode_t* node;     // Linda file node
    volume_t* vol;     // Linda filesystem
    byte* data;       // All the data contents
 
