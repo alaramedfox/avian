@@ -20,8 +20,8 @@ section .text
 
 	load_idt:
 	   cli
-		mov	edx, [esp + 4]
-		lidt [edx]
+		mov   edx, [esp + 4]
+		lidt  [edx]
 		sti	;<-- THIS CRASHES THE KERNEL
 		ret
 	

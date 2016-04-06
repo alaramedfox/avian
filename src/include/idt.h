@@ -22,6 +22,7 @@ enum __IDT_GATES
    
 };
 
+void idt_write_table(void);
 void idt_add_handler(addr_t, byte);
 void idt_add_exception(addr_t, byte);
  

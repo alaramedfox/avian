@@ -21,7 +21,7 @@ CINC=" -Isrc/include -Isrc/asm "
 CWARN=" -Wall -Wextra -Werror -Wfatal-errors -Wno-unused "
 #CWARN=" -Wfatal-errors "
 
-QFLAGS=" -ctrl-grab -fda $IMAGE -m 16 "
+QFLAGS=" -ctrl-grab -fda $IMAGE -m 16 -d cpu_reset "
 
 SOURCES=(" src src/asm src/lex ")
 

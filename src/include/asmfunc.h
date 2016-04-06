@@ -28,7 +28,7 @@ extern byte inportb(word);
 extern void outportb(word, byte);
 
 /* Interrupt controllers, defined in interrupts.asm */
-extern void load_idt(int32_t*);
+extern void load_idt(dword*);
 extern void keyboard_irq(void);
 extern void floppy_irq(void);
 extern void pit_irq(void);

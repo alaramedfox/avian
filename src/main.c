@@ -32,9 +32,12 @@ void bootscreen(void);
 void init(void) 
 {
    exceptions_init();
+   
+   
    hide_cursor();
    vga_setcolor(0x07);
    pic_init();
+   idt_write_table();
    kb_init();         //Init keyboard driver
    floppy_init();
    lex_init();
