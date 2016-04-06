@@ -43,26 +43,26 @@ void exceptions_init(void)
    //   idt_add_exception((addr_t)generate_default_irq(i), i);
    //}
    idt_add_exception((addr_t)generate_default_irq(0),0);
-   idt_add_exception((addr_t)generate_default_irq(1),1);
-   idt_add_exception((addr_t)generate_default_irq(2),2);
-   idt_add_exception((addr_t)generate_default_irq(3),3);
-   idt_add_exception((addr_t)generate_default_irq(4),4);
-   idt_add_exception((addr_t)generate_default_irq(5),5);
-   idt_add_exception((addr_t)generate_default_irq(6),6);
-   idt_add_exception((addr_t)generate_default_irq(7),7);
+   //idt_add_exception((addr_t)generate_default_irq(1),1);
+   //idt_add_exception((addr_t)generate_default_irq(2),2);
+   //idt_add_exception((addr_t)generate_default_irq(3),3);
+   //idt_add_exception((addr_t)generate_default_irq(4),4);
+   //idt_add_exception((addr_t)generate_default_irq(5),5);
+   //idt_add_exception((addr_t)generate_default_irq(6),6);
+   //idt_add_exception((addr_t)generate_default_irq(7),7);
    idt_add_exception((addr_t)generate_default_irq(8),8);
-   idt_add_exception((addr_t)generate_default_irq(9),9);
-   idt_add_exception((addr_t)generate_default_irq(10),10);
-   idt_add_exception((addr_t)generate_default_irq(11),11);
-   idt_add_exception((addr_t)generate_default_irq(12),12);
+   //idt_add_exception((addr_t)generate_default_irq(9),9);
+   //idt_add_exception((addr_t)generate_default_irq(10),10);
+   //idt_add_exception((addr_t)generate_default_irq(11),11);
+   //idt_add_exception((addr_t)generate_default_irq(12),12);
    idt_add_exception((addr_t)generate_default_irq(13),13);
-   idt_add_exception((addr_t)generate_default_irq(14),14);
-   idt_add_exception((addr_t)generate_default_irq(15),15);
-   idt_add_exception((addr_t)generate_default_irq(16),16);
-   idt_add_exception((addr_t)generate_default_irq(17),17);
-   idt_add_exception((addr_t)generate_default_irq(18),18);
+   //idt_add_exception((addr_t)generate_default_irq(14),14);
+   //idt_add_exception((addr_t)generate_default_irq(15),15);
+   //idt_add_exception((addr_t)generate_default_irq(16),16);
+   //idt_add_exception((addr_t)generate_default_irq(17),17);
+   //idt_add_exception((addr_t)generate_default_irq(18),18);
    
-   idt_add_exception((addr_t)throw_zero_divide, 0);
+   //idt_add_exception((addr_t)throw_zero_divide, 0);
 }
 
 static void line_panic_screen(void)
