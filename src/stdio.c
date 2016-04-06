@@ -173,6 +173,7 @@ int scan(char* buffer)
    size_t loc=0;
    move_cursor(vga_getrow(), vga_getcol());
    //buffer = (char*) calloc(BUFSIZE, 1);
+   printf("%c",STRING_END);
    
    while(loc < BUFSIZE)
    {
@@ -207,8 +208,11 @@ int scan(char* buffer)
       vga_moveptr(vga_loc);
       print(buffer);
       move_cursor(vga_getrow(), vga_getcol());
-      print("                        ");
-         
+      while(vga_getchar() != (char)STRING_END)
+      {
+         printf("%c",STRING_END);
+      }
+      
       
       keypress = false;
    }

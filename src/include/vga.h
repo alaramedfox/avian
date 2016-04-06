@@ -34,6 +34,7 @@ size_t vga_getloc   (void);          //Safely return the 1D vptr location
 void   vga_setcolor (byte);
 int    vga_tabsize  (int);
 char   vga_getchar  (void);          //Return the caracter at the current vptr
+byte   vga_getcolor (void);
 
 /* Screen manipulation */
 void vga_scroll   (void);            //Scrolling screen support

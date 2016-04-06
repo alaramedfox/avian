@@ -124,12 +124,13 @@ static void lex_history_up(char* buffer)
 
 static void lex_history_down(char* buffer)
 {
-   if(history.index < history.size) {
+   if(history.index < history.size-1) {
       char* next = history.record[++history.index];
       strcpy(buffer, next);
    }
    else {
-      memset(buffer, 'r', strlen(buffer));
+      history.index = history.size;
+      memset(buffer, 0, strlen(buffer));
    }
 }
 

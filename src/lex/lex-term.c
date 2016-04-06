@@ -5,6 +5,7 @@
 //    Purpose:       Lex terminal functions                    
 // ======================================================================== */
 
+#include <lex.h>
 #include <stdio.h>
 #include <string.h>
 #include <util.h>
@@ -18,6 +19,9 @@ static void lex_term_clear(void);
 static void lex_term_color(byte);
 static void lex_term_help(void);
 static void lex_term_tabs(byte);
+static void lex_term_history(int);
+
+extern volatile lex_history_t history;
 
 // ========================================================================= //
 //       Public API Implementation                                           //
@@ -36,6 +40,7 @@ void lex_term(int argc, char* argv[])
             case 'c': lex_term_clear(); break;
             case '#': lex_term_color(atoi(argv[arg_loc++])); break;
             case 't': lex_term_tabs(atoi(argv[arg_loc++])); break;
+            case 'h': lex_term_history(atoi(argv[arg_loc++])); break;
             
             default: break;
          }
@@ -57,6 +62,15 @@ static void lex_term_tabs(byte size)
    vga_tabsize(size);
 }
 
+static void lex_term_history(int num)
+{
+   foreach(i, num) {
+      int h = history.size-i-1;
+      if(h < 0) break;
+      printf("%i: %s\n",h,history.record[h]);
+   }
+}
+
 static void lex_term_color(byte color)
 {
    int loc = vga_getloc();
@@ -75,6 +89,7 @@ static void lex_term_help(void)
    printf(" c       Clear the screen (Case insensitive)\n");
    printf(" # [val] Set the terminal color to the specified value\n");
    printf(" t [val] Set the default tab width to the specified value\n");
+   printf(" h [N]   Display the last N commands\n");
 }
 
 

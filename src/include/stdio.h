@@ -10,6 +10,7 @@
 #include <stdarg.h>
 
 #define BUFSIZE 80
+#define STRING_END 255
 
 typedef struct __FILE_STREAM
 {
