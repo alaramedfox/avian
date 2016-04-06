@@ -136,7 +136,7 @@ typedef struct __EXT_SUPER
    /* These byts are not used (I think), but need to exist as filler */
    byte zero[788];
 
-} FLAT ext2_super_t;
+} packed ext2_super_t;
 
 typedef struct __EXT_GROUP
 {
@@ -148,7 +148,7 @@ typedef struct __EXT_GROUP
    word dirs;
    byte zero[17];
 
-} FLAT ext2_group_t;
+} packed ext2_group_t;
 
 typedef struct __EXT_INODE
 {
@@ -171,7 +171,7 @@ typedef struct __EXT_INODE
    dword os_value_3;
    dword os_value_4;
 
-} FLAT ext2_inode_t;
+} packed ext2_inode_t;
 
 typedef struct __EXT_DIRECTORY
 {
@@ -181,7 +181,7 @@ typedef struct __EXT_DIRECTORY
    byte type;
    char name[24];
 
-} FLAT ext2_dir_t;
+} packed ext2_dir_t;
 
 typedef struct __EXT_CACHE
 {
@@ -190,7 +190,7 @@ typedef struct __EXT_CACHE
    byte* block_bitmap;
    byte* inode_bitmap;
    
-} FLAT ext2_cache_t;
+} packed ext2_cache_t;
 
 
 // ========================================================================= //
@@ -201,6 +201,7 @@ typedef struct __EXT_CACHE
 int    ext2_read_sector(byte device, dword sector, byte* buffer);
 int    ext2_write_sector(byte device, dword sector, byte* buffer);
 
+/* Ext2 functions */
 int    ext2_read_superblock(ext2_super_t* block);
 size_t ext2_block_groups(ext2_super_t* block);
 

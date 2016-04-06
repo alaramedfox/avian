@@ -22,7 +22,7 @@ typedef struct __VGA
    size_t vptr;
    byte color;
    
-} FLAT vga_t;
+} packed vga_t;
 
 void move_cursor(byte,byte);
 void hide_cursor(void);
@@ -30,9 +30,11 @@ void hide_cursor(void);
 /* Setters and getters */
 size_t vga_getcol   (void);          //Safely return the current column of the cursor
 size_t vga_getrow   (void);          //Safely return the current row of cursor
-size_t vga_getloc (void);            //Safely return the 1D vptr location
+size_t vga_getloc   (void);          //Safely return the 1D vptr location
 void   vga_setcolor (byte);
 int    vga_tabsize  (int);
+char   vga_getchar  (void);          //Return the caracter at the current vptr
+byte   vga_getcolor (void);
 
 /* Screen manipulation */
 void vga_scroll   (void);            //Scrolling screen support

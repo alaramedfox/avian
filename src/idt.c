@@ -16,7 +16,7 @@ typedef struct __IDT_ENTRY
    byte type_attr;
    word higher;
    
-} FLAT idt_entry_t;
+} packed idt_entry_t;
 
 // ======================================================================== */
 //       Static prototypes
@@ -25,11 +25,19 @@ typedef struct __IDT_ENTRY
 static idt_entry_t idt_table[IDT_SIZE];
 
 static void idt_add_interrupt(addr_t, byte);
-static void idt_write_table(void);
 
 // ======================================================================== */
 //       Public API functions
 // ======================================================================== */
+
+void idt_write_table(void)
+{
+   dword descriptor[2] = { 
+      (sizeof(idt_entry_t) * IDT_SIZE) + (((addr_t)idt_table & 0xffff) << 16),
+      (addr_t)idt_table >> 16,
+   };
+   load_idt(descriptor);
+}
 
 void idt_add_handler(addr_t handler, byte irq)
 {
@@ -55,19 +63,10 @@ static void idt_add_interrupt(addr_t handler, byte offset)
    idt_table[offset].type_attr    = INTERRUPT_GATE;
    idt_table[offset].higher       = (handler & 0xFFFF0000) >> 16;
    
-   idt_write_table();
+   //idt_write_table();
 }
 
-static inline void idt_write_table(void)
-{
-   addr_t table_address = (addr_t)idt_table;
-   int descriptor[2] = { 
-      (sizeof(idt_entry_t) * IDT_SIZE) + ((table_address & 0xffff) << 16),
-      table_address >> 16,
-   };
 
-   load_idt(descriptor);
-}
 
 
 

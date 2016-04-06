@@ -74,6 +74,7 @@ bool anica_format_device(size_t sec, size_t bps, size_t res)
    
    anica_write_superblock(0, &vol->sb);
    anica_write_itable(vol);
+   floppy_sync_cache();
    free(vol->itable);
    free(vol);
    return true;
@@ -200,7 +201,7 @@ static word anica_find_superblock(void)
    byte* mbr = (byte*) malloc(512);
    floppy_read_block(0, mbr, 512);
    word offset=0;
-   if(mbr[0] != 'A') {
+   if(mbr[3] != 'A') {
       /* Found a FAT filesystem */
       memcpy(&offset, mbr+0x13, 2);
    }

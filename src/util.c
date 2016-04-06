@@ -22,7 +22,8 @@ void types_test(void)
    printf("- "); psizeof(char);  psizeof(size_t);    psizeof(int8_t);  psizeof(byte); printf("\n");
    printf("- "); psizeof(short); psizeof(ptrdiff_t); psizeof(int16_t); psizeof(word); printf("\n");
    printf("- "); psizeof(int);   psizeof(intptr_t);  psizeof(int32_t); psizeof(dword); printf("\n");
-   printf("- "); psizeof(long);  psizeof(intmax_t);  psizeof(int64_t); psizeof(addr_t); printf("\n");
+   printf("- "); psizeof(long);  psizeof(intmax_t);  psizeof(int64_t); psizeof(qword); printf("\n");
+   printf("- "); psizeof(bool); printf("\n");
    printf("\n");
    vga_tabsize(5);
 }

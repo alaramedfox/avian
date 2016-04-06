@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errors.h>
+#include <keyboard.h>
 
 typedef struct __LEX_INDEX
 {
@@ -28,11 +29,15 @@ typedef struct __LEX_INDEX
 /* Forward-declare LEX commands */
 extern void lex_list(int, char**);
 extern void lex_term(int, char**);
+extern void lex_manf(int, char**);
 
 /* Static functions */
 static void lex_help(int, char**);
 static void lex_execute(int, char**);
 static void lex_add_command(char*, char*, void (*f)(int, char**));
+static void lex_add_history(char*);
+static void lex_history_up(char*);
+static void lex_history_down(char*);
 
 /* Private variables */
 static const char    prompt[] = "Lex: ";
@@ -43,13 +48,20 @@ static size_t        lex_index_size = 0;
 //       Public API Implementation                                           //
 // ========================================================================= //
 
+volatile lex_history_t history;
+
 void lex_init(void)
 {
+   history.index = 0;
+   history.max = 25;
+   history.record = (char**) malloc(history.max);
+   
    command_index = (lex_index_t*) malloc(256 * sizeof(lex_index_t));
    
    lex_add_command("l", "list", lex_list);
    lex_add_command("t", "term", lex_term);
    lex_add_command("?", "help", lex_help);
+   lex_add_command("fs", "manfs", lex_manf);
    
    throw("Initialized Lex shell",0);
 }
@@ -62,6 +74,8 @@ void lex_init(void)
  */
 int shell(void)
 {
+   register_scan_event(UARROW, lex_history_up, false);
+   register_scan_event(DARROW, lex_history_down, false);
    char* input;
    while(true)
    {
@@ -71,6 +85,9 @@ int shell(void)
       input = (char*) calloc(80,1);
       scan(input);
       chomp(input);
+      
+      lex_add_history(input);
+      
       printf("\n");
       
       /* Splice the command and args from input */
@@ -96,6 +113,47 @@ int shell(void)
 //       Private functions                                                   //
 // ========================================================================= //
 
+static void lex_history_up(char* buffer)
+{
+   if(history.index > 0) {
+      char* previous = history.record[--history.index];
+      strcpy(buffer, previous);
+   }
+   else return; 
+}
+
+static void lex_history_down(char* buffer)
+{
+   if(history.index < history.size-1) {
+      char* next = history.record[++history.index];
+      strcpy(buffer, next);
+   }
+   else {
+      history.index = history.size;
+      memset(buffer, 0, strlen(buffer));
+   }
+}
+
+static void lex_add_history(char* line)
+{
+   if(history.size < history.max) {
+      /* Do not add if this command is identical to the previous one */
+      if(strcmp(history.record[history.size-1], line) == 0) return;
+      history.record[history.size] = (char*) malloc(strlen(line));
+      strcpy(history.record[history.size], line);
+      history.size++;
+      history.index = history.size;
+   }
+   else {
+      foreach(i, history.size-1) {
+         history.record[i] = history.record[i+1];
+      }
+      free(history.record[history.size]);
+      history.record[history.size] = (char*) malloc(strlen(line));
+      strcpy(history.record[history.size], line);
+   }
+}
+
 static void lex_help(int argc, char* argv[])
 {
    printf("LEX Shell version 0.1 -- Command overview\n\n");
@@ -104,7 +162,7 @@ static void lex_help(int argc, char* argv[])
    printf(" e      edit     :[mode]   [object]    Edit files, variables, etc\n");
    printf(" x      exec     :[mode]   [program]   Execute a program\n");
    printf(" t      term     :[var...] [val...]    Manipulate the terminal\n");
-   printf(" m      manf     :[opt...] [val...]    Manage the filesystem\n");
+   printf(" fs     manfs    :[opt...] [val...]    Manage the filesystem\n");
    printf("\n");
    printf("For more details on a command, type `[command] :?'\n");
 }

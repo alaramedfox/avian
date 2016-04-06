@@ -31,7 +31,7 @@ typedef struct __ENTRY
    addr_t    start;   // Starting address of entry
    size_t   size;      // Size of element
    
-} FLAT entry_t;
+} packed entry_t;
 
 /* Table list */
 typedef struct __TABLE
@@ -41,7 +41,7 @@ typedef struct __TABLE
    size_t max;
    entry_t *entry;
 
-} FLAT table_t;
+} packed table_t;
 
 
 

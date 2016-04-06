@@ -78,10 +78,11 @@ size_t ext2_block_groups(ext2_super_t* super)
    dword bt = super->blocks_total;
    dword it = super->inodes_total;
    
-   size_t by_blocks = bt/bpg + bt%bpg?1:0;
-   size_t by_inodes = it/ipg + it%ipg?1:0;
+   size_t by_blocks = bt/bpg + (bt%bpg?1:0);
+   size_t by_inodes = it/ipg + (it%ipg?1:0);
    
-   return by_blocks?by_inodes:by_blocks;
+   int i = by_blocks?by_inodes:by_blocks;
+   return i?i:1;
 }
 
 byte* ext2_read_block(ext2_super_t* super, dword index)

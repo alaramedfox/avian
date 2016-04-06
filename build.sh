@@ -14,11 +14,14 @@ TARGET=()
 ROOT="."
 OBJ="obj"
 BIN="bin"
+IMAGE="test.img"
 
-CFLAGS=" -mtune=i386 -m32 -ffreestanding -fno-exceptions -std=c99 -nostdlib "
+CFLAGS=" -march=pentium3 -m32 -ffreestanding -fno-exceptions -std=c99 -nostdlib "
 CINC=" -Isrc/include -Isrc/asm "
 CWARN=" -Wall -Wextra -Werror -Wfatal-errors -Wno-unused "
 #CWARN=" -Wfatal-errors "
+
+QFLAGS=" -ctrl-grab -fda $IMAGE -m 16 -d cpu_reset "
 
 SOURCES=(" src src/asm src/lex ")
 
@@ -97,6 +100,9 @@ function make_all {
 	assemble
 	compile
 	link
+	sudo mount -o loop bin/kernel.img /media/floppy
+	sudo cp bin/kernel-alpha /media/floppy/boot/avian.bin
+	sudo umount /media/floppy
 }
 
 function assemble {
@@ -143,20 +149,16 @@ function link {
 LOCAL="1"
 function update {
    LOCAL="0"
-   printf "$INFO Writing kernel image to floppy\n"
-   #dd if=bin/kernel-alpha of=boot-floppy.img seek=200 conv=notrunc
-   sudo mount -o loop temp.img /media/floppy
-   sudo cp bin/kernel-alpha /media/floppy/boot/kernel-alpha
-   sudo umount /media/floppy
+   cp bin/kernel.img $IMAGE
 }
 
 function run {
    if [ $LOCAL = "1" ]; then
       printf "$INFO Executing kernel-alpha with QEMU...\n"
-      qemu-system-i386 -kernel bin/kernel-alpha -fda test.img -m 16
+      qemu-system-i386 -kernel bin/kernel-alpha $QFLAGS
    else
 	   printf "$INFO Executing grub-test.img with QEMU...\n"
-	   qemu-system-i386 -fda temp.img -no-shutdown -m 16
+	   qemu-system-i386 $QFLAGS
 	fi
 	return
 }

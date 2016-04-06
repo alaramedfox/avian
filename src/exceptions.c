@@ -14,12 +14,55 @@
 #include <util.h>
 #include <stdlib.h>
 
+#define generate_default_irq(num) throw_irq_##num
+
+extern void throw_irq_0(void);
+extern void throw_irq_1(void);
+extern void throw_irq_2(void);
+extern void throw_irq_3(void);
+extern void throw_irq_4(void);
+extern void throw_irq_5(void);
+extern void throw_irq_6(void);
+extern void throw_irq_7(void);
+extern void throw_irq_8(void);
+extern void throw_irq_9(void);
+extern void throw_irq_10(void);
+extern void throw_irq_11(void);
+extern void throw_irq_12(void);
+extern void throw_irq_13(void);
+extern void throw_irq_14(void);
+extern void throw_irq_15(void);
+extern void throw_irq_16(void);
+extern void throw_irq_17(void);
+extern void throw_irq_18(void);
+
+
 void exceptions_init(void)
 {
-   foreach(i, 13) {
-      idt_add_exception((addr_t)throw_exception, i);
-   }
-   idt_add_exception((addr_t)throw_zero_divide, 0);
+   //foreach(i, 13) {
+   //   idt_add_exception((addr_t)generate_default_irq(i), i);
+   //}
+   idt_add_exception((addr_t)generate_default_irq(0),0);
+   //idt_add_exception((addr_t)generate_default_irq(1),1);
+   //idt_add_exception((addr_t)generate_default_irq(2),2);
+   //idt_add_exception((addr_t)generate_default_irq(3),3);
+   //idt_add_exception((addr_t)generate_default_irq(4),4);
+   //idt_add_exception((addr_t)generate_default_irq(5),5);
+   //idt_add_exception((addr_t)generate_default_irq(6),6);
+   //idt_add_exception((addr_t)generate_default_irq(7),7);
+   idt_add_exception((addr_t)generate_default_irq(8),8);
+   //idt_add_exception((addr_t)generate_default_irq(9),9);
+   //idt_add_exception((addr_t)generate_default_irq(10),10);
+   //idt_add_exception((addr_t)generate_default_irq(11),11);
+   //idt_add_exception((addr_t)generate_default_irq(12),12);
+   idt_add_exception((addr_t)generate_default_irq(13),13);
+   //idt_add_exception((addr_t)generate_default_irq(14),14);
+   //idt_add_exception((addr_t)generate_default_irq(15),15);
+   //idt_add_exception((addr_t)generate_default_irq(16),16);
+   //idt_add_exception((addr_t)generate_default_irq(17),17);
+   //idt_add_exception((addr_t)generate_default_irq(18),18);
+   
+   //idt_add_exception((addr_t)throw_zero_divide, 0);
 }
 
 static void line_panic_screen(void)
@@ -74,5 +117,7 @@ void catch_zero_divide(dword eip)
 {
    catch_exception(eip, 0);
 }
+
+
 
 

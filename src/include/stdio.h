@@ -10,6 +10,7 @@
 #include <stdarg.h>
 
 #define BUFSIZE 80
+#define STRING_END 255
 
 typedef struct __FILE_STREAM
 {
@@ -29,6 +30,9 @@ enum __COLOR_DEFS
 
 typedef uint32_t fpos_t;
 typedef uint32_t off_t;
+
+int deregister_scan_event(word key);
+int register_scan_event(word key, void (*f)(char*), bool ret);
 
 int scan(char* buffer);
 

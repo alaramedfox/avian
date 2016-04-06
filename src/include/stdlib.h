@@ -10,6 +10,8 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#define MALLOC_DEBUG
+
 /* custom datatypes */
 typedef uint16_t   index_t;
 typedef uintptr_t  addr_t;
@@ -31,7 +33,7 @@ typedef uint64_t   qword;    //64-bit value   8 bytes
 #define foreach(var, count)   for(typeof(count) var=0; var<count; var++)
       
 /* This compresses the packed attribute into something smaller */
-#define FLAT   __attribute__((packed))
+#define packed   __attribute__((packed))
 
 /* This enables code tracing, if a flag is set */
 #if 1
@@ -53,11 +55,21 @@ int      strtol(const char *str, char **endptr, int base);
  *      MEMORY - Defined in mman.c
  */
 #define  new(T) (T*)malloc(sizeof(T))
-void*    calloc(size_t, size_t)  __attribute__ ((malloc));
-void     free(void*);
-void*    malloc(size_t)          __attribute__ ((malloc));
-void*    realloc(void*, size_t);
+
+__attribute__ ((malloc))
+void*    _calloc(const char*, size_t, size_t);
+#define  calloc(num, size) _calloc(__func__,num,size)
+
+
+__attribute__ ((malloc))
+void*    _malloc(const char*, size_t);
+#define  malloc(size)   _malloc(__func__, size)
+
+void*    _realloc(const char*, void*, size_t);
+#define  realloc(ptr, size) _realloc(__func__,ptr,size)
+
 size_t   ptrsize(void*);
+void     free(void*);
 
 typedef struct __DIV
 {
