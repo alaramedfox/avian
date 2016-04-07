@@ -43,6 +43,7 @@ static void lex_fs_mount(char* dev, char* point);
 static void lex_fs_unmount(char* point);
 static void lex_fs_list(void);
 static void lex_fs_new(char* obj, char* path);
+static void lex_fs_dirlist(char* path);
 
 // ========================================================================= //
 //       Public API Implementation                                           //
@@ -81,7 +82,8 @@ void lex_manf(int argc, char* argv[])
                break;
                
             case 'u': lex_fs_unmount(ARGV(a)); break;
-            case 'l': lex_fs_list(); break;
+            case 'l': lex_fs_dirlist(ARGV(a)); break;
+            case 'L': lex_fs_list(); break;
             
             default: break;
          }
@@ -120,6 +122,62 @@ static void lex_fs_format(char* point, char* fs)
    }
    
    printf("You need to mount a device before formatting\n");
+}
+
+static void lex_fs_dirlist(char* path)
+{
+   if(path == NULL) {
+      printf("Missing or invalid parameter\n");
+      return;
+   }
+   
+   /* Split the path in the form "Point:Path" */
+   char** split_path = (char**) malloc(2);
+   int halves = split(':',' ',path,split_path);
+   if(halves != 2) {
+      printf("Paths must be of the form `Mountpoint:path'\n");
+      goto exit2;
+   }
+   
+   /* Extract the two components of the path */
+   char* point = (char*) malloc(strlen(split_path[0])+1);
+   strcpy(point,split_path[0]);
+   char* real_path = (char*) malloc(strlen(split_path[1])+1);
+   strcpy(real_path, split_path[1]);
+   
+   /* Aquire the device to be accessed */
+   device_t device = NO_DEV;
+   volume_t* vol;
+   foreach(i, mounted_volumes) {
+      if(strcmp(point, mountpoints[i].point) == 0) {
+         device = mountpoints[i].device;
+         vol = mountpoints[i].vol;
+         break;
+      }
+   }
+   if(device == NO_DEV) {
+      printf("%s is not mounted\n",point);
+      goto exit1;
+   }
+   
+   /* Read the actual list */
+   char** list = (char**) malloc(64);
+   
+   int entries = anica_list_contents(vol, path, list);
+   int tabsize = vga_tabsize(0);
+   vga_tabsize(10);
+   foreach(i, entries) {
+      printf("%s\t",list[i]);
+   }
+   printf("\n");
+   
+   exit1:
+   free(point);
+   free(real_path);
+   exit2:
+   foreach(i, halves) free(split_path[i]);
+   free(split_path);
+   return;
 }
 
 static void lex_fs_new(char* obj, char* path)

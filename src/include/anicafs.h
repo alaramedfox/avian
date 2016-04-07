@@ -17,7 +17,7 @@ enum __ANICA_TABLE_TYPE
    ANICA_DIR = 'D',
    ANICA_FILE = 'F',
    ANICA_DATA = 'C',
-   ANICA_FREE = 'A',
+   ANICA_FREE = 'U',
 };
 
 enum __ANICA_MODES
@@ -118,6 +118,7 @@ bool anica_format_device(size_t, size_t, size_t);
 int  anica_open_file(volume_t* vol, const char path[], byte mode, anode_t* file);
 int  anica_write_file(volume_t* vol, byte* data, anode_t* node);
 int  anica_read_file(volume_t* vol, byte* data, anode_t* node);
+int anica_list_contents(volume_t* vol, const char path[], char** list);
 
 int  anica_read_itable(volume_t*);
 int  anica_write_itable(volume_t*);
