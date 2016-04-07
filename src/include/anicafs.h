@@ -39,7 +39,15 @@ enum __ANICA_ERRORS
    ANICA_ERR = 255,  // Some unknown error
 };
 
+enum __ANICA_DEFAULTS
+{
+   ANICA_MAX_PATH = 64, // Maximum depth of paths
+   ANICA_MIN_SIZE = 32, // Default size of new files
+   ANICA_MAX_NAME = 12, // Maximum length of file/dir names
+};
+
 /**   
+ *    Anica_Documentation:    
  *    The Index Table is a list of addresses (and sizes) of
  *    each unit of data, whether it be a directory, file, or
  *    actual block of file content. On the disk, the index table
@@ -49,20 +57,15 @@ enum __ANICA_ERRORS
  *    the sought-after node in the table. When a superblock is
  *    loaded from disk, the index table is loaded into memory, and
  *    the superblock records a pointer to that memory address.
- *
- *    Each table entry can address up to 4 GiB of space, with a
- *    maximum continuous data size of 4 KiB. One sector of entries
- *    can manage a maximum of 4 MiB of data, assuming each entry uses
- *    the maximum cluster size of 4 KiB. I think these numbers are wrong...
- *
  */
- 
 typedef struct __ANICA_ENTRY
 {
    byte    type;    // Type of data (file, dir, etc)
-   word    size;    // Size of data in bytes
-   addr_t  addr;    // Byte address of cluster
-   char    end;     // Ending byte
+   union {
+   word    size;    // Size of data in bytes (type == data)
+   index_t parent;  // Parent index (type != data)
+   };
+   addr_t  addr;    // Byte address of node
 
 } packed aentry_t;
 
@@ -73,12 +76,11 @@ typedef struct __ANICA_NODE
    index_t parent;   // Index of parent directory
    index_t self;     // Index of this object
    index_t data;     // Index of content data
-   char end;
 
 } packed anode_t;
 
 /**
- *      Structure containing the Linda FS superblock data
+ *      Structure containing the AnicaFS superblock data
  *      The superblock is a chunk of data loaded from the
  *      first sector of a partition that provides information
  *      about the data. 
