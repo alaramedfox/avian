@@ -164,12 +164,17 @@ static void lex_fs_dirlist(char* path)
    char** list = (char**) malloc(64);
    
    int entries = anica_list_contents(vol, path, list);
+   if(entries < 0) {
+      printf("Path not found\n");
+      goto exit1;
+   }
    int tabsize = vga_tabsize(0);
    vga_tabsize(10);
    foreach(i, entries) {
-      printf("%s\t",list[i]);
+      if(list[i] != NULL) printf("%s\t",list[i]);
    }
    printf("\n");
+   vga_tabsize(tabsize);
    
    exit1:
    free(point);

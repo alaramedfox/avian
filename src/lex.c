@@ -14,13 +14,6 @@
 #include <errors.h>
 #include <keyboard.h>
 
-__attribute__((constructor)) 
-void test_constructor(void)
-{
-   printf("Constructor\n");
-   while(true);
-}
-
 typedef struct __LEX_INDEX
 {
    char* cmd;

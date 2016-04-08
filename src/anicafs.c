@@ -37,7 +37,7 @@ static addr_t   anica_read_data(volume_t*, addr_t, byte*, size_t);
 static addr_t   anica_write_data(volume_t*, addr_t, byte*, size_t);
 static int      anica_read_path(volume_t*, const char[], anode_t*);
 static int      anica_parent_index(volume_t*, const char[], char*);
-static aentry_t anica_add_entry(volume_t*, byte, word);
+static aentry_t anica_add_entry(volume_t*, byte, index_t, size_t);
 static anode_t  anica_make_file(volume_t*, const char[], size_t);
 
 // ======================================================================== //
@@ -99,6 +99,8 @@ bool anica_mkdir(volume_t* vol, const char path[])
    char* filename = (char*) malloc(16);
    int parent_index = anica_parent_index(vol, path, filename);
    
+   printf("anica_mkdir: Directory = %s, Parent = %i\n",filename, parent_index);
+   
    bool status;
    
    if(parent_index < 0) status = false;
@@ -124,11 +126,19 @@ int anica_list_contents(volume_t* vol, const char path[], char** list)
    if(index < 0) return -1;
    size_t entries = 0;
    foreach(i, vol->sb.entries) {
-      if(vol->itable[i].type != ANICA_DATA) {
+      if(vol->itable[i].type != ANICA_DATA && vol->itable[i].parent == index) {
          anica_read_node(vol, &vol->itable[i], &node);
-         if(node.parent == index) {
-            list[entries] = (char*) malloc(strlen(node.name)+1);
-            strcpy(list[entries], node.name);
+         size_t len = strlen(node.name);
+         /* TODO: Fix bug where empty contents are 'discovered' */
+         if(len) {
+            list[entries] = (char*) calloc(len+2,1);
+            memcpy(list[entries], node.name, len);
+            switch(vol->itable[i].type)
+            {
+               case ANICA_DIR: list[entries][len] = '/'; break;
+               case ANICA_FILE: list[entries][len] = '*'; break;
+               default: list[entries][len] = '?'; break;
+            }
             entries++;
          }
       }
@@ -228,20 +238,19 @@ static int anica_read_path(volume_t* vol, const char path[], anode_t* node)
    size_t depth = split('/',0,path,tree);
    foreach(level, depth)
    {
-      anode_t temp;
-      /* Look up the index of this node */
+      found = false;
       foreach(i, vol->sb.entries) {
-         if(vol->itable[i].type != ANICA_DATA) {
-            anica_read_node(vol, &vol->itable[i], &temp);
-            if(temp.parent == index && strcmp(tree[level], temp.name) == 0) {
-               index = temp.self;
+         aentry_t entry = vol->itable[i]; // Make a copy of the entry
+         if(entry.type != ANICA_DATA && entry.parent == index) {
+            anica_read_node(vol, &entry, node);
+            if(strcmp(tree[level], node->name) == 0) {
+               index = node->self;
                found = true;
                break;
             }
          }
       }
-      if(found == false) return -1;
-      else *node = temp;
+      //if(found == false) return -1;
    }
    return index;
 }
@@ -264,10 +273,11 @@ static int anica_parent_index(volume_t* vol, const char path[], char* filename)
    memcpy(parent_path, path, parent_str_len);
    
    int parent_index = anica_read_path(vol, parent_path,NULL);
-   if(filename != NULL) filename = tree[depth-1];
+   if(filename != NULL) strcpy(filename, tree[depth-1]);
    
    foreach(i, depth) free(tree[i]);
    free(tree);
+   free(parent_path);
    
    return parent_index;
 }
@@ -281,35 +291,29 @@ static anode_t anica_make_file(volume_t* vol, const char path[], size_t size)
    /* Create file node */
    anode_t node;
    strcpy(node.name, filename);
-   node.parent = parent_index;
    node.permit = 0xC0DE;
    node.self = vol->sb.entries+1;
    node.data = vol->sb.entries+2;
    
-   aentry_t file_entry = anica_add_entry(vol, ANICA_FILE, node.parent);
-   aentry_t data_entry = anica_add_entry(vol, ANICA_DATA, size);
+   aentry_t file_entry = anica_add_entry(vol, ANICA_FILE, parent_index, 32);
+   aentry_t data_entry = anica_add_entry(vol, ANICA_DATA, node.data, size);
 
    /* Write data to disk */
    anica_write_node(vol, &file_entry, &node);
    
+   free(filename);
+   
    return node;
 }
 
-static aentry_t anica_add_entry(volume_t* vol, byte type, word parent)
+static aentry_t anica_add_entry(volume_t* vol, byte type, index_t parent, size_t size)
 {
    aentry_t entry;
    entry.type = type;
-   if(type == ANICA_DATA) {
-      entry.size = parent;
-      entry.addr = anica_find_block(vol, entry.size);
-   }
-   else {
-      entry.parent = parent;
-      entry.addr = anica_find_block(vol, sizeof(aentry_t));
-   }
+   entry.size = size;
+   entry.parent = parent;
+   entry.addr = anica_find_block(vol, entry.size);
    vol->itable[vol->sb.entries++] = entry;
-   //vol->itable[node->data] = *(entry);
-   //vol->sb.entries++;
    return entry;
 }
 
@@ -363,25 +367,6 @@ static addr_t anica_write_node(volume_t* vol, aentry_t* entry, anode_t* node)
    return anica_write_data(vol, entry->addr, (byte*)node, sizeof(anode_t));
 }
 
-static char* anica_filename(const char path[])
-{  
-   /* Calculate the length of the file name */
-   size_t name_size = 0;
-   while(path[name_size] != '.' && name_size < strlen(path)) 
-      { name_size++; }
-   size_t ext_size = strlen(path) - (name_size+1);
-   size_t pads = 11 - (ext_size + name_size);
-   char* filename = (char*) malloc(12);
-   foreach(i, name_size) { filename[i] = path[i]; }
-   foreach(i, pads) { filename[i+name_size] = ' '; }
-   foreach(i, ext_size) {
-      filename[i+name_size+pads] = path[i+name_size+1];
-   }
-   /* Null terminate string */
-   filename[11] = 0;
-   return filename;
-}
-
 static void anica_format_sb(lsuper_t* superblock, size_t sec, size_t bps, size_t res)
 {  
    word start = anica_find_superblock();
@@ -398,24 +383,21 @@ static void anica_format_sb(lsuper_t* superblock, size_t sec, size_t bps, size_t
    superblock->entries = 0;
 }
 
-static bool anica_write_dir(volume_t* vol, char* name, word parent)
+static bool anica_write_dir(volume_t* vol, char* name, index_t parent)
 {  
    bool status = true;
    
    /* Create the directory node */
    anode_t dir;
-   //char _name[12] = "           /";
-   //memcpy(_name, name, strlen(name));
-   //memcpy(dir.name, _name, 12);
-   memset(dir.name, 0, 12);
+   memset(dir.name, 0, 16);
    memcpy(dir.name, name, strlen(name));
    dir.permit = 0xC0DE;
-   dir.parent = parent;
    dir.self = vol->sb.entries++;
    dir.data = 0;
+   memset(dir.zero, 'D', 10); 
 
    /* Create table entry for the directory */
-   aentry_t entry = anica_add_entry(vol, ANICA_DIR, dir.parent);
+   aentry_t entry = anica_add_entry(vol, ANICA_DIR, parent, sizeof(anode_t));
    anica_write_node(vol, &entry, &dir);
    
    return status;
@@ -432,9 +414,7 @@ static bool anica_write_dir(volume_t* vol, char* name, word parent)
 
 int anica_read_itable(volume_t* vol)
 {  
-
    int sector = vol->sb.table_addr;
-   //print("Reading table from sector "); iprint((sector,DEC)); print("\n");
    byte* block = (byte*) malloc(512);
    floppy_read_block(sector, block, 512);
    memcpy(vol->itable, block, 512);
@@ -444,9 +424,7 @@ int anica_read_itable(volume_t* vol)
 
 int anica_write_itable(volume_t* vol)
 {  
-
    int sector = vol->sb.table_addr;
-   //print("Writing table to sector "); iprint((sector,DEC)); print("\n");
    byte* block = (byte*) malloc(512);
    memcpy(block, vol->itable, 512);
    
