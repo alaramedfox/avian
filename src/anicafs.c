@@ -81,8 +81,8 @@ bool anica_format_device(size_t sec, size_t bps, size_t res)
    anica_mkdir(vol,"$/programs");
    
    /* Reserve file blocks for GRUB and the kernel */
+   anode_t kernel = anica_make_file(vol, "$/kernel/avian.bin", 32);
    
-
    
    
    anica_write_superblock(0, &vol->sb);
@@ -295,7 +295,7 @@ static anode_t anica_make_file(volume_t* vol, const char path[], size_t size)
    node.self = vol->sb.entries+1;
    node.data = vol->sb.entries+2;
    
-   aentry_t file_entry = anica_add_entry(vol, ANICA_FILE, parent_index, 32);
+   aentry_t file_entry = anica_add_entry(vol, ANICA_FILE, parent_index, sizeof(anode_t));
    aentry_t data_entry = anica_add_entry(vol, ANICA_DATA, node.data, size);
 
    /* Write data to disk */

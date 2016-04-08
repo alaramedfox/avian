@@ -17,6 +17,7 @@ enum __ANICA_TABLE_TYPE
    ANICA_DIR,
    ANICA_FILE,
    ANICA_DATA,
+   ANICA_SYS,
 };
 
 enum __ANICA_MODES
