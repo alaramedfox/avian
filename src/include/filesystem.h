@@ -44,7 +44,7 @@ char*      fs_to_str(format_t);
 void       format_device(device_t, format_t);
 volume_t*  mount(device_t);
 void       unmount(volume_t*);
-file_t*    open(volume_t*, const char[], byte);
+file_t*    open(volume_t*, char*, byte);
 size_t     read(file_t*);
 size_t     write(file_t*, void*);
 void       close(file_t*);

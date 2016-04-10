@@ -1,4 +1,4 @@
-#define FILE_C_SOURCE
+#define LEX_C_SOURCE
 // ======================================================================== */
 //    Avian Kernel   Bryan Webb (C) 2016                              
 //    File:          avian/lex/lex.c                                   
@@ -40,9 +40,11 @@ static void lex_history_up(char*);
 static void lex_history_down(char*);
 
 /* Private variables */
-static const char    prompt[] = "Lex: ";
+static char**        prompt;
 static lex_index_t*  command_index;
 static size_t        lex_index_size = 0;
+
+char* current_directory;
 
 // ========================================================================= //
 //       Public API Implementation                                           //
@@ -53,8 +55,11 @@ volatile lex_history_t history;
 void lex_init(void)
 {
    history.index = 0;
-   history.max = 25;
+   history.max = 255;
    history.record = (char**) malloc(history.max);
+   
+   current_directory = (char*) calloc(128,1);
+   prompt = (char**) malloc(4);
    
    command_index = (lex_index_t*) malloc(256 * sizeof(lex_index_t));
    
@@ -79,7 +84,11 @@ int shell(void)
    char* input;
    while(true)
    {
-      printf("%s",prompt);
+      char cdir[128];
+      strcpy(cdir, current_directory);
+      split(':',0,cdir, prompt);
+      printf("%#(lex)%s%# ",0x0F, prompt[1]==NULL?"root:":prompt[1], 0x07);
+      
       
       /* Gather and chomp the input */
       input = (char*) calloc(80,1);
@@ -107,7 +116,27 @@ int shell(void)
    return 0;
 }
 
-
+char* lex_full_path(const char relpath[])
+{
+   char* new_path = (char*) malloc(128);
+   
+   if(relpath == NULL || relpath[0] == 0) {
+      strcpy(new_path, current_directory);
+   }
+   
+   else if(split(':',0,relpath,NULL) < 2) {
+      strcpy(new_path, current_directory);
+      strcat(new_path, relpath);
+   }
+   else {
+      strcpy(new_path, relpath);
+   }
+   
+   //if(new_path[strlen(new_path)-1] != '/') {
+   //   strcat(new_path, "/");
+   //}
+   return new_path;
+}
 
 // ========================================================================= //
 //       Private functions                                                   //

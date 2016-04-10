@@ -112,7 +112,7 @@ volume_t* mount(device_t device)
    return volume;
 }
 
-file_t* open(volume_t* device, const char path[], byte mode)
+file_t* open(volume_t* device, char* path, byte mode)
 {  
 
    file_t* file = new(file_t);

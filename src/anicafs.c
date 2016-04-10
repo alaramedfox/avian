@@ -30,15 +30,15 @@ static void     anica_format_sb(lsuper_t*, size_t,size_t,size_t);
 static bool     anica_write_dir(volume_t*,char*, word);
 static addr_t   anica_find_block(volume_t*, size_t);
 static word     anica_find_superblock(void);
-static char*    anica_filename(const char path[]);
+static char*    anica_filename(char*);
 static addr_t   anica_read_node(volume_t*, aentry_t*, anode_t*);
 static addr_t   anica_write_node(volume_t*, aentry_t*, anode_t*);
 static addr_t   anica_read_data(volume_t*, addr_t, byte*, size_t);
 static addr_t   anica_write_data(volume_t*, addr_t, byte*, size_t);
-static int      anica_read_path(volume_t*, const char[], anode_t*);
-static int      anica_parent_index(volume_t*, const char[], char*);
+static int      anica_read_path(volume_t*, char*, anode_t*);
+static int      anica_parent_index(volume_t*, char*, char*);
 static aentry_t anica_add_entry(volume_t*, byte, index_t, size_t);
-static anode_t  anica_make_file(volume_t*, const char[], size_t);
+static anode_t  anica_make_file(volume_t*, char*, size_t);
 
 // ======================================================================== //
 //           Public API functions                                           //
@@ -76,13 +76,17 @@ bool anica_format_device(size_t sec, size_t bps, size_t res)
    
    /* Create directory structure */
    anica_write_dir(vol, "$", 0); // Root
-   anica_mkdir(vol,"$/kernel");   
-   anica_mkdir(vol,"$/libraries");
-   anica_mkdir(vol,"$/programs");
+   anica_mkdir(vol,"$/sys");
+   anica_mkdir(vol,"$/sys/avian");
+   anica_mkdir(vol,"$/sys/grub");
+   
+   anica_mkdir(vol,"$/lib");
+   anica_mkdir(vol,"$/app");
+   anica_mkdir(vol,"$/usr");
    
    /* Reserve file blocks for GRUB and the kernel */
-   anode_t kernel = anica_make_file(vol, "$/kernel/avian.bin", 32);
-   
+   anode_t kernel = anica_make_file(vol, "$/sys/avian/avian.bin", 32);
+   anode_t stage2 = anica_make_file(vol, "$/sys/grub/stage2", 32);
    
    
    anica_write_superblock(0, &vol->sb);
@@ -93,13 +97,11 @@ bool anica_format_device(size_t sec, size_t bps, size_t res)
    return true;
 }
 
-bool anica_mkdir(volume_t* vol, const char path[])
+bool anica_mkdir(volume_t* vol, char* path)
 {
    /* Extract filename and path from given path */
    char* filename = (char*) malloc(16);
    int parent_index = anica_parent_index(vol, path, filename);
-   
-   printf("anica_mkdir: Directory = %s, Parent = %i\n",filename, parent_index);
    
    bool status;
    
@@ -119,7 +121,7 @@ bool anica_mkdir(volume_t* vol, const char path[])
  *    allocated with a size large enough to hold all the contents.
  *    (Note: list[N] will be allocated in this function) 
  */
-int anica_list_contents(volume_t* vol, const char path[], char** list)
+int anica_list_contents(volume_t* vol, char* path, char** list)
 {
    anode_t node;
    int index = anica_read_path(vol, path, &node);
@@ -135,9 +137,15 @@ int anica_list_contents(volume_t* vol, const char path[], char** list)
             memcpy(list[entries], node.name, len);
             switch(vol->itable[i].type)
             {
-               case ANICA_DIR: list[entries][len] = '/'; break;
-               case ANICA_FILE: list[entries][len] = '*'; break;
-               default: list[entries][len] = '?'; break;
+               case ANICA_DIR: 
+                  list[entries][len] = ANICA_DIR_ICON; 
+                  break;
+               case ANICA_FILE: 
+                  list[entries][len] = ANICA_FILE_ICON; 
+                  break;
+               default: 
+                  list[entries][len] = ANICA_SYS_ICON; 
+                  break;
             }
             entries++;
          }
@@ -156,7 +164,7 @@ int anica_list_contents(volume_t* vol, const char path[], char** list)
  *    permissions, or something else. 
  */
 
-int anica_open_file(volume_t* vol, const char path[], byte mode, anode_t* file)
+int anica_open_file(volume_t* vol, char* path, byte mode, anode_t* file)
 {  
    int status;
    anode_t node;
@@ -228,7 +236,7 @@ int anica_write_file(volume_t* vol, byte* data, anode_t* node)
  *    is copied to the provided empty node structure.
  *    If not, a negative value is returned indicating the specific error.
  */
-static int anica_read_path(volume_t* vol, const char path[], anode_t* node)
+static int anica_read_path(volume_t* vol, char* path, anode_t* node)
 {
    int index = vol->sb.root;
    bool found = false;
@@ -238,7 +246,11 @@ static int anica_read_path(volume_t* vol, const char path[], anode_t* node)
    size_t depth = split('/',0,path,tree);
    foreach(level, depth)
    {
+      if(strlen(tree[level]) < 1) {
+         continue;  
+      }
       found = false;
+      
       foreach(i, vol->sb.entries) {
          aentry_t entry = vol->itable[i]; // Make a copy of the entry
          if(entry.type != ANICA_DATA && entry.parent == index) {
@@ -250,7 +262,7 @@ static int anica_read_path(volume_t* vol, const char path[], anode_t* node)
             }
          }
       }
-      //if(found == false) return -1;
+      if(found == false) return -1;
    }
    return index;
 }
@@ -264,10 +276,15 @@ static int anica_read_path(volume_t* vol, const char path[], anode_t* node)
  *    to `file.ext` and the function will return the index of `subdir`.
  *    If the path was not found, a negative value is returned.
  */
-static int anica_parent_index(volume_t* vol, const char path[], char* filename)
+static int anica_parent_index(volume_t* vol, char* path, char* filename)
 {
    char** tree = (char**) malloc(64);
    size_t depth = split('/',0,path,tree);
+   
+   printf("Path: [%s]\nSplit:\n",path);
+   foreach(i, depth) printf("[%s] ", tree[i]);
+   printf("\n");
+   
    size_t parent_str_len = strlen(path) - strlen(tree[depth-1]) -1;
    char* parent_path = (char*) malloc(parent_str_len+1);
    memcpy(parent_path, path, parent_str_len);
@@ -282,7 +299,7 @@ static int anica_parent_index(volume_t* vol, const char path[], char* filename)
    return parent_index;
 }
 
-static anode_t anica_make_file(volume_t* vol, const char path[], size_t size)
+static anode_t anica_make_file(volume_t* vol, char* path, size_t size)
 {
    /* Extract filename and path from given path */
    char* filename = (char*) malloc(16);

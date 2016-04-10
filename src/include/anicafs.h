@@ -41,9 +41,22 @@ enum __ANICA_ERRORS
 
 enum __ANICA_DEFAULTS
 {
+   /* Definitions for various sizes */
    ANICA_MAX_PATH = 64, // Maximum depth of paths
    ANICA_MIN_SIZE = 32, // Default size of new files
    ANICA_MAX_NAME = 12, // Maximum length of file/dir names
+   
+   /* Definitions for special directories */
+   ANICA_PARENT_DIR = '^',  // Name of a relative path's parent directory
+   ANICA_CURRENT_DIR = '@', // Name of relative path's current directory
+   ANICA_ROOT_DIR = '$', // Name of a filesystem's root directory
+   
+   /* Definitions for directory content suffixes */
+   ANICA_FILE_ICON = '*',  // Appended to filenames
+   ANICA_DIR_ICON = '/',   // Appended to directory names
+   ANICA_SYS_ICON = '.',   // Appended to special things
+   ANICA_LINK_ICON = '&',  // Appended to symbolic links
+   
 };
 
 /**   
@@ -112,14 +125,14 @@ typedef struct __ANICA_VOLUME
 //           Public API functions                                          //
 // ======================================================================= //
 
-bool anica_mkdir(volume_t* vol, const char path[]);
+bool anica_mkdir(volume_t* vol, char* path);
 bool anica_read_superblock(byte device, lsuper_t* superblock);
 bool anica_write_superblock(byte device, lsuper_t* superblock);
 bool anica_format_device(size_t, size_t, size_t);
-int  anica_open_file(volume_t* vol, const char path[], byte mode, anode_t* file);
+int  anica_open_file(volume_t* vol, char* path, byte mode, anode_t* file);
 int  anica_write_file(volume_t* vol, byte* data, anode_t* node);
 int  anica_read_file(volume_t* vol, byte* data, anode_t* node);
-int  anica_list_contents(volume_t* vol, const char path[], char** list);
+int  anica_list_contents(volume_t* vol, char* path, char** list);
 
 int  anica_read_itable(volume_t*);
 int  anica_write_itable(volume_t*);
