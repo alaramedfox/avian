@@ -78,7 +78,17 @@ char* new_str(const char str[])
    char* newstr = (char*) malloc(strlen(str));
    memcpy(newstr, str, strlen(str));
    return newstr;
-}  
+}
+
+size_t strlongest(char** strings, int num)
+{
+   size_t record = 0;
+   foreach(i, num) {
+      size_t len = strlen(strings[i]);
+      if(len > record) record = len;
+   }
+   return record;
+}
 
 static inline void itoa_bytes(int number, char str[])
 {  

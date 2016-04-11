@@ -46,7 +46,7 @@ void avian_main(void)
 {  
    bootscreen();
    init();
-   
+
    printf("Entering shell\n");
    shell();
    

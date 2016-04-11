@@ -473,11 +473,14 @@ static int floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
     */
    dma_xfer(2, (addr_t)dma_buffer, bytes, !read);
    
+   byte modifier = (lba%2==1)?0xC0:0x40;
+   
    if(read) {
-      status = floppy_send_byte(READ_DATA | 0x40);
+      status = floppy_send_byte(READ_DATA | modifier);
    }
    else {
-      status = floppy_send_byte(WRITE_DATA | 0x40);
+      status = floppy_send_byte(WRITE_DATA | modifier);
+      //status = floppy_send_byte(WRITE_DATA);
    }
    
    if(status) {

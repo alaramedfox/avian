@@ -106,17 +106,17 @@ volume_t* mount(device_t device)
 {  
    volume_t* volume = new(volume_t);
    anica_read_superblock(device, &volume->sb);
-   volume->itable = (lentry_t*) malloc(volume->sb.table_size * 8);
+   volume->itable = (aentry_t*) malloc(volume->sb.table_size * 8);
    anica_read_itable(volume);
    
    return volume;
 }
 
-file_t* open(volume_t* device, const char path[], byte mode)
+file_t* open(volume_t* device, char* path, byte mode)
 {  
 
    file_t* file = new(file_t);
-   lnode_t* filenode = new(lnode_t);
+   anode_t* filenode = new(anode_t);
    file->node = filenode;
    file->vol = device;
    

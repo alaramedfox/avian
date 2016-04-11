@@ -14,10 +14,10 @@
 
 enum __ANICA_TABLE_TYPE
 {
-   ANICA_DIR = 'D',
-   ANICA_FILE = 'F',
-   ANICA_DATA = 'C',
-   ANICA_FREE = 'A',
+   ANICA_DIR,
+   ANICA_FILE,
+   ANICA_DATA,
+   ANICA_SYS,
 };
 
 enum __ANICA_MODES
@@ -39,7 +39,28 @@ enum __ANICA_ERRORS
    ANICA_ERR = 255,  // Some unknown error
 };
 
+enum __ANICA_DEFAULTS
+{
+   /* Definitions for various sizes */
+   ANICA_MAX_PATH = 64, // Maximum depth of paths
+   ANICA_MIN_SIZE = 32, // Default size of new files
+   ANICA_MAX_NAME = 12, // Maximum length of file/dir names
+   
+   /* Definitions for special directories */
+   ANICA_PARENT_DIR = '^',  // Name of a relative path's parent directory
+   ANICA_CURRENT_DIR = '@', // Name of relative path's current directory
+   ANICA_ROOT_DIR = '$', // Name of a filesystem's root directory
+   
+   /* Definitions for directory content suffixes */
+   ANICA_FILE_ICON = '*',  // Appended to filenames
+   ANICA_DIR_ICON = '/',   // Appended to directory names
+   ANICA_SYS_ICON = '.',   // Appended to special things
+   ANICA_LINK_ICON = '&',  // Appended to symbolic links
+   
+};
+
 /**   
+ *    Anica_Documentation:    
  *    The Index Table is a list of addresses (and sizes) of
  *    each unit of data, whether it be a directory, file, or
  *    actual block of file content. On the disk, the index table
@@ -49,36 +70,29 @@ enum __ANICA_ERRORS
  *    the sought-after node in the table. When a superblock is
  *    loaded from disk, the index table is loaded into memory, and
  *    the superblock records a pointer to that memory address.
- *
- *    Each table entry can address up to 4 GiB of space, with a
- *    maximum continuous data size of 4 KiB. One sector of entries
- *    can manage a maximum of 4 MiB of data, assuming each entry uses
- *    the maximum cluster size of 4 KiB. I think these numbers are wrong...
- *
  */
- 
+
 typedef struct __ANICA_ENTRY
 {
-   byte    type;    // Type of data (file, dir, etc)
-   word    size;    // Size of data in bytes
-   addr_t  addr;    // Byte address of cluster
-   char    end;     // Ending byte
+   dword    type:    2;    // Entry type
+   dword    addr:    30;   // Node address
+   index_t  parent:  16;   // Parent index
+   word     size:    16;   // Node size
 
-} packed lentry_t;
+} packed aentry_t;
 
 typedef struct __ANICA_NODE
 {
-   char name[12];    // ASCII Name of node
-   word permit;  // Access permissions
-   index_t parent;   // Index of parent directory
-   index_t self;     // Index of this object
-   index_t data;     // Index of content data
-   char end;
+   char name[16];    // ASCII Name of node
+   word permit;      // Access permissions
+   index_t self;     // Index of this node's table entry
+   index_t data;     // Index of this node's data entry
+   byte zero[10];    // Unused data
 
-} packed lnode_t;
+} packed anode_t;
 
 /**
- *      Structure containing the Linda FS superblock data
+ *      Structure containing the AnicaFS superblock data
  *      The superblock is a chunk of data loaded from the
  *      first sector of a partition that provides information
  *      about the data. 
@@ -103,7 +117,7 @@ typedef struct __ANICA_SUPERBLOCK
 typedef struct __ANICA_VOLUME
 {
    lsuper_t sb;
-   lentry_t *itable;
+   aentry_t *itable;
 
 } packed volume_t;
 
@@ -111,12 +125,14 @@ typedef struct __ANICA_VOLUME
 //           Public API functions                                          //
 // ======================================================================= //
 
+bool anica_mkdir(volume_t* vol, char* path);
 bool anica_read_superblock(byte device, lsuper_t* superblock);
 bool anica_write_superblock(byte device, lsuper_t* superblock);
 bool anica_format_device(size_t, size_t, size_t);
-int  anica_open_file(volume_t* vol, const char path[], byte mode, lnode_t* file);
-int  anica_write_file(volume_t* vol, byte* data, lnode_t* node);
-int  anica_read_file(volume_t* vol, byte* data, lnode_t* node);
+int  anica_open_file(volume_t* vol, char* path, byte mode, anode_t* file);
+int  anica_write_file(volume_t* vol, byte* data, anode_t* node);
+int  anica_read_file(volume_t* vol, byte* data, anode_t* node);
+int  anica_list_contents(volume_t* vol, char* path, char** list);
 
 int  anica_read_itable(volume_t*);
 int  anica_write_itable(volume_t*);

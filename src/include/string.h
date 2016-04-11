@@ -22,6 +22,7 @@ enum __ITOA_CASES
 size_t split(char, char, const char[], char**);
 void   chomp(char[]);
 char*  new_str(const char[]);
+size_t strlongest(char**, int);
 
 void*  memchr(const void *str, int c, size_t n);
 int    memcmp(const void *str1, const void *str2, size_t n);

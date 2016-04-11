@@ -95,6 +95,7 @@ section .text
       
    global throw_irq_8
    throw_irq_8:
+      pop eax ; Ignore error code
       mov eax, [esp]
       push 8
       push eax
