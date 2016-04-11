@@ -25,18 +25,10 @@ QFLAGS=" -ctrl-grab -fda $IMAGE -m 16 -d cpu_reset "
 
 SOURCES=(" src src/asm src/lex ")
 
-function increment_file {
-	file=$1
-	old="`sed  's/^ *//' $file` +1"  
-	echo $old | bc > $file.temp  
-	mv $1.temp $file
-	return "`sed  's/^ *//' $1`"
-}
-
 function increment_build {
-	BUILDFILE="version/build"
-	MAJORFILE="version/major"
-	TIMEFILE="version/time"
+	BUILDFILE=".version/build"
+	MAJORFILE=".version/major"
+	TIMEFILE=".version/time"
 	HEADER="src/include/buildcount.h"
 
 	version="`sed  's/^ *//' $MAJORFILE`"  

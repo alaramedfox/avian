@@ -23,6 +23,7 @@
 # Debugging files #
 ###################
 *.map
+*.version
 
 # Backups #
 ###########
