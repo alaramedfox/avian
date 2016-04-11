@@ -71,6 +71,8 @@ void*    _realloc(const char*, void*, size_t);
 size_t   ptrsize(void*);
 void     free(void*);
 
+int system(const char *command);
+
 typedef struct __DIV
 {
    int quot;

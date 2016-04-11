@@ -39,7 +39,7 @@ function increment_build {
 	echo "$version`sed  's/^ *//' $BUILDFILE` - `date`" > $TIMEFILE
 	echo "#define BUILD \"`sed  's/^ *//' $BUILDFILE`\"" > $HEADER 
 	echo "#define TIMESTAMP \"$version`sed  's/^ *//' $BUILDFILE` - `date`\"" >> $HEADER  
-	echo "#define VERSION \"$version`sed  's/^ *//' $BUILDFILE`\"" >> $HEADER
+	echo "#define VERSION \"$version (`sed  's/^ *//' $BUILDFILE`)\"" >> $HEADER
 }
 
 function printhelp {

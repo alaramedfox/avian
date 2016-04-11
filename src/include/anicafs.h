@@ -30,11 +30,11 @@ enum __ANICA_MODES
 
 enum __ANICA_ERRORS
 {
-   ANICA_OK     = 0,    // Everything went OK
-   ANICA_FSERR  = 1,    // Some sort of filesystem error
-   ANICA_NOFILE = 2,    // Could not find file
-   ANICA_NODIR  = 3,    // Could not find directory
-   ANICA_IOERR  = 4,    // Error reading or writing to device
+   ANICA_OK     =  0,    // Everything went OK
+   ANICA_FSERR  = -1,    // Some sort of filesystem error
+   ANICA_NOFILE = -2,    // Could not find file
+   ANICA_NODIR  = -3,    // Could not find directory
+   ANICA_IOERR  = -4,    // Error reading or writing to device
    
    ANICA_ERR = 255,  // Some unknown error
 };

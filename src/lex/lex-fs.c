@@ -45,6 +45,7 @@ static void lex_fs_list(void);
 static void lex_fs_new(char* obj, const char relpath[]);
 static void lex_fs_dirlist(const char relpath[]);
 static void lex_fs_enter(const char relpath[]);
+static bool lex_read_mountpath(const char path[], volume_t* vol, char* point, char* real_path);
 
 // ========================================================================= //
 //       Public API Implementation                                           //
@@ -52,6 +53,9 @@ static void lex_fs_enter(const char relpath[]);
 
 void lex_manf(int argc, char* argv[])
 {
+   printf("lex_manf: %i args",argc);
+   foreach(i, argc) printf(" [%s]",argv[i]);
+   printf("\n");
    if(argc >= 2 && argv[1][0] == ':') {
       int a = 2;
       char *arg1, *arg2;
@@ -129,6 +133,8 @@ static void lex_fs_enter(const char relpath[])
 {
    char* path = lex_full_path(relpath);
    size_t s1 = strlen(path);
+   
+   //if(anica_list_contents(path
   
    if(relpath[0] == ANICA_PARENT_DIR) {
       char** tree = (char**) malloc(64);
@@ -171,48 +177,33 @@ static void lex_fs_dirlist(const char relpath[])
       return;
    }
    
-   /* Split the path in the form "Point:Path" */
-   char** split_path = (char**) malloc(8);
-   int halves = split(':',' ',path,split_path);
-   if(halves != 2) {
-      printf("Paths must be of the form `Mountpoint:path'\n");
-      goto exit2;
-   }
+   volume_t vol;
+   char* point = (char*) malloc(16);
+   char* real_path = (char*) malloc(80);
+   lex_read_mountpath(path, &vol, point, real_path);
    
-   /* Extract the two components of the path */
-   char* point = (char*) malloc(strlen(split_path[0])+1);
-   strcpy(point,split_path[0]);
-   char* real_path = (char*) malloc(strlen(split_path[1])+1);
-   strcpy(real_path, split_path[1]);
-   
-   /* Aquire the device to be accessed */
-   device_t device = NO_DEV;
-   volume_t* vol;
-   foreach(i, mounted_volumes) {
-      if(strcmp(point, mountpoints[i].point) == 0) {
-         device = mountpoints[i].device;
-         vol = mountpoints[i].vol;
-         break;
-      }
-   }
-   if(device == NO_DEV) {
-      printf("%s is not mounted\n",point);
-      goto exit1;
-   }
+   /* NOTE: This might be a buggy hack to remove the '/' */
+   //size_t s1 = strlen(real_path)-1;
+   //if(real_path[s1] == '/') real_path[s1] = 0;
    
    /* Read the actual list */
    char** list = (char**) malloc(64);
    
-   int entries = anica_list_contents(vol, real_path, list);
+   int entries = anica_list_contents(&vol, real_path, list);
    if(entries < 0) {
-      printf("Directory `%s' not found\n",real_path);
-      goto exit1;
+      switch(entries)
+      {
+         case ANICA_FSERR: printf("manfs: %s is not a directory\n",path); break;
+         case ANICA_NODIR: printf("manfs: %s not found\n",path); break;
+         case ANICA_IOERR: printf("manfs: Input/Output error\n"); break;
+         default: printf("manfs: Unknown error\n"); break;
+      }
+      goto exit;
    }
    
    /* Print the directory contents */
    int tabsize = vga_tabsize(0);
-   vga_tabsize(strlongest(list, entries)/2);
-   printf("%#@\t^%#\t", lex_sys_color, lex_text_color);
+   vga_tabsize(strlongest(list, entries));
    byte lfc = lex_file_color;
    byte ldc = lex_dir_color;
    byte lsc = lex_sys_color;
@@ -244,13 +235,12 @@ static void lex_fs_dirlist(const char relpath[])
    printf("\n");
    vga_tabsize(tabsize);
    
-   exit1:
+   exit:
    free(path);
    free(point);
    free(real_path);
-   exit2:
-   foreach(i, halves) free(split_path[i]);
-   free(split_path);
+   foreach(i, entries) free(list[i]);
+   free(list);
    return;
 }
 
@@ -325,10 +315,8 @@ static void lex_fs_list(void)
 
 static void lex_fs_mount(char* dev, char* point)
 {
-   if(dev == NULL || point == NULL) {
-      printf("Missing or invalid parameter\n");
-      return;
-   }
+   VALIDATE_ARG(dev, return);
+   VALIDATE_ARG(point, return);
    
    if(mounted_volumes == MAX_LEX_MOUNTS) {
       printf("Maximum number of volumes have been mounted\n");
@@ -381,7 +369,7 @@ static void lex_fs_unmount(char* point)
 
 static void lex_fs_help(void)
 {
-   printf("Usage: fs :[opt...] [val...]  - Manage a filesystem\n");
+   printf("Usage: manfs :[opt...] [val...]  - Manage a filesystem\n");
    printf(" ?                       Print this help text\n");
    printf(" f [point] [filesystem]  Formats a device with the given filesystem\n");
    printf(" c [param]               Manage filesystem caching\n");
@@ -390,7 +378,7 @@ static void lex_fs_help(void)
    printf(" u [point]               Unmount a filesystem\n");
    printf(" l                       List currently mounted devices\n");
    
-   printf("Use `fs :[opt] help' for details on a particular command\n");
+   printf("Use `manfs :[opt] help' for details on a particular command\n");
 }
 
 static void lex_fs_dump(char* fmt, char* sec)
@@ -421,6 +409,43 @@ static void lex_fs_dump(char* fmt, char* sec)
    }
    printf("\n\n");
    free(data);
+}
+
+static bool lex_read_mountpath(const char path[], volume_t* vol, char* point, char* real_path)
+{
+   bool status = true;
+   /* Split the path in the form "Point:Path" */
+   char** split_path = (char**) malloc(8);
+   int halves = split(':',' ',path,split_path);
+   if(halves != 2) {
+      printf("Paths must be of the form `Mountpoint:path'\n");
+      status = false;
+      goto exit;
+   }
+   
+   /* Extract the two components of the path */
+   strcpy(point, split_path[0]);
+   strcpy(real_path, split_path[1]);
+   
+   /* Aquire the device to be accessed */
+   device_t device = NO_DEV;
+   foreach(i, mounted_volumes) {
+      if(strcmp(point, mountpoints[i].point) == 0) {
+         device = mountpoints[i].device;
+         *vol = *mountpoints[i].vol;
+         break;
+      }
+   }
+   if(device == NO_DEV) {
+      printf("%s is not mounted\n",point);
+      status = false;
+      goto exit;
+   }
+   
+   exit:
+   foreach(i, halves) free(split_path[i]);
+   free(split_path);
+   return status;
 }
 
 static void lex_fs_cache(char* option)

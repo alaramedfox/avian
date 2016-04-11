@@ -63,7 +63,7 @@ void bootscreen(void)
    int location = vga_getloc();
    for(size_t i=0; i<80; i++)    { addch(HLINE1); }
    vga_moveptr(location+4);
-   printf("[ Avian Kernel version " VERSION " ]\n\n");
+   printf("[ Avian Kernel " VERSION " ]\n\n");
    
    vga_setcolor(0x07);
 }

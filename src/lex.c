@@ -17,7 +17,6 @@
 typedef struct __LEX_INDEX
 {
    char* cmd;
-   char* alias;
    void (*function)(int argc, char* argv[]);
 
 } lex_index_t;
@@ -34,10 +33,17 @@ extern void lex_manf(int, char**);
 /* Static functions */
 static void lex_help(int, char**);
 static void lex_execute(int, char**);
-static void lex_add_command(char*, char*, void (*f)(int, char**));
+static void lex_add_command(char*, void (*f)(int, char**));
 static void lex_add_history(char*);
 static void lex_history_up(char*);
 static void lex_history_down(char*);
+
+/* Functions for internal aliases */
+static void lex_alias_clear(int, char**);
+static void lex_alias_enter(int, char**);
+static void lex_alias_make(int, char**);
+static void lex_alias_dirlist(int, char**);
+
 
 /* Private variables */
 static char**        prompt;
@@ -63,12 +69,33 @@ void lex_init(void)
    
    command_index = (lex_index_t*) malloc(256 * sizeof(lex_index_t));
    
-   lex_add_command("l", "list", lex_list);
-   lex_add_command("t", "term", lex_term);
-   lex_add_command("?", "help", lex_help);
-   lex_add_command("fs", "manfs", lex_manf);
+   lex_add_command("list", lex_list);
+   lex_add_command("term", lex_term);
+   lex_add_command("help", lex_help);
+   lex_add_command("manfs", lex_manf);
+   
+   lex_add_command("clear", lex_alias_clear);
+   lex_add_command("enter", lex_alias_enter);
+   lex_add_command("make", lex_alias_make);
+   lex_add_command("ld", lex_alias_dirlist);
    
    throw("Initialized Lex shell",0);
+}
+
+/**
+ *    Anica_Documentation:
+ *    Implementation of the C standard's system() function.
+ *    it processes the string input and sends it to the Lex
+ *    command processor. As specified by the C Standard, the
+ *    function returns -1 on error, or the status of the command
+ *    otherwise.
+ */
+int system(const char *command)
+{
+   char** argv = (char**) malloc(80);
+   int argc = split(' ',0,command, argv);
+   lex_execute(argc, argv);
+   return 0;
 }
 
 /**
@@ -95,7 +122,7 @@ int shell(void)
       scan(input);
       chomp(input);
       
-      lex_add_history(input);
+      if(strlen(input) > 1) lex_add_history(input);
       
       printf("\n");
       
@@ -113,6 +140,8 @@ int shell(void)
       free(argv);
       free(input);
    }
+   deregister_scan_event(UARROW);
+   deregister_scan_event(DARROW);
    return 0;
 }
 
@@ -138,9 +167,51 @@ char* lex_full_path(const char relpath[])
    return new_path;
 }
 
+
+
 // ========================================================================= //
 //       Private functions                                                   //
 // ========================================================================= //
+
+static void lex_alias_clear(int argc, char* argv[])
+{
+   char* command = (char*) malloc(80);
+   strcpy(command, "term :c");
+   strmerge(command, argv+1, argc-1, " ");
+   
+   system(command);
+   free(command);
+}
+
+static void lex_alias_make(int argc, char* argv[])
+{
+   char* command = (char*) malloc(80);
+   strcpy(command, "manfs :n");
+   strmerge(command, argv+1, argc-1, " ");
+   
+   system(command);
+   free(command);
+}
+
+static void lex_alias_enter(int argc, char* argv[])
+{
+   char* command = (char*) malloc(80);
+   strcpy(command, "manfs :e");
+   strmerge(command, argv+1, argc-1, " ");
+   
+   system(command);
+   free(command);
+}
+
+static void lex_alias_dirlist(int argc, char* argv[])
+{
+   char* command = (char*) malloc(80);
+   strcpy(command, "manfs :l");
+   strmerge(command, argv+1, argc-1, " ");
+   
+   system(command);
+   free(command);
+}
 
 static void lex_history_up(char* buffer)
 {
@@ -186,22 +257,26 @@ static void lex_add_history(char* line)
 static void lex_help(int argc, char* argv[])
 {
    printf("LEX Shell version 0.1 -- Command overview\n\n");
-   printf("-CMD----ALIAS----ARGS------------------INFO----------------------\n");
-   printf(" l      list     :[cat...] [val...]    List items in a category\n");
-   printf(" e      edit     :[mode]   [object]    Edit files, variables, etc\n");
-   printf(" x      exec     :[mode]   [program]   Execute a program\n");
-   printf(" t      term     :[var...] [val...]    Manipulate the terminal\n");
-   printf(" fs     manfs    :[opt...] [val...]    Manage the filesystem\n");
+   printf("-CMD------ARGS---------------INFO----------------------\n");
+   printf(" list     :[cat..] [val..]   List items in a category\n");
+   printf(" edit     :[mode]  [obj]     Edit files, variables, etc\n");
+   printf(" exec     :[mode]  [app]     Execute a program\n");
+   printf(" term     :[var..] [val..]   Manipulate the terminal\n");
+   printf(" manfs    :[opt..] [val..]   Manage the filesystem\n");
+   printf(" clear    -none-             Clear the screen\n");
+   printf(" enter    [path]             Enter a subdirectory\n");
+   printf(" make     :[obj..] [path..]  Create an object at the given path\n");
+   printf(" ld       [path]             List contents of a directory\n");
    printf("\n");
    printf("For more details on a command, type `[command] :?'\n");
 }
 
 static void lex_execute(int argc, char* argv[])
 {
-   if(argc == 0) return;
+   if(argc == 0 || argv == NULL || argv[0] == NULL) return;
+   
    foreach(i, lex_index_size) {
-      if(strcmp(argv[0], command_index[i].cmd) == 0 ||
-         strcmp(argv[0], command_index[i].alias) == 0) {
+      if(strcmp(argv[0], command_index[i].cmd) == 0) {
          command_index[i].function(argc, argv);
          return;
       }
@@ -209,10 +284,9 @@ static void lex_execute(int argc, char* argv[])
    printf("Unknown command `%s'\n",argv[0]);
 }
 
-static void lex_add_command(char* cmd, char* alias, void (*function)(int argc, char* argv[]))
+static void lex_add_command(char* cmd, void (*function)(int argc, char* argv[]))
 {
    command_index[lex_index_size].cmd = cmd;
-   command_index[lex_index_size].alias = alias;
    command_index[lex_index_size].function = function;
    lex_index_size++;
 }

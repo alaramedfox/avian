@@ -125,8 +125,13 @@ int anica_list_contents(volume_t* vol, char* path, char** list)
 {
    anode_t node;
    int index = anica_read_path(vol, path, &node);
-   if(index < 0) return -1;
+   if(index < 0) return index;
+   
    size_t entries = 0;
+   list[0] = (char*) malloc(3);
+   list[1] = (char*) malloc(3);
+   strcpy(list[entries++], "@/");
+   strcpy(list[entries++], "^/");
    foreach(i, vol->sb.entries) {
       if(vol->itable[i].type != ANICA_DATA && vol->itable[i].parent == index) {
          anica_read_node(vol, &vol->itable[i], &node);
@@ -240,7 +245,6 @@ static int anica_read_path(volume_t* vol, char* path, anode_t* node)
 {
    int index = vol->sb.root;
    bool found = false;
-   //int index = -1;
    
    char** tree = (char**) malloc(64);
    size_t depth = split('/',0,path,tree);
@@ -262,8 +266,14 @@ static int anica_read_path(volume_t* vol, char* path, anode_t* node)
             }
          }
       }
-      if(found == false) return -1;
+      if(found == false) {
+         index = ANICA_NODIR;
+         goto exit;
+      }
    }
+   exit:
+   foreach(i, depth) free(tree[i]);
+   free(tree);
    return index;
 }
 

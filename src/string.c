@@ -75,8 +75,9 @@ void chomp(char str[])
 
 char* new_str(const char str[])
 {  
-   char* newstr = (char*) malloc(strlen(str));
-   memcpy(newstr, str, strlen(str));
+   char* newstr = (char*) malloc(strlen(str)+1);
+   //memcpy(newstr, str, strlen(str));
+   strcpy(newstr, str);
    return newstr;
 }
 
@@ -88,6 +89,23 @@ size_t strlongest(char** strings, int num)
       if(len > record) record = len;
    }
    return record;
+}
+
+/**
+ *    Avian_Documentation:
+ *    Merges an array of strings into the given string,
+ *    then returns a pointer to that string.
+ *    If a delimeter is provided (eg, not NULL), then that 
+ *    delimeter is used to separate the concatenations.
+ */
+char* strmerge(char* dest, char** src, int num, const char* delim)
+{
+   foreach(i, num) {
+      if(delim != NULL) strcat(dest, delim);
+      strcat(dest, src[i]); 
+   }
+   
+   return dest;
 }
 
 static inline void itoa_bytes(int number, char str[])
