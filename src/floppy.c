@@ -234,19 +234,6 @@ void floppy_init(void)
    outportb(FDC_CCR,0x00);
    outportb(FDC_DSR,0x00);
    
-   /* Load the first track into the cache 
-   int sectors = 18;
-   byte* first_track = (byte*) malloc(sectors*512);
-   floppy_data_transfer(0, first_track, sectors*512, true);
-   foreach(i, sectors) {
-      byte* sector = (byte*) malloc(512);
-      memcpy(sector, first_track+(i*512), 512);
-      floppy_add_cache(i, sector);
-      free(sector);
-   }
-   free(first_track);
-   */
-   
    throw("Started floppy controller",0);
 }
 
@@ -447,7 +434,6 @@ static int floppy_send_byte(byte data)
    return FDC_IOERR;
 }
 
-#include <vga.h>
 static int floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
 {
    bool status = FDC_OK;
@@ -470,7 +456,6 @@ static int floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
    do {
       seek_status = floppy_seek(chs.cyl);
       tries--;
-      
    } while(tries && seek_status);
    
    if(seek_status) {

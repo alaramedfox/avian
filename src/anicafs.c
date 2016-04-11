@@ -60,9 +60,12 @@ bool anica_read_superblock(byte device, lsuper_t* superblock)
 bool anica_write_superblock(byte device, lsuper_t* superblock)
 {  
    byte* block = (byte*) calloc(512, 1);
-   if(device == 0) floppy_read_block(superblock->hidden, block, 512);
+   word sb_sector = anica_find_superblock();
+   //if(device == 0) floppy_read_block(superblock->hidden, block, 512);
+   if(device == 0) floppy_read_block(sb_sector, block, 512);
    memcpy(block, superblock, sizeof(lsuper_t));
-   if(device == 0) floppy_write_block(superblock->hidden, block, 512);
+   //if(device == 0) floppy_write_block(superblock->hidden, block, 512);
+   if(device == 0) floppy_write_block(sb_sector, block, 512);
    free(block);
    return true;
 }
@@ -77,16 +80,29 @@ bool anica_format_device(size_t sec, size_t bps, size_t res)
    /* Create directory structure */
    anica_write_dir(vol, "$", 0); // Root
    anica_mkdir(vol,"$/sys");
-   anica_mkdir(vol,"$/sys/avian");
-   anica_mkdir(vol,"$/sys/grub");
    
    anica_mkdir(vol,"$/lib");
    anica_mkdir(vol,"$/app");
    anica_mkdir(vol,"$/usr");
    
+   char grub_config[] = "title Avian Kernel\nkernel 2680+160\nboot";
+   
    /* Reserve file blocks for GRUB and the kernel */
-   anode_t kernel = anica_make_file(vol, "$/sys/avian/avian.bin", 32);
-   anode_t stage2 = anica_make_file(vol, "$/sys/grub/stage2", 32);
+   size_t kernel_size = 96 * 1024;  // 96 KiB
+   size_t stage2_size = 102 * 1024; // 102 KiB
+   size_t config_size = strlen(grub_config)+5;
+   
+   anode_t kernel = anica_make_file(vol, "$/sys/avian.bin", kernel_size);
+   //anode_t stage2 = anica_make_file(vol, "$/sys/grub/stage2", stage2_size);
+   //anode_t grubcf = anica_make_file(vol, "$/sys/grub/menu.lst", config_size);
+   
+   //vol->itable[grubcf.data].addr = 0x18E00;
+   
+   //anica_write_file(vol, (byte*)grub_config, &grubcf);
+   
+   
+   vol->itable[kernel.data].addr = 1372160;  // Sector 2680
+   //vol->itable[stage2.data].addr = 0x200;    // Sector 1
    
    
    anica_write_superblock(0, &vol->sb);
@@ -212,7 +228,7 @@ int anica_write_file(volume_t* vol, byte* data, anode_t* node)
    size_t bytes = vol->itable[node->data].size;
    addr_t address = vol->itable[node->data].addr;
    
-   size_t datasize = ptrsize(data)+2;
+   size_t datasize = ptrsize(data);
    /* If the file will be larger, re-allocate the file */
    if(datasize > bytes) {
       address = anica_find_block(vol, datasize);
@@ -354,7 +370,8 @@ static word anica_find_superblock(void)
       memcpy(&offset, mbr+0x13, 2);
    }
    free(mbr);
-   return offset;
+   //return offset;
+   return 200;
 }
 
 static addr_t anica_write_data(volume_t* vol, addr_t addr, byte* data, size_t bytes)
@@ -405,7 +422,7 @@ static void anica_format_sb(lsuper_t* superblock, size_t sec, size_t bps, size_t
    superblock->hidden = start;
    superblock->reserved = res;
    superblock->table_addr = res+start+1;
-   superblock->table_size = 64;
+   superblock->table_size = 128;
    superblock->root = 0;
    superblock->entries = 0;
 }
@@ -442,9 +459,11 @@ static bool anica_write_dir(volume_t* vol, char* name, index_t parent)
 int anica_read_itable(volume_t* vol)
 {  
    int sector = vol->sb.table_addr;
-   byte* block = (byte*) malloc(512);
-   floppy_read_block(sector, block, 512);
-   memcpy(vol->itable, block, 512);
+   size_t tsize = vol->sb.table_size * sizeof(aentry_t);
+   
+   byte* block = (byte*) malloc(tsize);
+   floppy_read_block(sector, block, tsize);
+   memcpy(vol->itable, block, tsize);
    free(block);
    return ANICA_OK;
 }
@@ -452,10 +471,12 @@ int anica_read_itable(volume_t* vol)
 int anica_write_itable(volume_t* vol)
 {  
    int sector = vol->sb.table_addr;
-   byte* block = (byte*) malloc(512);
-   memcpy(block, vol->itable, 512);
+   size_t tsize = vol->sb.table_size * sizeof(aentry_t);
    
-   floppy_write_block(sector, block, 512);
+   byte* block = (byte*) malloc(tsize);
+   memcpy(block, vol->itable, tsize);
+   
+   floppy_write_block(sector, block, tsize);
    free(block);
    return ANICA_OK;
 }

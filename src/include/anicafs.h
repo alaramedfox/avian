@@ -65,19 +65,30 @@ enum __ANICA_DEFAULTS
  *    each unit of data, whether it be a directory, file, or
  *    actual block of file content. On the disk, the index table
  *    is a long list of consecutive entries, with each entry being
- *    8 bytes (64 entries per sector). When nodes and clusters refer
+ *    12 bytes (128 entries per 3 sectos). When nodes and clusters refer
  *    to other nodes or clusters, this reference is by the index of
  *    the sought-after node in the table. When a superblock is
  *    loaded from disk, the index table is loaded into memory, and
  *    the superblock records a pointer to that memory address.
  */
 
+/*
 typedef struct __ANICA_ENTRY
 {
    dword    type:    2;    // Entry type
    dword    addr:    30;   // Node address
    index_t  parent:  16;   // Parent index
    word     size:    16;   // Node size
+
+} packed aentry_t;
+*/
+
+typedef struct __ANICA_ENTRY
+{
+   word     type;
+   index_t  parent;
+   dword    addr;
+   dword    size;
 
 } packed aentry_t;
 
