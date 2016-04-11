@@ -20,6 +20,10 @@
 *.tar
 *.zip
 
+# Debugging files #
+###################
+*.map
+
 # Backups #
 ###########
 *.old
