@@ -29,6 +29,8 @@
 void init(void);
 void bootscreen(void);
 
+extern void start(void);
+
 void init(void) 
 {
    exceptions_init();
@@ -42,12 +44,18 @@ void init(void)
    printf("\nSystem booted.\n\n");
 }
 
+int main(int argc, char* argv[])
+{
+   start();
+   return 0;
+}
+
 void avian_main(void) 
 {  
    bootscreen();
    init();
    
-   anica_format_device(2880,512,0);
+   //anica_format_device(2880,512,0);
 
    printf("Entering shell\n");
    shell();

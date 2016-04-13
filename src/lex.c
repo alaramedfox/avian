@@ -25,24 +25,17 @@ typedef struct __LEX_INDEX
 //       Private variables and function prototypes                           //
 // ========================================================================= //
 
-/* Forward-declare LEX commands */
-extern void lex_list(int, char**);
-extern void lex_term(int, char**);
-extern void lex_manf(int, char**);
+lex_mpoint_t mountpoints[MAX_LEX_MOUNTS];
+size_t mounted_volumes=0;
+
+//IMPORT_LEX("ld", lex_list_dir);
 
 /* Static functions */
 static void lex_help(int, char**);
 static void lex_execute(int, char**);
-static void lex_add_command(char*, void (*f)(int, char**));
 static void lex_add_history(char*);
 static void lex_history_up(char*);
 static void lex_history_down(char*);
-
-/* Functions for internal aliases */
-static void lex_alias_clear(int, char**);
-static void lex_alias_enter(int, char**);
-static void lex_alias_make(int, char**);
-static void lex_alias_dirlist(int, char**);
 
 
 /* Private variables */
@@ -69,21 +62,23 @@ void lex_init(void)
    
    command_index = (lex_index_t*) malloc(256 * sizeof(lex_index_t));
    
-   lex_add_command("list", lex_list);
-   lex_add_command("term", lex_term);
-   lex_add_command("help", lex_help);
-   lex_add_command("manfs", lex_manf);
-   
-   lex_add_command("clear", lex_alias_clear);
-   lex_add_command("enter", lex_alias_enter);
-   lex_add_command("make", lex_alias_make);
-   lex_add_command("ld", lex_alias_dirlist);
+   IMPORT_LEX(lex_clear);
+   IMPORT_LEX(lex_ld);
+   IMPORT_LEX(lex_format);
+   IMPORT_LEX(lex_make);
+   IMPORT_LEX(lex_devlist);
+   IMPORT_LEX(lex_mount);
+   IMPORT_LEX(lex_umount);
+   IMPORT_LEX(lex_fsdump);
+   IMPORT_LEX(lex_varstat);
+   IMPORT_LEX(lex_memstat);
+   IMPORT_LEX(lex_enter);
    
    throw("Initialized Lex shell",0);
 }
 
 /**
- *    Anica_Documentation:
+ *    Avian_Documentation:
  *    Implementation of the C standard's system() function.
  *    it processes the string input and sends it to the Lex
  *    command processor. As specified by the C Standard, the
@@ -99,6 +94,7 @@ int system(const char *command)
 }
 
 /**
+ *    Avian_Documentation:
  *    Main Shell Loop
  *    Lex will provide a prompt, then gather input, filter
  *    it for commands and arguments, then passes it to the
@@ -145,6 +141,11 @@ int shell(void)
    return 0;
 }
 
+/**
+ *    Avian_Documentation:
+ *    Converts the provided relative path into the full path, based on
+ *    the current working directory string.
+ */
 char* lex_full_path(const char relpath[])
 {
    char* new_path = (char*) malloc(128);
@@ -161,66 +162,70 @@ char* lex_full_path(const char relpath[])
       strcpy(new_path, relpath);
    }
    
-   //if(new_path[strlen(new_path)-1] != '/') {
-   //   strcat(new_path, "/");
-   //}
    return new_path;
 }
 
 
+/**
+ *    Avian_Documentation:
+ *    Registers the provided function pointer with the provided command.
+ *    These additions should be loaded using the __constructor__ GCC
+ *    attribute.
+ */
+void lex_add_command(char cmd[], void (*function)(int argc, char* argv[]))
+{
+   command_index[lex_index_size].cmd = cmd;
+   command_index[lex_index_size].function = function;
+   lex_index_size++;
+}
+
+/**
+ *    Avian_Documentation:
+ *    Reads a given path, and splits it apart to work out the mountpoint,
+ *    for which it reads the volume_t structure, populates the mountpoint
+ *    string, and populates the real_path string. Upon success, returns true.
+ *    False otherwise.
+ */
+bool lex_read_mountpath(const char path[], volume_t* vol, char* point, char* real_path)
+{
+   bool status = true;
+   /* Split the path in the form "Point:Path" */
+   char** split_path = (char**) malloc(8);
+   int halves = split(':',' ',path,split_path);
+   if(halves != 2) {
+      printf("Paths must be of the form `Mountpoint:path'\n");
+      status = false;
+      goto exit;
+   }
+   
+   /* Extract the two components of the path */
+   strcpy(point, split_path[0]);
+   strcpy(real_path, split_path[1]);
+   
+   /* Aquire the device to be accessed */
+   device_t device = NO_DEV;
+   foreach(i, mounted_volumes) {
+      if(strcmp(point, mountpoints[i].point) == 0) {
+         device = mountpoints[i].device;
+         *vol = *mountpoints[i].vol;
+         break;
+      }
+   }
+   if(device == NO_DEV) {
+      printf("%s is not mounted\n",point);
+      status = false;
+      goto exit;
+   }
+   
+   exit:
+   foreach(i, halves) free(split_path[i]);
+   free(split_path);
+   return status;
+}
 
 // ========================================================================= //
 //       Private functions                                                   //
 // ========================================================================= //
-
-static void lex_alias_clear(int argc, char* argv[])
-{
-   char* command = (char*) malloc(80);
-   strcpy(command, "term :c");
-   strmerge(command, argv+1, argc-1, " ");
-   
-   system(command);
-   free(command);
-}
-
-static void lex_alias_make(int argc, char* argv[])
-{
-   char* command = (char*) malloc(80);
-   strcpy(command, "manfs :n");
-   strmerge(command, argv+1, argc-1, " ");
-   
-   system(command);
-   free(command);
-}
-
-static void lex_alias_enter(int argc, char* argv[])
-{
-   char* command = (char*) malloc(80);
-   strcpy(command, "manfs :e");
-   strmerge(command, argv+1, argc-1, " ");
-   
-   system(command);
-   free(command);
-}
-
-static void lex_alias_dirlist(int argc, char* argv[])
-{
-   char* command = (char*) malloc(80);
-   strcpy(command, "manfs :l");
-   strmerge(command, argv+1, argc-1, " ");
-   
-   system(command);
-   free(command);
-}
-
-static void lex_history_up(char* buffer)
-{
-   if(history.index > 0) {
-      char* previous = history.record[--history.index];
-      strcpy(buffer, previous);
-   }
-   else return; 
-}
 
 static void lex_history_down(char* buffer)
 {
@@ -232,6 +237,15 @@ static void lex_history_down(char* buffer)
       history.index = history.size;
       memset(buffer, 0, strlen(buffer));
    }
+}
+
+static void lex_history_up(char* buffer)
+{
+   if(history.index > 0) {
+      char* previous = history.record[--history.index];
+      strcpy(buffer, previous);
+   }
+   else return; 
 }
 
 static void lex_add_history(char* line)
@@ -273,9 +287,11 @@ static void lex_help(int argc, char* argv[])
 
 static void lex_execute(int argc, char* argv[])
 {
-   if(argc == 0 || argv == NULL || argv[0] == NULL) return;
+   if(argc == 0 || argv == NULL || argv[0] == NULL)
+      printf("Nothing was passed to command processor\n");
    
    foreach(i, lex_index_size) {
+      printf("Checking against stored command `%s'\n",command_index[i].cmd);
       if(strcmp(argv[0], command_index[i].cmd) == 0) {
          command_index[i].function(argc, argv);
          return;
@@ -284,11 +300,6 @@ static void lex_execute(int argc, char* argv[])
    printf("Unknown command `%s'\n",argv[0]);
 }
 
-static void lex_add_command(char* cmd, void (*function)(int argc, char* argv[]))
-{
-   command_index[lex_index_size].cmd = cmd;
-   command_index[lex_index_size].function = function;
-   lex_index_size++;
-}
+
 
 

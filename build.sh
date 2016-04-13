@@ -16,14 +16,24 @@ OBJ="obj"
 BIN="bin"
 IMAGE="test.img"
 
-CFLAGS=" -march=pentium3 -m32 -ffreestanding -fno-exceptions -std=c99 -nostdlib "
-CINC=" -Isrc/include -Isrc/asm "
-CWARN=" -Wall -Wextra -Werror -Wfatal-errors -Wno-unused "
-#CWARN=" -Wfatal-errors "
+CARCH="-m32 -mtune=i386"                   # Architecture options
+CSTD="-std=c99 -nostdlib "                 # C Language options
+CEMBED="-ffreestanding -fno-exceptions"    # Embedded options
+CINC="-Isrc/include -Isrc/asm"             # File inclusion options
+CWARN="-Wall -Wextra -Werror -Wno-unused"  # Warning options
+
+LARCH="-m elf_i386 -A i386"   # Architecture options
+LMAP="-Map kernel.map"        # Output map generation
+LSCRIPT="-T linker.ld"        # Linker script options
+LLIBS="-Llib"                 # Library options
+
+LFLAGS=" $LARCH $LMAP $LSCRIPT $LLIBS "     # Linker options
+
+CFLAGS=" $CARCH $CSTD $CEMBED $CINC $CWARN -Wfatal-errors " 
 
 QFLAGS=" -ctrl-grab -fda $IMAGE -m 16 -d cpu_reset "
 
-SOURCES=(" src src/asm src/lex ")
+SOURCES=(" src src/asm ")
 
 function increment_build {
 	BUILDFILE=".version/build"
@@ -63,6 +73,7 @@ function main {
 			"-a") OPTIONS+=" -a " ;;
 			"-h") OPTIONS+=" -h " ;;
 			"-l") OPTIONS+=" -l " ;;
+			"-lib") OPTIONS+=" -lib " ;;
 			"-make") OPTIONS+=" -make " ;;
 			"-write") OPTIONS+=" -write " ;;
 			"-run") OPTIONS+=" -run " ;;
@@ -77,6 +88,7 @@ function main {
 			"-a") assemble ;;
 			"-h") printhelp ;;
 			"-l") link ;;
+			"-lib") make_library ;;
 			"-make") make_all;;
 			"-write") update ;;
 			"-run") run ;;
@@ -97,6 +109,19 @@ function make_all {
 	sudo umount /media/floppy
 }
 
+function make_library {
+   
+   for LIB in $TARGET; do
+      SRC=$(ls src/lex | grep "\.c")
+      for i in $SRC; do
+         NAME=`echo "$i" | cut -d'.' -f1`
+         gcc -c src/$LIB/$NAME.c -o src/$LIB/obj/$NAME.o $CFLAGS
+      done
+      printf "$INFO Compiling lib$LIB.a\n"
+      ar r lib/lib$LIB.a src/$LIB/obj/*.o
+   done
+}
+
 function assemble {
 	for i in $TARGET; do
 		NAME=`echo "$i" | cut -d'.' -f1`
@@ -113,7 +138,7 @@ function compile {
 			NAME=`echo "$SRC" | cut -d'.' -f1`
 			if [ -f $DIR/$NAME.c ]; then
 				printf "$INFO Compiling $SRC\n"
-				gcc -c $DIR/$NAME.c -o $OBJ/$NAME.o $CINC $CFLAGS $CWARN
+				gcc -c $DIR/$NAME.c -o $OBJ/$NAME.o $CFLAGS
 			fi
 		done
 	done
@@ -130,7 +155,7 @@ function link {
 			OLDSIZE=0
 		fi
 		#BINARY=`echo $i | grep "alpha\|beta\|stable"`
-		ld -m elf_i386 -A i386 -T linker.ld -o bin/kernel-alpha obj/*.o -Map kernel.map
+		ld -o bin/kernel-alpha obj/*.o $LFLAGS lib/*.a
 		NEWSIZE=$(stat -c%s "bin/kernel-alpha")
 		
 		printf "$INFO Generated binary bin/kernel-alpha ($NEWSIZE bytes)\n"

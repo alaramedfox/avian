@@ -16,8 +16,9 @@ section .text
 
    global 	start				; Bootloader entry point
 	extern 	avian_main	   ; Kernel entry point
-
+   extern   _init
 	start:
+	   call _init
 		cli 						; Block interrupts
 		mov 	esp, __stack	; Set stack pointer
 		call	avian_main		; Invoke the C kernel

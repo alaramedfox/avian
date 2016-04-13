@@ -5,71 +5,35 @@
 //    Purpose:       Lex list functions                    
 // ======================================================================== */
 
+#include <lex.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <mman.h>
 #include <util.h>
-#include <filesystem.h>
 #include <vga.h>
+#include <filesystem.h>
 
 // ========================================================================= //
 //       Private variables and function prototypes                           //
 // ========================================================================= //
 
-void lex_list(int, char**);
-
-static void lex_list_help(void);
-static void lex_list_dir(void);
-static void lex_list_memory(bool);
-static void lex_list_unknown(char);
-static void lex_list_vars(void);
-static void lex_list_fs(void);
 
 // ========================================================================= //
 //       Public API Implementation                                           //
 // ========================================================================= //
 
-void lex_list(int argc, char* argv[])
-{
-   if(argc >= 2 && argv[1][0] == ':') {
-      foreach(i, strlen(argv[1])) {
-         switch(argv[1][i])
-         {
-            case ':': break;
-            case '?': lex_list_help(); break;
-            case 'm': lex_list_memory(0); break;
-            case 'M': lex_list_memory(1); break;
-            case 'd': lex_list_dir(); break;
-            case 'v': lex_list_vars(); break;
-            case 'f': lex_list_fs(); break;
-            
-            default: lex_list_unknown(argv[1][0]); break;
-         }
-      }
-   }
-   else {
-      lex_list_help();
-   }
-}
 
-// ========================================================================= //
-//       Private functions                                                   //
-// ========================================================================= //
-
-static void lex_list_help(void)
+/**
+ *    Avian_Documentation:
+ *    Lex Command - memstat [options]
+ *    Prints diagnostic memory information
+ */
+EXPORT_LEX("memstat", lex_memstat);
+void lex_memstat(int argc, char* argv[])
 {
-   printf("Usage: l :[category ...]  - Lists items in the given category\n");
-   printf(" ?     Print this help information\n");
-   printf(" m     Memory usage statistics\n");
-   printf(" M     Detailed memory statistics\n");
-   printf(" d     Contents of current directory\n");
-   printf(" v     Print the size of internal variables\n");
-   printf(" f     Filesystems and devices\n");
-}
-
-static void lex_list_memory(bool detailed)
-{
+   bool detailed = false;
+   
    printf("  Total     %h\t(%i bytes)\n",ALLOC_SIZE, ALLOC_SIZE);
    printf("  Used      %h\t(%i bytes)\n",mem_used(), mem_used());
    printf("  Free      %h\t(%i bytes)\n",mem_free(), mem_free());
@@ -95,17 +59,27 @@ static void lex_list_memory(bool detailed)
    }
 }
 
-static void lex_list_vars(void)
+
+
+/**
+ *    Avian_Documentation:
+ *    Lex Command - varstat
+ *    Prints diagnostic information about internal variables
+ */
+EXPORT_LEX("varstat", lex_varstat);
+void lex_varstat(int argc, char* argv[])
 {
    types_test();
 }
 
-static void lex_list_dir(void)
-{
 
-}
-
-static void lex_list_fs(void)
+/**
+ *    Avian_Documentation:
+ *    Lex Command - devstat
+ *    Prints diagnostic information about mounted devices
+ */
+EXPORT_LEX("devstat", lex_devstat);
+void lex_devstat(int argc, char* argv[])
 {
    printf("Scanning devices...\n");
    char* fs = read_fs(fda);
@@ -113,11 +87,6 @@ static void lex_list_fs(void)
    if(fs != NULL) {
       printf(" (fda)   %s\t  1.44 MiB\n",fs);
    }
-}
-
-static void lex_list_unknown(char category)
-{
-   printf("Unknown category `%c'\n",category);
 }
 
 
