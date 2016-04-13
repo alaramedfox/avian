@@ -25,11 +25,6 @@ typedef struct __LEX_INDEX
 //       Private variables and function prototypes                           //
 // ========================================================================= //
 
-lex_mpoint_t mountpoints[MAX_LEX_MOUNTS];
-size_t mounted_volumes=0;
-
-//IMPORT_LEX("ld", lex_list_dir);
-
 /* Static functions */
 static void lex_help(int, char**);
 static void lex_execute(int, char**);
@@ -50,6 +45,8 @@ char* current_directory;
 // ========================================================================= //
 
 volatile lex_history_t history;
+lex_mpoint_t mountpoints[MAX_LEX_MOUNTS];
+size_t mounted_volumes=0;
 
 void lex_init(void)
 {
@@ -63,7 +60,7 @@ void lex_init(void)
    command_index = (lex_index_t*) malloc(256 * sizeof(lex_index_t));
    
    IMPORT_LEX(lex_clear);
-   IMPORT_LEX(lex_ld);
+   IMPORT_LEX(lex_ls);
    IMPORT_LEX(lex_format);
    IMPORT_LEX(lex_make);
    IMPORT_LEX(lex_devlist);
@@ -287,11 +284,9 @@ static void lex_help(int argc, char* argv[])
 
 static void lex_execute(int argc, char* argv[])
 {
-   if(argc == 0 || argv == NULL || argv[0] == NULL)
-      printf("Nothing was passed to command processor\n");
+   if(argc == 0 || argv == NULL || argv[0] == NULL) return;
    
    foreach(i, lex_index_size) {
-      printf("Checking against stored command `%s'\n",command_index[i].cmd);
       if(strcmp(argv[0], command_index[i].cmd) == 0) {
          command_index[i].function(argc, argv);
          return;

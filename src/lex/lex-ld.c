@@ -26,8 +26,8 @@
  *    Lists the contents of the current directory, or the specified
  *    path
  */
-EXPORT_LEX("ld", lex_ld);
-void lex_ld(int argc, char* argv[])
+EXPORT_LEX("ls", lex_ls);
+void lex_ls(int argc, char* argv[])
 {
    int a = 1;
    char* relpath = ARGV(a);

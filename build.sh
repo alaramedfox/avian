@@ -99,6 +99,7 @@ function main {
 }
 
 function make_all {
+   rm obj/*.o
 	increment_build "1"
 	TARGET+=$(ls -R | grep "\.c\|\.asm")
 	assemble
@@ -112,7 +113,7 @@ function make_all {
 function make_library {
    
    for LIB in $TARGET; do
-      SRC=$(ls src/lex | grep "\.c")
+      SRC=$(ls src/$LIB | grep "\.c")
       for i in $SRC; do
          NAME=`echo "$i" | cut -d'.' -f1`
          gcc -c src/$LIB/$NAME.c -o src/$LIB/obj/$NAME.o $CFLAGS
