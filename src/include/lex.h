@@ -66,7 +66,7 @@ extern volatile byte lex_sys_color;
 extern volatile byte lex_text_color;
 extern char* current_directory;
 
-bool  lex_read_mountpath(const char[], volume_t*, char*, char*);
+volume_t*  lex_read_mountpath(const char[], char*, char*);
 void  lex_add_command(char cmd[], void (*f)(int, char**));
 void  lex_init(void);
 int   shell(void);

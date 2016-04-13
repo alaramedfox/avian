@@ -55,62 +55,7 @@ void lex_format(int argc, char* argv[])
 }
 
 
-EXPORT_LEX("make", lex_make);
-void lex_make(int argc, char* argv[])
-{
-   VALIDATE_ARG(argv[1], return);
-   VALIDATE_ARG(argv[2], return);
-   char* obj = argv[1];
-   char* relpath = argv[2];
-   
-   char* path = lex_full_path(relpath);
-   
-   /* Split the path in the form "Point:Path" */
-   char** split_path = (char**) malloc(2);
-   int halves = split(':',' ',path,split_path);
-   if(halves != 2) {
-      printf("Paths must be of the form `Mountpoint:path'\n");
-      goto exit2;
-   }
-   
-   /* Extract the two components of the path */
-   char* point = (char*) malloc(strlen(split_path[0])+1);
-   strcpy(point,split_path[0]);
-   char* real_path = (char*) malloc(strlen(split_path[1])+1);
-   strcpy(real_path, split_path[1]);
-   
-   /* Aquire the device to be accessed */
-   device_t device = NO_DEV;
-   volume_t* vol;
-   foreach(i, mounted_volumes) {
-      if(strcmp(point, mountpoints[i].point) == 0) {
-         device = mountpoints[i].device;
-         vol = mountpoints[i].vol;
-         break;
-      }
-   }
-   if(device == NO_DEV) {
-      printf("%s is not mounted\n",point);
-      goto exit1;
-   }
-   
-   /* Determine the object to be created */
-   if(strcmp(obj, "dir") == 0) {
-      /* TODO: Do not automatically assume floppy drive */
-      if(!anica_mkdir(vol, real_path)) {
-         printf("Could not create directory\n");
-         goto exit1;
-      }
-   }
-   
-   exit1:
-   free(point);
-   free(real_path);
-   exit2:
-   foreach(i, halves) free(split_path[i]);
-   free(split_path);
-   return;
-}
+
 
 
 /**
@@ -238,20 +183,14 @@ void lex_fsdump(int argc, char* argv[])
    free(data);
 }
 
-
-
-
-static void lex_fs_cache(char* option)
+EXPORT_LEX("fscache", lex_fscache);
+void lex_fscache(int argc, char* argv[])
 {
-   if(option == NULL) {
-      printf("Missing or invalid parameter. See `fs :c help' for details\n");
-      return;
-   }  
-   char** argv = (char**) malloc(2*sizeof(char**));
-   int argc = split('=',0,option,argv);
+   int a = 1;
+   char* opt = ARGV(a);
+   VALIDATE_ARG(opt, return);
    
-   char* opt = argv[0];
-   int val = argc==2?atoi(argv[1]):0;
+   int val = argc==3?atoi(ARGV(a)):0;
    
    if(strcmp(opt,"disable") == 0) {
       floppy_cache_state = FDC_CACHE_DISABLE;

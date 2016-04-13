@@ -56,6 +56,8 @@ void avian_main(void)
    init();
    
    //anica_format_device(2880,512,0);
+   system("mount fda C");
+   system("enter C:$");
 
    printf("Entering shell\n");
    shell();

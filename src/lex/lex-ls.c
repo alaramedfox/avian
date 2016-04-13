@@ -13,16 +13,12 @@
 #include <string.h>
 
 // ========================================================================= //
-//       Private variables and function prototypes                           //
-// ========================================================================= //
-
-// ========================================================================= //
 //       Public API Implementation                                           //
 // ========================================================================= //
 
 /**
  *    Avian_Documentation:
- *    Lex Command - ld [path] :[options]
+ *    Lex Command - ls [path] :[options]
  *    Lists the contents of the current directory, or the specified
  *    path
  */
@@ -38,22 +34,25 @@ void lex_ls(int argc, char* argv[])
       return;
    }
    
-   volume_t vol;
    char* point = (char*) malloc(16);
    char* real_path = (char*) malloc(80);
-   lex_read_mountpath(path, &vol, point, real_path);
+   volume_t* vol = lex_read_mountpath(path, point, real_path);
+
+   if(vol == NULL) {
+      printf("ls: Failed to read volume\n");
+   }
    
    /* Read the actual list */
    char** list = (char**) malloc(64);
    
-   int entries = anica_list_contents(&vol, real_path, list);
+   int entries = anica_list_contents(vol, real_path, list);
    if(entries < 0) {
       switch(entries)
       {
-         case ANICA_FSERR: printf("manfs: %s is not a directory\n",path); break;
-         case ANICA_NODIR: printf("manfs: %s not found\n",path); break;
-         case ANICA_IOERR: printf("manfs: Input/Output error\n"); break;
-         default: printf("manfs: Unknown error\n"); break;
+         case ANICA_FSERR: printf("ls: %s is not a directory\n",path); break;
+         case ANICA_NODIR: printf("ls: %s not found\n",path); break;
+         case ANICA_IOERR: printf("ls: Input/Output error\n"); break;
+         default: printf("ls: Unknown error\n"); break;
       }
       goto exit;
    }

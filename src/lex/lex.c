@@ -70,6 +70,7 @@ void lex_init(void)
    IMPORT_LEX(lex_varstat);
    IMPORT_LEX(lex_memstat);
    IMPORT_LEX(lex_enter);
+   IMPORT_LEX(lex_fscache);
    
    throw("Initialized Lex shell",0);
 }
@@ -183,15 +184,15 @@ void lex_add_command(char cmd[], void (*function)(int argc, char* argv[]))
  *    string, and populates the real_path string. Upon success, returns true.
  *    False otherwise.
  */
-bool lex_read_mountpath(const char path[], volume_t* vol, char* point, char* real_path)
+volume_t* lex_read_mountpath(const char path[], char* point, char* real_path)
 {
-   bool status = true;
+   volume_t* ptr;
    /* Split the path in the form "Point:Path" */
    char** split_path = (char**) malloc(8);
    int halves = split(':',' ',path,split_path);
    if(halves != 2) {
       printf("Paths must be of the form `Mountpoint:path'\n");
-      status = false;
+      ptr = NULL;
       goto exit;
    }
    
@@ -204,20 +205,20 @@ bool lex_read_mountpath(const char path[], volume_t* vol, char* point, char* rea
    foreach(i, mounted_volumes) {
       if(strcmp(point, mountpoints[i].point) == 0) {
          device = mountpoints[i].device;
-         *vol = *mountpoints[i].vol;
+         ptr = mountpoints[i].vol;
          break;
       }
    }
    if(device == NO_DEV) {
       printf("%s is not mounted\n",point);
-      status = false;
+      ptr = NULL;
       goto exit;
    }
    
    exit:
    foreach(i, halves) free(split_path[i]);
    free(split_path);
-   return status;
+   return ptr;
 }
 
 // ========================================================================= //

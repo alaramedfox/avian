@@ -59,6 +59,13 @@ enum __ANICA_DEFAULTS
    
 };
 
+enum __ANICA_DEFS
+{
+   SOF = 0x02,   // Start of file
+   LNF = 0x1a,   // Link point for more data
+   EOF = 0x03,   // End of file
+};
+
 /**   
  *    Anica_Documentation:    
  *    The Index Table is a list of addresses (and sizes) of
@@ -71,17 +78,6 @@ enum __ANICA_DEFAULTS
  *    loaded from disk, the index table is loaded into memory, and
  *    the superblock records a pointer to that memory address.
  */
-
-/*
-typedef struct __ANICA_ENTRY
-{
-   dword    type:    2;    // Entry type
-   dword    addr:    30;   // Node address
-   index_t  parent:  16;   // Parent index
-   word     size:    16;   // Node size
-
-} packed aentry_t;
-*/
 
 typedef struct __ANICA_ENTRY
 {
@@ -123,11 +119,11 @@ typedef struct __ANICA_SUPERBLOCK
    dword  root;         // Table index of the root directory (should be 0)
    dword  entries;      // Number of index entries
    
-} packed lsuper_t;
+} packed asuper_t;
 
 typedef struct __ANICA_VOLUME
 {
-   lsuper_t sb;
+   asuper_t sb;
    aentry_t *itable;
 
 } packed volume_t;
@@ -136,19 +132,37 @@ typedef struct __ANICA_VOLUME
 //           Public API functions                                          //
 // ======================================================================= //
 
-bool anica_mkdir(volume_t* vol, char* path);
-bool anica_read_superblock(byte device, lsuper_t* superblock);
-bool anica_write_superblock(byte device, lsuper_t* superblock);
-bool anica_format_device(size_t, size_t, size_t);
-int  anica_open_file(volume_t* vol, char* path, byte mode, anode_t* file);
-int  anica_write_file(volume_t* vol, byte* data, anode_t* node);
-int  anica_read_file(volume_t* vol, byte* data, anode_t* node);
-int  anica_list_contents(volume_t* vol, char* path, char** list);
+/* Functions defined in anica/anicafs.c */
+bool     anica_write_dir(volume_t* vol, char* name, index_t parent);
+addr_t   anica_read_data(volume_t* vol, addr_t addr, byte* data, size_t bytes);
+addr_t   anica_write_data(volume_t* vol, addr_t addr, byte* data, size_t bytes);
+int      anica_read_path(volume_t* vol, char* path, anode_t* node);
+int      anica_write_file(volume_t* vol, byte* data, anode_t* node);
+int      anica_read_file(volume_t* vol, byte* data, anode_t* node);
+int      anica_open_file(volume_t* vol, char* path, byte mode, anode_t* file);
+int      anica_list_contents(volume_t* vol, char* path, char** list);
+bool     anica_format_device(size_t sec, size_t bps, size_t res);
+bool     anica_is_addr_free(volume_t* vol, addr_t addr);
+bool     anica_block_fits(volume_t* vol, addr_t addr, size_t size);
+addr_t   anica_find_block(volume_t* vol, size_t size);
 
-int  anica_read_itable(volume_t*);
-int  anica_write_itable(volume_t*);
+/* Functions defined in anica/anica-node.c */
+anode_t  anica_make_file(volume_t* vol, char* path, size_t size);
+bool     anica_mkdir(volume_t* vol, char* path);
+addr_t   anica_read_node(volume_t* vol, aentry_t* entry, anode_t* node);
+addr_t   anica_write_node(volume_t* vol, aentry_t* entry, anode_t* node);
 
+/* Functions defined in anica/anica-sb.c */
+bool     anica_read_superblock(byte device, asuper_t* superblock);
+bool     anica_write_superblock(byte device, asuper_t* superblock);
+void     anica_format_sb(asuper_t* superblock, size_t sec, size_t bps, size_t res);
+word     anica_find_superblock(void);
 
+/* Functions defined in anica/anica-table.c */
+int      anica_read_itable(volume_t* vol);
+int      anica_write_itable(volume_t* vol);
+int      anica_parent_index(volume_t* vol, char* path, char* filename);
+aentry_t anica_add_entry(volume_t* vol, byte type, index_t parent, size_t size);
 
 
 

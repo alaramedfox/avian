@@ -7,68 +7,14 @@
 
 #include <anicafs.h>
 
-#include <vga.h>
-#include <util.h>
 #include <string.h>
 #include <floppy.h>
 #include <errors.h>
-#include <time.h>
 #include <stdio.h>
-
-enum __ANICA_DEFS
-{
-   SOF = 0x02,   // Start of file
-   LNF = 0x1a,   // Link point for more data
-   EOF = 0x03,   // End of file
-};
-
-// ======================================================================== //
-//           Private function prototypes                                    //
-// ======================================================================== //
-
-static void     anica_format_sb(lsuper_t*, size_t,size_t,size_t);
-static bool     anica_write_dir(volume_t*,char*, word);
-static addr_t   anica_find_block(volume_t*, size_t);
-static word     anica_find_superblock(void);
-static char*    anica_filename(char*);
-static addr_t   anica_read_node(volume_t*, aentry_t*, anode_t*);
-static addr_t   anica_write_node(volume_t*, aentry_t*, anode_t*);
-static addr_t   anica_read_data(volume_t*, addr_t, byte*, size_t);
-static addr_t   anica_write_data(volume_t*, addr_t, byte*, size_t);
-static int      anica_read_path(volume_t*, char*, anode_t*);
-static int      anica_parent_index(volume_t*, char*, char*);
-static aentry_t anica_add_entry(volume_t*, byte, index_t, size_t);
-static anode_t  anica_make_file(volume_t*, char*, size_t);
 
 // ======================================================================== //
 //           Public API functions                                           //
 // ======================================================================== //
-
-bool anica_read_superblock(byte device, lsuper_t* superblock)
-{  
-   word sb_sector = anica_find_superblock();
-
-   byte* block = (byte*) calloc(512, 1);
-   if(device == 0) floppy_read_block(sb_sector, block, 512);
-   memcpy(superblock, block, sizeof(lsuper_t));
-   superblock->hidden = sb_sector;
-   
-   free(block);
-   return true;
-}
-
-bool anica_write_superblock(byte device, lsuper_t* superblock)
-{  
-   byte* block = (byte*) calloc(512, 1);
-   word sb_sector = anica_find_superblock();
-   //if(device == 0) floppy_read_block(superblock->hidden, block, 512);
-   if(device == 0) floppy_read_block(sb_sector, block, 512);
-   memcpy(block, superblock, sizeof(lsuper_t));
-   //if(device == 0) floppy_write_block(superblock->hidden, block, 512);
-   if(device == 0) floppy_write_block(sb_sector, block, 512);
-   free(block);
-   return true;
-}
 
 bool anica_format_device(size_t sec, size_t bps, size_t res)
 {  
@@ -113,20 +59,6 @@ bool anica_format_device(size_t sec, size_t bps, size_t res)
    return true;
 }
 
-bool anica_mkdir(volume_t* vol, char* path)
-{
-   /* Extract filename and path from given path */
-   char* filename = (char*) malloc(16);
-   int parent_index = anica_parent_index(vol, path, filename);
-   
-   bool status;
-   
-   if(parent_index < 0) status = false;
-   else status = anica_write_dir(vol, filename, parent_index);
-   
-   return status;
-}
-
 /**
  *    Avian_Documentation:
  *    Searches a a path and populates the provided empty list with
@@ -139,6 +71,8 @@ bool anica_mkdir(volume_t* vol, char* path)
  */
 int anica_list_contents(volume_t* vol, char* path, char** list)
 {
+   if(vol == NULL) return -1;
+   
    anode_t node;
    int index = anica_read_path(vol, path, &node);
    if(index < 0) return index;
@@ -242,10 +176,6 @@ int anica_write_file(volume_t* vol, byte* data, anode_t* node)
    return 0;
 }
 
-// ======================================================================== //
-//           Private functions                                              //
-// ======================================================================== //
-
 /**
  *    Avian_Documentation:
  *    Returns the table index of the final object in the path,
@@ -257,7 +187,7 @@ int anica_write_file(volume_t* vol, byte* data, anode_t* node)
  *    is copied to the provided empty node structure.
  *    If not, a negative value is returned indicating the specific error.
  */
-static int anica_read_path(volume_t* vol, char* path, anode_t* node)
+int anica_read_path(volume_t* vol, char* path, anode_t* node)
 {
    int index = vol->sb.root;
    bool found = false;
@@ -302,79 +232,8 @@ static int anica_read_path(volume_t* vol, char* path, anode_t* node)
  *    to `file.ext` and the function will return the index of `subdir`.
  *    If the path was not found, a negative value is returned.
  */
-static int anica_parent_index(volume_t* vol, char* path, char* filename)
-{
-   char** tree = (char**) malloc(64);
-   size_t depth = split('/',0,path,tree);
-   
-   printf("Path: [%s]\nSplit:\n",path);
-   foreach(i, depth) printf("[%s] ", tree[i]);
-   printf("\n");
-   
-   size_t parent_str_len = strlen(path) - strlen(tree[depth-1]) -1;
-   char* parent_path = (char*) malloc(parent_str_len+1);
-   memcpy(parent_path, path, parent_str_len);
-   
-   int parent_index = anica_read_path(vol, parent_path,NULL);
-   if(filename != NULL) strcpy(filename, tree[depth-1]);
-   
-   foreach(i, depth) free(tree[i]);
-   free(tree);
-   free(parent_path);
-   
-   return parent_index;
-}
 
-static anode_t anica_make_file(volume_t* vol, char* path, size_t size)
-{
-   /* Extract filename and path from given path */
-   char* filename = (char*) malloc(16);
-   int parent_index = anica_parent_index(vol, path, filename);
-
-   /* Create file node */
-   anode_t node;
-   strcpy(node.name, filename);
-   node.permit = 0xC0DE;
-   node.self = vol->sb.entries+1;
-   node.data = vol->sb.entries+2;
-   
-   aentry_t file_entry = anica_add_entry(vol, ANICA_FILE, parent_index, sizeof(anode_t));
-   aentry_t data_entry = anica_add_entry(vol, ANICA_DATA, node.data, size);
-
-   /* Write data to disk */
-   anica_write_node(vol, &file_entry, &node);
-   
-   free(filename);
-   
-   return node;
-}
-
-static aentry_t anica_add_entry(volume_t* vol, byte type, index_t parent, size_t size)
-{
-   aentry_t entry;
-   entry.type = type;
-   entry.size = size;
-   entry.parent = parent;
-   entry.addr = anica_find_block(vol, entry.size);
-   vol->itable[vol->sb.entries++] = entry;
-   return entry;
-}
-
-static word anica_find_superblock(void)
-{  
-   byte* mbr = (byte*) malloc(512);
-   floppy_read_block(0, mbr, 512);
-   word offset=0;
-   if(mbr[3] != 'A') {
-      /* Found a FAT filesystem */
-      memcpy(&offset, mbr+0x13, 2);
-   }
-   free(mbr);
-   //return offset;
-   return 200;
-}
-
-static addr_t anica_write_data(volume_t* vol, addr_t addr, byte* data, size_t bytes)
+addr_t anica_write_data(volume_t* vol, addr_t addr, byte* data, size_t bytes)
 {  
    dword sector = addr / vol->sb.sector_size;
    dword offset = addr % vol->sb.sector_size;
@@ -388,7 +247,7 @@ static addr_t anica_write_data(volume_t* vol, addr_t addr, byte* data, size_t by
    return addr;
 }
 
-static addr_t anica_read_data(volume_t* vol, addr_t addr, byte* data, size_t bytes)
+addr_t anica_read_data(volume_t* vol, addr_t addr, byte* data, size_t bytes)
 {  
    dword sector = addr / vol->sb.sector_size;
    dword offset = addr % vol->sb.sector_size;
@@ -401,33 +260,7 @@ static addr_t anica_read_data(volume_t* vol, addr_t addr, byte* data, size_t byt
    return addr;
 }
 
-static addr_t anica_read_node(volume_t* vol, aentry_t* entry, anode_t* node)
-{  
-   return anica_read_data(vol, entry->addr, (byte*)node, sizeof(anode_t));
-}
-
-static addr_t anica_write_node(volume_t* vol, aentry_t* entry, anode_t* node)
-{
-   return anica_write_data(vol, entry->addr, (byte*)node, sizeof(anode_t));
-}
-
-static void anica_format_sb(lsuper_t* superblock, size_t sec, size_t bps, size_t res)
-{  
-   word start = anica_find_superblock();
-   
-   strcpy(superblock->uuid, "AnicaFS");
-   strcpy(superblock->label, "No Label");
-   superblock->volume_size = sec;
-   superblock->sector_size = bps;
-   superblock->hidden = start;
-   superblock->reserved = res;
-   superblock->table_addr = res+start+1;
-   superblock->table_size = 128;
-   superblock->root = 0;
-   superblock->entries = 0;
-}
-
-static bool anica_write_dir(volume_t* vol, char* name, index_t parent)
+bool anica_write_dir(volume_t* vol, char* name, index_t parent)
 {  
    bool status = true;
    
@@ -448,38 +281,7 @@ static bool anica_write_dir(volume_t* vol, char* name, index_t parent)
    
 }
 
-/**
- *    Reads/writes the given itable from the volume into the provided
- *    table pointer. If the table is read correctly, then the 
- *    function returns the number of elements in the table. If
- *    the function cannot read the table, a value of -1 is
- *    returned. 
- */
 
-int anica_read_itable(volume_t* vol)
-{  
-   int sector = vol->sb.table_addr;
-   size_t tsize = vol->sb.table_size * sizeof(aentry_t);
-   
-   byte* block = (byte*) malloc(tsize);
-   floppy_read_block(sector, block, tsize);
-   memcpy(vol->itable, block, tsize);
-   free(block);
-   return ANICA_OK;
-}
-
-int anica_write_itable(volume_t* vol)
-{  
-   int sector = vol->sb.table_addr;
-   size_t tsize = vol->sb.table_size * sizeof(aentry_t);
-   
-   byte* block = (byte*) malloc(tsize);
-   memcpy(block, vol->itable, tsize);
-   
-   floppy_write_block(sector, block, tsize);
-   free(block);
-   return ANICA_OK;
-}
 
 /**
  *    Searches for a space at least the size of the given
@@ -489,7 +291,7 @@ int anica_write_itable(volume_t* vol)
  *
  */
  
-static bool anica_is_addr_free(volume_t* vol, addr_t addr)
+bool anica_is_addr_free(volume_t* vol, addr_t addr)
 {  
 
    addr_t start, end;
@@ -506,7 +308,7 @@ static bool anica_is_addr_free(volume_t* vol, addr_t addr)
    return true;
 }
  
-static bool anica_block_fits(volume_t* vol, addr_t addr, size_t size)
+bool anica_block_fits(volume_t* vol, addr_t addr, size_t size)
 {  
    
    size_t bs = 0;
@@ -520,7 +322,7 @@ static bool anica_block_fits(volume_t* vol, addr_t addr, size_t size)
    return false;
 }
 
-static addr_t anica_find_block(volume_t* vol, size_t size)
+addr_t anica_find_block(volume_t* vol, size_t size)
 {  
 
    addr_t search_start = (512*vol->sb.table_addr + vol->sb.table_size*sizeof(aentry_t));
