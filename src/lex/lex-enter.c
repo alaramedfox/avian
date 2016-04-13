@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <string.h>
 
-EXPORT_LEX("enter", lex_enter);
+EXPORT_LEX("enter", "[path]", "Enter a subdirectory", lex_enter);
 void lex_enter(int argc, char* argv[])
 {
    VALIDATE_ARG(argv[1], return);

@@ -31,7 +31,7 @@ extern volatile byte floppy_cache_value;
 //       Public API Implementation                                           //
 // ========================================================================= //
 
-EXPORT_LEX("format", lex_format);
+EXPORT_LEX("format", "[point] [type]", "Format a mountpoint", lex_format);
 void lex_format(int argc, char* argv[])
 {  
    VALIDATE_ARG(argv[1], return);
@@ -63,7 +63,7 @@ void lex_format(int argc, char* argv[])
  *    Lex Command - devlist
  *    Lists all currently mounted devices and their mountpoints
  */
-EXPORT_LEX("devlist", lex_devlist);
+EXPORT_LEX("devlist", "[opt]", "List mounted devices", lex_devlist);
 void lex_devlist(int argc, char* argv[])
 {
    foreach(i, 79) printf("-");
@@ -83,7 +83,7 @@ void lex_devlist(int argc, char* argv[])
  *    Lex Command - mount [device] [mountpoint]
  *    Mounts the specified device using the mountpoint as a label
  */
-EXPORT_LEX("mount", lex_mount);
+EXPORT_LEX("mount", "[dev] [point]", "Mount a device", lex_mount);
 void lex_mount(int argc, char* argv[])
 {
    VALIDATE_ARG(argv[1], return);
@@ -128,7 +128,7 @@ void lex_mount(int argc, char* argv[])
  *    Lex Command - umount [mountpoint]
  *    Unmounts the specified mount point
  */
-EXPORT_LEX("umount", lex_umount);
+EXPORT_LEX("umount", "[point]", "Unmount a device", lex_umount);
 void lex_umount(int argc, char* argv[])
 {
    VALIDATE_ARG(argv[1], return);
@@ -151,7 +151,7 @@ void lex_umount(int argc, char* argv[])
  *    Lex Command - fsdump [format] [sector]
  *    Prints raw data to screen from the given sector on disk
  */
-EXPORT_LEX("fsdump", lex_fsdump);
+EXPORT_LEX("fsdump", "[format] [sector]", "Dump raw data from a sector", lex_fsdump);
 void lex_fsdump(int argc, char* argv[])
 {
    VALIDATE_ARG(argv[1], return);
@@ -183,7 +183,7 @@ void lex_fsdump(int argc, char* argv[])
    free(data);
 }
 
-EXPORT_LEX("fscache", lex_fscache);
+EXPORT_LEX("fscache", "[opt] [val]", "Specify FDC caching", lex_fscache);
 void lex_fscache(int argc, char* argv[])
 {
    int a = 1;

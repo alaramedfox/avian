@@ -13,10 +13,13 @@
 #include <string.h>
 #include <errors.h>
 #include <keyboard.h>
+#include <vga.h>
 
 typedef struct __LEX_INDEX
 {
    char* cmd;
+   char* arg;
+   char* doc;
    void (*function)(int argc, char* argv[]);
 
 } lex_index_t;
@@ -59,6 +62,7 @@ void lex_init(void)
    
    command_index = (lex_index_t*) malloc(256 * sizeof(lex_index_t));
    
+   IMPORT_LEX(lex_help);
    IMPORT_LEX(lex_clear);
    IMPORT_LEX(lex_ls);
    IMPORT_LEX(lex_format);
@@ -170,9 +174,12 @@ char* lex_full_path(const char relpath[])
  *    These additions should be loaded using the __constructor__ GCC
  *    attribute.
  */
-void lex_add_command(char cmd[], void (*function)(int argc, char* argv[]))
+void lex_add_command(char cmd[], char arg[], char doc[], 
+                     void (*function)(int argc, char* argv[]))
 {
    command_index[lex_index_size].cmd = cmd;
+   command_index[lex_index_size].arg = arg;
+   command_index[lex_index_size].doc = doc;
    command_index[lex_index_size].function = function;
    lex_index_size++;
 }
@@ -221,6 +228,19 @@ volume_t* lex_read_mountpath(const char path[], char* point, char* real_path)
    return ptr;
 }
 
+EXPORT_LEX("help", "[command]", "Display specific help information", lex_help);
+void lex_help(int argc, char* argv[])
+{
+   printf("LEX Shell version 0.1 -- Command overview\n\n");
+   printf("-CMD------ARGS---------------INFO----------------------\n");
+   foreach(i, lex_index_size) {
+      vga_movexy(vga_getrow(), 1);  printf("%s", command_index[i].cmd);
+      vga_movexy(vga_getrow(), 10); printf("%s", command_index[i].arg);
+      vga_movexy(vga_getrow(), 30); printf("%s", command_index[i].doc);
+      printf("\n");
+   }
+}
+
 // ========================================================================= //
 //       Private functions                                                   //
 // ========================================================================= //
@@ -266,22 +286,7 @@ static void lex_add_history(char* line)
    }
 }
 
-static void lex_help(int argc, char* argv[])
-{
-   printf("LEX Shell version 0.1 -- Command overview\n\n");
-   printf("-CMD------ARGS---------------INFO----------------------\n");
-   printf(" list     :[cat..] [val..]   List items in a category\n");
-   printf(" edit     :[mode]  [obj]     Edit files, variables, etc\n");
-   printf(" exec     :[mode]  [app]     Execute a program\n");
-   printf(" term     :[var..] [val..]   Manipulate the terminal\n");
-   printf(" manfs    :[opt..] [val..]   Manage the filesystem\n");
-   printf(" clear    -none-             Clear the screen\n");
-   printf(" enter    [path]             Enter a subdirectory\n");
-   printf(" make     :[obj..] [path..]  Create an object at the given path\n");
-   printf(" ld       [path]             List contents of a directory\n");
-   printf("\n");
-   printf("For more details on a command, type `[command] :?'\n");
-}
+
 
 static void lex_execute(int argc, char* argv[])
 {

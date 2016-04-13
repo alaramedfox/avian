@@ -29,7 +29,7 @@ volatile byte lex_text_color = 0x07;
  *    Lex Command - term-tabs [size]
  *    Sets the tab width for the terminal
  */
-EXPORT_LEX("term-tabs", lex_term_tabs);
+EXPORT_LEX("term-tabs", "[width]", "Set the tab width", lex_term_tabs);
 void lex_term_tabs(int argc, char* argv[])
 {
    
@@ -41,7 +41,7 @@ void lex_term_tabs(int argc, char* argv[])
  *    Lex Command - lex-history [option]
  *    Specifies how command history is recorded
  */
-EXPORT_LEX("term-history", lex_term_history);
+EXPORT_LEX("term-history", "[opt]", "Specify command history options", lex_term_history);
 void lex_term_history(int argc, char* argv[])
 {
    
@@ -54,7 +54,7 @@ void lex_term_history(int argc, char* argv[])
  *    Lex Command - clear
  *    Clears the screen
  */
-EXPORT_LEX("clear", lex_clear);
+EXPORT_LEX("clear", "-none-", "Clear the screen", lex_clear);
 void lex_clear(int argc, char* argv[])
 {
    vga_clear();
@@ -66,7 +66,7 @@ void lex_clear(int argc, char* argv[])
  *    Lex Command - term-color [category] [value]
  *    Specifies the default colors used in the terminal
  */
-EXPORT_LEX("term-color", lex_term_color);
+EXPORT_LEX("term-color", "[cat] [val]", "Specify terminal colors", lex_term_color);
 void lex_term_color(int argc, char* argv[])
 {
    //VALIDATE_ARG(category, return);

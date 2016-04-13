@@ -25,13 +25,17 @@
 #define lex_function(name) \
    int name(int argc, char* argv[])
    
-#define EXPORT_LEX(cmd, function) \
-   char command_##function[] = cmd;
+#define EXPORT_LEX(cmd, arg, doc, function)  \
+   char command_##function[] = cmd;          \
+   char helpdoc_##function[] = doc;          \
+   char argsdoc_##function[] = arg
 
-#define IMPORT_LEX(function)                       \
-   extern void function(int argc, char* argv[]);   \
-   extern char command_##function[];         \
-   lex_add_command(command_##function, function)
+#define IMPORT_LEX(f)                        \
+   extern void f(int argc, char* argv[]);    \
+   extern char command_##f[];                \
+   extern char helpdoc_##f[];                \
+   extern char argsdoc_##f[];                \
+   lex_add_command(command_##f, argsdoc_##f, helpdoc_##f, f)
    
 enum __LEX_RETURN
 {
@@ -67,7 +71,7 @@ extern volatile byte lex_text_color;
 extern char* current_directory;
 
 volume_t*  lex_read_mountpath(const char[], char*, char*);
-void  lex_add_command(char cmd[], void (*f)(int, char**));
+void  lex_add_command(char cmd[], char arg[], char doc[], void (*f)(int, char**));
 void  lex_init(void);
 int   shell(void);
 char* lex_full_path(const char[]);

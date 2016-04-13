@@ -19,7 +19,7 @@
 //       Public API Implementation                                           //
 // ========================================================================= //
 
-EXPORT_LEX("make", lex_make);
+EXPORT_LEX("make", "[obj] [path]", "Create an object", lex_make);
 void lex_make(int argc, char* argv[])
 {
    VALIDATE_ARG(argv[1], return);

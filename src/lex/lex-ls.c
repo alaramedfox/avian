@@ -22,7 +22,7 @@
  *    Lists the contents of the current directory, or the specified
  *    path
  */
-EXPORT_LEX("ls", lex_ls);
+EXPORT_LEX("ls", "[path]", "List contents of path", lex_ls);
 void lex_ls(int argc, char* argv[])
 {
    int a = 1;

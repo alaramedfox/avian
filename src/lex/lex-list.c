@@ -29,7 +29,7 @@
  *    Lex Command - memstat [options]
  *    Prints diagnostic memory information
  */
-EXPORT_LEX("memstat", lex_memstat);
+EXPORT_LEX("memstat", "[opt]", "Print memory information", lex_memstat);
 void lex_memstat(int argc, char* argv[])
 {
    bool detailed = false;
@@ -66,7 +66,7 @@ void lex_memstat(int argc, char* argv[])
  *    Lex Command - varstat
  *    Prints diagnostic information about internal variables
  */
-EXPORT_LEX("varstat", lex_varstat);
+EXPORT_LEX("varstat", "-none-", "Print data size information", lex_varstat);
 void lex_varstat(int argc, char* argv[])
 {
    types_test();
@@ -78,7 +78,7 @@ void lex_varstat(int argc, char* argv[])
  *    Lex Command - devstat
  *    Prints diagnostic information about mounted devices
  */
-EXPORT_LEX("devstat", lex_devstat);
+EXPORT_LEX("devstat", "-none-", "Print device information", lex_devstat);
 void lex_devstat(int argc, char* argv[])
 {
    printf("Scanning devices...\n");
