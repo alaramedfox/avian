@@ -171,11 +171,11 @@ void lex_fsdump(int argc, char* argv[])
    foreach(i, 512) {
       if(format == 1) {
          if(i && i%4==0) printf(" ");
-         if(i%32==0) printf("\n%#+%i%#\t",GREEN,i,C_TERM);
+         if(i%32==0) printf("\n%A+%i%A\t",F_GRN,i,F_GRY);
          printf(data[i]<=0xf?"0%X":"%X",data[i]);
       }
       else if(format == 2) {
-         if(i%64==0) printf("\n%#+%i%#\t",GREEN,i,C_TERM);
+         if(i%64==0) printf("\n%A+%i%A\t",F_GRN,i,F_GRY);
          printf("%c",data[i]<32?249:data[i]);
       }
    }

@@ -11,9 +11,6 @@
 #include <string.h>
 #include <keyboard.h>
 
-extern volatile int itoa_case;
-extern volatile bool itoa_long;
-
 // ========================================================================= //
 //       Private variables and function prototypes                           //
 // ========================================================================= //
@@ -30,77 +27,9 @@ static scan_event_t event_list[16];
 static size_t event_list_size=0;
 static size_t event_list_max=16;
 
-static void print(const char str[])
-{
-   if(str == NULL) {
-      print("NULL");
-      return;
-   }
-   
-   for(size_t i=0; str[i] != '\0'; i++) {
-      addch(str[i]);
-   }
-}
-
-static void iprint(int num, int base, int chcase, bool prefix)
-{
-   itoa_case = chcase;
-   itoa_long = prefix;
-   
-   char* str = (char*) malloc(11);
-   itoa(num, base, str);
-   print(str);
-   free(str);
-}
-
-static void iaddch(int num, int base, int chcase, bool prefix, char* str)
-{
-   itoa_case = chcase;
-   itoa_long = prefix;
-   itoa(num, base, str);
-}
-
 // ========================================================================= //
 //       Public API Implementation                                           //
 // ========================================================================= //
-
-int printf(const char* format, ...)
-{
-   va_list args;
-   va_start(args, format);
-   bool escape = false;
-   bool long_escape = false;
-   
-   foreach(i, strlen(format)) {
-      if(escape) {
-         switch(format[i])
-         {
-            case '{': long_escape = true;                break;
-            case '}': long_escape = false;               break;
-            case '#': vga_setcolor(va_arg(args,int));    break;
-            case 'c': addch(va_arg(args,int));           break;
-            case 'd':
-            case 'i': iprint(va_arg(args,int),DEC,0,0);  break;
-            case 's': print(va_arg(args,char*));         break;
-            case 'x': iprint(va_arg(args,int),HEX,1,1);  break;
-            case 'X': iprint(va_arg(args,int),HEX,0,0);  break;
-            case '%': addch('%');                        break;
-            case 'h': iprint(va_arg(args,int),BYTES,0,1);break;
-            case 'H': iprint(va_arg(args,int),BYTES,1,1);break;
-            default: break;
-         }
-         escape = false || long_escape;
-      }
-      else if(format[i] == '%') {
-         escape = true;
-      }
-      else {
-         addch(format[i]);
-      }
-   }
-   va_end(args);
-   return 1;
-}
 
 int getch(void)
 {
@@ -219,7 +148,7 @@ int scan(char* buffer)
       
       echo_buffer:
       vga_moveptr(vga_loc);
-      print(buffer);
+      printf("%s", buffer);
       move_cursor((loc+vga_loc)/VGA_COL, (loc+vga_loc)%VGA_COL);
       
       while(vga_getchar() != (char)STRING_END)

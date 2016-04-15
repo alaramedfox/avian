@@ -13,7 +13,7 @@
 
 #include <vga.h>
 
-#define psizeof(T)   printf("%{#s#}\t(%i)\t",0x02,#T,0x07,sizeof(T)*8)
+#define psizeof(T)   printf("%A%s%A\t(%i)\t",F_GRN,#T,F_GRY,sizeof(T)*8)
 
 void types_test(void)
 {
@@ -30,18 +30,11 @@ void types_test(void)
 
 void colors_test(void)
 {
-   vga_tabsize(3);
-   foreach(i, 256) {
-      if(i<16) printf("%#  #%X %#",i,i,0x07);
-      else printf("%# #%X %#",i,i,0x07);
-   }
-   vga_setcolor(0x07);
-   vga_tabsize(5);
 }
 
 void trace_function(const char function[])
 {
-   printf("[ %#%s%# ]",MAG,function,GREY);
+   printf("[ %A%s%A ]",F_MAG,function,F_GRY);
 }
 
 void notify_progress(const char str[], int current, int target)

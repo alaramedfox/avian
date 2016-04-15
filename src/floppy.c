@@ -440,7 +440,7 @@ static int floppy_data_transfer(int lba, byte *block, size_t bytes, bool read)
    chs_t chs = lba_convert(lba);
    byte *dma_buffer = (byte*) malloc(bytes);
    
-   printf("Floppy: Buffer %#%s%# sector %i\n", BROWN,read?"<--":"-->",C_TERM,lba);
+   printf("Floppy: Buffer %A%s%A sector %i\n", F_BRN,read?"<--":"-->",F_GRY,lba);
    
    floppy_start_motor(0);
    

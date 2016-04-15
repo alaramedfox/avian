@@ -19,11 +19,29 @@ typedef struct __FILE_STREAM
    
 } FILE;
 
+#define BOLD   "\x1b[1m"
+#define TERM   "\x1b[0m"
+
+#define F_BLK  "\x1b[30m"
+#define F_BLU  "\x1b[31m"
+#define F_GRN  "\x1b[32m"
+#define F_CYN  "\x1b[33m"
+#define F_RED  "\x1b[34m"
+#define F_MAG  "\x1b[35m"
+#define F_BRN  "\x1b[36m"
+#define F_GRY  "\x1b[37m"
+
+#define B_BLK  "\x1b[40m"
+#define B_BLU  "\x1b[41m"
+#define B_GRN  "\x1b[42m"
+#define B_CYN  "\x1b[43m"
+#define B_RED  "\x1b[44m"
+#define B_MAG  "\x1b[45m"
+#define B_BRN  "\x1b[46m"
+#define B_GRY  "\x1b[47m"
+
 enum __COLOR_DEFS
 {
-   BLACK = 0x0, BLUE  = 0x1, GREEN = 0x2, CYAN  = 0x3,
-   RED   = 0x4, MAG   = 0x5, BROWN = 0x6, GREY  = 0x7,
-   
    C_TERM  = 0x07, C_BLUESCR=0x1F, 
    C_WARN  = 0x04, C_CRIT = 0x47,
 };
@@ -37,6 +55,8 @@ int register_scan_event(word key, void (*f)(char*), bool ret);
 int scan(char* buffer);
 
 int printf(const char* format, ...);
+int sprintf(char* str, const char* format, ...);
+int vsprintf(char* str, const char* format, va_list args);
 int scanf(const char* format, ...);
 
 

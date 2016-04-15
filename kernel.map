@@ -14,9 +14,10 @@ lib/liblex.a(lex-enter.o)     lib/liblex.a(lex.o) (command_lex_enter)
 lib/liblex.a(lex-list.o)      lib/liblex.a(lex.o) (command_lex_memstat)
 lib/liblex.a(lex-make.o)      lib/liblex.a(lex.o) (command_lex_make)
 lib/liblex.a(lex-manfs.o)     lib/liblex.a(lex.o) (command_lex_format)
-lib/liblex.a(lex-term.o)      lib/liblex.a(lex-ls.o) (lex_file_color)
-lib/libstd.a(stdio.o)         obj/errors.o (printf)
-lib/libstd.a(string.o)        lib/libstd.a(stdio.o) (itoa_case)
+lib/liblex.a(lex-term.o)      lib/liblex.a(lex.o) (command_lex_clear)
+lib/libstd.a(stdio.o)         lib/liblex.a(lex.o) (register_scan_event)
+lib/libstd.a(string.o)        lib/libanica.a(anica-table.o) (split)
+lib/libstd.a(printf.o)        obj/errors.o (printf)
 lib/libstd.a(math.o)          lib/libstd.a(string.o) (pow)
 
 Allocating common symbols
@@ -59,490 +60,497 @@ LOAD obj/vga.o
  *(.mbh)
  .mbh           0x0000000000100000        0xc obj/boot.o
 
-.rodata         0x0000000000100020     0x106c
+.rodata         0x0000000000100020     0x10bb
  .rodata        0x0000000000100020       0x30 obj/dma.o
- .rodata        0x0000000000100050       0x30 obj/errors.o
- .rodata        0x0000000000100080       0x4c obj/ext2.o
- .rodata        0x00000000001000cc       0x6e obj/filesystem.o
- *fill*         0x000000000010013a        0x2 
- .rodata        0x000000000010013c      0x11e obj/floppy.o
- .rodata        0x000000000010025a       0x18 obj/keyboard.o
- *fill*         0x0000000000100272        0x2 
- .rodata        0x0000000000100274       0x76 obj/main.o
- *fill*         0x00000000001002ea        0x2 
- .rodata        0x00000000001002ec       0x1e obj/mman.o
- .rodata        0x000000000010030a        0xa obj/stack.o
- .rodata        0x0000000000100314        0x4 obj/time.o
-                0x0000000000100314                bios_ticks
- .rodata        0x0000000000100318       0xe5 obj/util.o
- *fill*         0x00000000001003fd        0x3 
- .rodata        0x0000000000100400        0x4 obj/vga.o
- .rodata        0x0000000000100404       0x54 lib/libanica.a(anica-sb.o)
- .rodata        0x0000000000100458       0x38 lib/libanica.a(anica-table.o)
- .rodata        0x0000000000100490       0xc3 lib/libanica.a(anicafs.o)
- .rodata        0x0000000000100553       0x1c lib/libanica.a(anica-node.o)
- *fill*         0x000000000010056f        0x1 
- .rodata        0x0000000000100570      0x205 lib/libirq.a(exceptions.o)
- *fill*         0x0000000000100775        0x3 
- .rodata        0x0000000000100778      0x131 lib/liblex.a(lex.o)
- .rodata        0x00000000001008a9       0xa8 lib/liblex.a(lex-ls.o)
- .rodata        0x0000000000100951       0x2c lib/liblex.a(lex-enter.o)
- .rodata        0x000000000010097d       0xf9 lib/liblex.a(lex-list.o)
- *fill*         0x0000000000100a76        0x2 
- .rodata        0x0000000000100a78       0x8b lib/liblex.a(lex-make.o)
- *fill*         0x0000000000100b03        0x1 
- .rodata        0x0000000000100b04      0x3b6 lib/liblex.a(lex-manfs.o)
- *fill*         0x0000000000100eba        0x2 
- .rodata        0x0000000000100ebc      0x17e lib/libstd.a(stdio.o)
- *fill*         0x000000000010103a        0x6 
- .rodata        0x0000000000101040       0x4c lib/libstd.a(string.o)
+ .rodata        0x0000000000100050       0x48 obj/errors.o
+ .rodata        0x0000000000100098       0x4c obj/ext2.o
+ .rodata        0x00000000001000e4       0x6e obj/filesystem.o
+ *fill*         0x0000000000100152        0x2 
+ .rodata        0x0000000000100154      0x12a obj/floppy.o
+ .rodata        0x000000000010027e       0x18 obj/keyboard.o
+ *fill*         0x0000000000100296        0x2 
+ .rodata        0x0000000000100298       0x76 obj/main.o
+ *fill*         0x000000000010030e        0x2 
+ .rodata        0x0000000000100310       0x1e obj/mman.o
+ .rodata        0x000000000010032e        0xa obj/stack.o
+ .rodata        0x0000000000100338        0x4 obj/time.o
+                0x0000000000100338                bios_ticks
+ .rodata        0x000000000010033c       0xe2 obj/util.o
+ *fill*         0x000000000010041e        0x2 
+ .rodata        0x0000000000100420        0x4 obj/vga.o
+ .rodata        0x0000000000100424       0x54 lib/libanica.a(anica-sb.o)
+ .rodata        0x0000000000100478       0x38 lib/libanica.a(anica-table.o)
+ .rodata        0x00000000001004b0       0xc3 lib/libanica.a(anicafs.o)
+ .rodata        0x0000000000100573       0x1c lib/libanica.a(anica-node.o)
+ *fill*         0x000000000010058f        0x1 
+ .rodata        0x0000000000100590      0x205 lib/libirq.a(exceptions.o)
+ *fill*         0x0000000000100795        0x3 
+ .rodata        0x0000000000100798      0x13d lib/liblex.a(lex.o)
+ .rodata        0x00000000001008d5       0xc0 lib/liblex.a(lex-ls.o)
+ .rodata        0x0000000000100995       0x2c lib/liblex.a(lex-enter.o)
+ .rodata        0x00000000001009c1       0xf9 lib/liblex.a(lex-list.o)
+ *fill*         0x0000000000100aba        0x2 
+ .rodata        0x0000000000100abc       0x8b lib/liblex.a(lex-make.o)
+ *fill*         0x0000000000100b47        0x1 
+ .rodata        0x0000000000100b48      0x3c2 lib/liblex.a(lex-manfs.o)
+ .rodata        0x0000000000100f0a        0x6 lib/libstd.a(stdio.o)
+ *fill*         0x0000000000100f10       0x10 
+ .rodata        0x0000000000100f20       0x4c lib/libstd.a(string.o)
+ .rodata        0x0000000000100f6c      0x16f lib/libstd.a(printf.o)
 
-.eh_frame       0x000000000010108c     0x1a8c
- .eh_frame      0x000000000010108c       0x58 obj/dma.o
- .eh_frame      0x00000000001010e4       0x40 obj/errors.o
+.eh_frame       0x00000000001010dc     0x1b0c
+ .eh_frame      0x00000000001010dc       0x58 obj/dma.o
+ .eh_frame      0x0000000000101134       0x40 obj/errors.o
                                          0x58 (size before relaxing)
- .eh_frame      0x0000000000101124       0x80 obj/ext2.o
+ .eh_frame      0x0000000000101174       0x80 obj/ext2.o
                                          0x98 (size before relaxing)
- .eh_frame      0x00000000001011a4      0x1c0 obj/filesystem.o
+ .eh_frame      0x00000000001011f4      0x1c0 obj/filesystem.o
                                         0x1d8 (size before relaxing)
- .eh_frame      0x0000000000101364      0x2d0 obj/floppy.o
+ .eh_frame      0x00000000001013b4      0x2d0 obj/floppy.o
                                         0x2e8 (size before relaxing)
- .eh_frame      0x0000000000101634       0x40 obj/keyboard.o
+ .eh_frame      0x0000000000101684       0x40 obj/keyboard.o
                                          0x58 (size before relaxing)
- .eh_frame      0x0000000000101674       0x80 obj/main.o
+ .eh_frame      0x00000000001016c4       0x80 obj/main.o
                                          0x98 (size before relaxing)
- .eh_frame      0x00000000001016f4      0x1cc obj/mman.o
+ .eh_frame      0x0000000000101744      0x1cc obj/mman.o
                                         0x1e4 (size before relaxing)
- .eh_frame      0x00000000001018c0       0x40 obj/random.o
+ .eh_frame      0x0000000000101910       0x40 obj/random.o
                                          0x58 (size before relaxing)
- .eh_frame      0x0000000000101900      0x120 obj/stack.o
+ .eh_frame      0x0000000000101950      0x120 obj/stack.o
                                         0x138 (size before relaxing)
- .eh_frame      0x0000000000101a20       0x60 obj/time.o
+ .eh_frame      0x0000000000101a70       0x60 obj/time.o
                                          0x78 (size before relaxing)
- .eh_frame      0x0000000000101a80       0x80 obj/util.o
+ .eh_frame      0x0000000000101ad0       0x80 obj/util.o
                                          0x98 (size before relaxing)
- .eh_frame      0x0000000000101b00      0x308 obj/vga.o
+ .eh_frame      0x0000000000101b50      0x308 obj/vga.o
                                         0x320 (size before relaxing)
- .eh_frame      0x0000000000101e08       0x80 lib/libanica.a(anica-sb.o)
+ .eh_frame      0x0000000000101e58       0x80 lib/libanica.a(anica-sb.o)
                                          0x98 (size before relaxing)
- .eh_frame      0x0000000000101e88       0x94 lib/libanica.a(anica-table.o)
+ .eh_frame      0x0000000000101ed8       0x94 lib/libanica.a(anica-table.o)
                                          0xac (size before relaxing)
- .eh_frame      0x0000000000101f1c      0x1c0 lib/libanica.a(anicafs.o)
+ .eh_frame      0x0000000000101f6c      0x1c0 lib/libanica.a(anicafs.o)
                                         0x1d8 (size before relaxing)
- .eh_frame      0x00000000001020dc       0x90 lib/libanica.a(anica-node.o)
+ .eh_frame      0x000000000010212c       0x90 lib/libanica.a(anica-node.o)
                                          0xa8 (size before relaxing)
- .eh_frame      0x000000000010216c       0x9c lib/libirq.a(exceptions.o)
+ .eh_frame      0x00000000001021bc       0x9c lib/libirq.a(exceptions.o)
                                          0xb4 (size before relaxing)
- .eh_frame      0x0000000000102208       0x80 lib/libirq.a(idt.o)
+ .eh_frame      0x0000000000102258       0x80 lib/libirq.a(idt.o)
                                          0x98 (size before relaxing)
- .eh_frame      0x0000000000102288       0xe8 lib/libirq.a(pic.o)
+ .eh_frame      0x00000000001022d8       0xe8 lib/libirq.a(pic.o)
                                         0x100 (size before relaxing)
- .eh_frame      0x0000000000102370      0x164 lib/liblex.a(lex.o)
+ .eh_frame      0x00000000001023c0      0x164 lib/liblex.a(lex.o)
                                         0x17c (size before relaxing)
- .eh_frame      0x00000000001024d4       0x20 lib/liblex.a(lex-ls.o)
+ .eh_frame      0x0000000000102524       0x20 lib/liblex.a(lex-ls.o)
                                          0x38 (size before relaxing)
- .eh_frame      0x00000000001024f4       0x20 lib/liblex.a(lex-enter.o)
+ .eh_frame      0x0000000000102544       0x20 lib/liblex.a(lex-enter.o)
                                          0x38 (size before relaxing)
- .eh_frame      0x0000000000102514       0x70 lib/liblex.a(lex-list.o)
+ .eh_frame      0x0000000000102564       0x70 lib/liblex.a(lex-list.o)
                                          0x88 (size before relaxing)
- .eh_frame      0x0000000000102584       0x20 lib/liblex.a(lex-make.o)
+ .eh_frame      0x00000000001025d4       0x20 lib/liblex.a(lex-make.o)
                                          0x38 (size before relaxing)
- .eh_frame      0x00000000001025a4       0xd4 lib/liblex.a(lex-manfs.o)
+ .eh_frame      0x00000000001025f4       0xd4 lib/liblex.a(lex-manfs.o)
                                          0xec (size before relaxing)
- .eh_frame      0x0000000000102678       0x80 lib/liblex.a(lex-term.o)
+ .eh_frame      0x00000000001026c8       0x80 lib/liblex.a(lex-term.o)
                                          0x98 (size before relaxing)
- .eh_frame      0x00000000001026f8      0x114 lib/libstd.a(stdio.o)
-                                        0x12c (size before relaxing)
- .eh_frame      0x000000000010280c      0x2ac lib/libstd.a(string.o)
+ .eh_frame      0x0000000000102748       0x94 lib/libstd.a(stdio.o)
+                                         0xac (size before relaxing)
+ .eh_frame      0x00000000001027dc      0x2ac lib/libstd.a(string.o)
                                         0x2c4 (size before relaxing)
- .eh_frame      0x0000000000102ab8       0x60 lib/libstd.a(math.o)
+ .eh_frame      0x0000000000102a88      0x100 lib/libstd.a(printf.o)
+                                        0x118 (size before relaxing)
+ .eh_frame      0x0000000000102b88       0x60 lib/libstd.a(math.o)
                                          0x78 (size before relaxing)
 
-.text           0x0000000000102b20     0x715d
+.text           0x0000000000102bf0     0x728b
  *(.text)
- .text          0x0000000000102b20        0xc obj/boot.o
-                0x0000000000102b20                start
- .text          0x0000000000102b2c      0x1ba obj/dma.o
-                0x0000000000102b2c                dma_xfer
- .text          0x0000000000102ce6       0xad obj/errors.o
-                0x0000000000102d58                throw
- .text          0x0000000000102d93      0x455 obj/ext2.o
-                0x0000000000102d93                ext2_read_superblock
-                0x0000000000102e17                ext2_read_cache
-                0x00000000001030bd                ext2_block_groups
-                0x0000000000103167                ext2_read_block
- .text          0x00000000001031e8      0x3d4 obj/filesystem.o
-                0x00000000001031e8                dev_to_str
-                0x00000000001031f7                fs_to_str
-                0x0000000000103206                str_to_dev
-                0x0000000000103247                str_to_fs
-                0x0000000000103288                read_fs
-                0x0000000000103397                format_device
-                0x00000000001033c7                mount
-                0x000000000010342a                open
-                0x000000000010349b                read
-                0x00000000001034c9                write
-                0x00000000001034fa                close
-                0x000000000010350d                unmount
-                0x000000000010354c                ext2_read_sector
-                0x0000000000103584                ext2_write_sector
- .text          0x00000000001035bc      0xdc4 obj/floppy.o
-                0x00000000001035bc                floppy_clear_cache
-                0x000000000010363d                floppy_sync_cache
-                0x00000000001036e5                floppy_write_block
-                0x00000000001037c1                floppy_read_block
-                0x000000000010388d                floppy_handler
-                0x00000000001038a8                floppy_init
- .text          0x0000000000104380       0x16 obj/interrupts.o
-                0x0000000000104380                load_idt
-                0x000000000010438a                keyboard_irq
-                0x0000000000104390                floppy_irq
- .text          0x0000000000104396      0x14e obj/keyboard.o
-                0x0000000000104396                kb_init
-                0x00000000001043f8                keyboard_handler
- .text          0x00000000001044e4      0x115 obj/main.o
-                0x00000000001044e4                init
-                0x0000000000104527                main
-                0x0000000000104539                avian_main
-                0x0000000000104585                bootscreen
- .text          0x00000000001045f9      0x3e4 obj/mman.o
-                0x00000000001045f9                ptrsize
-                0x0000000000104647                free
-                0x0000000000104677                _calloc
-                0x00000000001046be                _malloc
-                0x0000000000104781                _realloc
-                0x00000000001047d8                mem_blocks
-                0x00000000001047e4                mem_used
-                0x0000000000104821                mem_free
-                0x0000000000104834                mem_block_info
- *fill*         0x00000000001049dd        0x3 
- .text          0x00000000001049e0       0x10 obj/portio.o
-                0x00000000001049e0                inportb
-                0x00000000001049e6                outportb
- .text          0x00000000001049f0       0x5b obj/random.o
-                0x00000000001049f0                rand
-                0x0000000000104a3e                srand
- .text          0x0000000000104a4b      0x1a3 obj/stack.o
-                0x0000000000104a4b                stack_str
-                0x0000000000104a56                push_str
-                0x0000000000104a94                new_stack
-                0x0000000000104ae3                delete_stack
-                0x0000000000104b04                push
-                0x0000000000104b50                pop
-                0x0000000000104b9c                peek
-                0x0000000000104bca                empty
-                0x0000000000104bd9                full
- *fill*         0x0000000000104bee        0x2 
- .text          0x0000000000104bf0       0xfe obj/throw.o
-                0x0000000000104bf0                throw_exception
-                0x0000000000104bfe                throw_zero_divide
-                0x0000000000104c09                throw_irq_0
-                0x0000000000104c15                throw_irq_1
-                0x0000000000104c21                throw_irq_2
-                0x0000000000104c2d                throw_irq_3
-                0x0000000000104c39                throw_irq_4
-                0x0000000000104c45                throw_irq_5
-                0x0000000000104c51                throw_irq_6
-                0x0000000000104c5d                throw_irq_7
-                0x0000000000104c69                throw_irq_8
-                0x0000000000104c76                throw_irq_9
-                0x0000000000104c82                throw_irq_10
-                0x0000000000104c8e                throw_irq_11
-                0x0000000000104c9a                throw_irq_12
-                0x0000000000104ca6                throw_irq_13
-                0x0000000000104cb2                throw_irq_14
-                0x0000000000104cbe                throw_irq_15
-                0x0000000000104cca                throw_irq_16
-                0x0000000000104cd6                throw_irq_17
-                0x0000000000104ce2                throw_irq_18
- .text          0x0000000000104cee       0x78 obj/time.o
-                0x0000000000104cee                get_bios_ticks
-                0x0000000000104cfb                usleep
-                0x0000000000104d37                sleep
- .text          0x0000000000104d66      0x495 obj/util.o
-                0x0000000000104d66                types_test
-                0x0000000000105102                colors_test
-                0x000000000010518f                trace_function
-                0x00000000001051ba                notify_progress
- .text          0x00000000001051fb      0x535 obj/vga.o
-                0x00000000001051fb                move_cursor
-                0x0000000000105283                hide_cursor
-                0x000000000010529f                vga_tabsize
-                0x00000000001052c1                vga_increment
-                0x00000000001052d8                vga_decrement
-                0x00000000001052ef                vga_getcol
-                0x000000000010530d                vga_getrow
-                0x0000000000105329                vga_getloc
-                0x0000000000105339                vga_setcolor
-                0x0000000000105355                vga_newline
-                0x0000000000105376                vga_creturn
-                0x0000000000105396                vga_getcolor
-                0x00000000001053a6                vga_getchar
-                0x00000000001053c0                vga_tabchar
-                0x0000000000105425                vga_movexy
-                0x0000000000105468                vga_moveptr
-                0x0000000000105495                vga_char_at
-                0x00000000001054c9                vga_clear
-                0x000000000010552b                vga_clear_row
-                0x000000000010557f                vga_write
-                0x00000000001055bb                addch
-                0x0000000000105605                vga_color
-                0x000000000010562e                printxy
-                0x0000000000105692                vga_scroll
- .text          0x0000000000105730      0x232 lib/libanica.a(anica-sb.o)
-                0x0000000000105730                anica_read_superblock
-                0x00000000001057b8                anica_write_superblock
-                0x0000000000105857                anica_format_sb
-                0x00000000001058e9                anica_find_superblock
- .text          0x0000000000105962      0x2d0 lib/libanica.a(anica-table.o)
-                0x0000000000105962                anica_read_itable
-                0x00000000001059e3                anica_write_itable
-                0x0000000000105a64                anica_parent_index
-                0x0000000000105b9e                anica_add_entry
- .text          0x0000000000105c32      0xb7f lib/libanica.a(anicafs.o)
-                0x0000000000105c32                anica_format_device
-                0x0000000000105dbc                anica_list_contents
-                0x0000000000106007                anica_open_file
-                0x00000000001060ca                anica_read_file
-                0x0000000000106188                anica_write_file
-                0x00000000001062b0                anica_read_path
-                0x0000000000106442                anica_write_data
-                0x00000000001064f2                anica_read_data
-                0x0000000000106585                anica_write_dir
-                0x000000000010665a                anica_is_addr_free
-                0x00000000001066e1                anica_block_fits
-                0x0000000000106738                anica_find_block
- .text          0x00000000001067b1      0x1d0 lib/libanica.a(anica-node.o)
-                0x00000000001067b1                anica_make_file
-                0x00000000001068c0                anica_mkdir
-                0x0000000000106929                anica_read_node
-                0x0000000000106955                anica_write_node
- .text          0x0000000000106981      0x322 lib/libirq.a(exceptions.o)
-                0x0000000000106981                exceptions_init
-                0x0000000000106c3e                catch_exception
-                0x0000000000106c88                catch_zero_divide
- .text          0x0000000000106ca3       0xd4 lib/libirq.a(idt.o)
-                0x0000000000106ca3                idt_write_table
-                0x0000000000106cd1                idt_add_handler
-                0x0000000000106cfb                idt_add_exception
- .text          0x0000000000106d77      0x1ff lib/libirq.a(pic.o)
-                0x0000000000106d77                pic_init
-                0x0000000000106ddb                pic_send_eoi
-                0x0000000000106e11                pic_enable_irq
-                0x0000000000106e6d                pic_disable_irq
-                0x0000000000106f37                pic_remap
- .text          0x0000000000106f76      0xa71 lib/liblex.a(lex.o)
-                0x0000000000106f76                lex_init
-                0x00000000001071e7                system
-                0x0000000000107242                shell
-                0x00000000001073f0                lex_full_path
-                0x0000000000107499                lex_add_command
-                0x0000000000107500                lex_read_mountpath
- .text          0x00000000001079e7      0x380 lib/liblex.a(lex-ls.o)
-                0x00000000001079e7                lex_ls
- .text          0x0000000000107d67      0x22d lib/liblex.a(lex-enter.o)
-                0x0000000000107d67                lex_enter
- .text          0x0000000000107f94      0x1fb lib/liblex.a(lex-list.o)
-                0x0000000000107f94                lex_memstat
-                0x000000000010813a                lex_varstat
-                0x0000000000108147                lex_devstat
- .text          0x000000000010818f      0x173 lib/liblex.a(lex-make.o)
-                0x000000000010818f                lex_make
- .text          0x0000000000108302      0x95e lib/liblex.a(lex-manfs.o)
-                0x0000000000108302                lex_format
-                0x00000000001083f5                lex_devlist
-                0x00000000001084b9                lex_mount
-                0x00000000001086a0                lex_umount
-                0x000000000010878e                lex_fsdump
-                0x0000000000108993                lex_fscache
- .text          0x0000000000108c60       0x1c lib/liblex.a(lex-term.o)
-                0x0000000000108c60                lex_term_tabs
-                0x0000000000108c65                lex_term_history
-                0x0000000000108c6a                lex_clear
-                0x0000000000108c77                lex_term_color
- .text          0x0000000000108c7c      0x69d lib/libstd.a(stdio.o)
-                0x0000000000108d62                printf
-                0x0000000000108f59                getch
-                0x0000000000108f90                register_scan_event
-                0x000000000010901f                deregister_scan_event
-                0x00000000001090b8                scan
- .text          0x0000000000109319      0x8d2 lib/libstd.a(string.o)
-                0x0000000000109319                split
-                0x0000000000109441                chomp
-                0x0000000000109480                new_str
-                0x00000000001094bc                strlongest
-                0x000000000010950c                strmerge
-                0x00000000001096ad                reverse
-                0x000000000010971b                itoa
-                0x00000000001098b2                atoi
-                0x0000000000109935                strcat
-                0x0000000000109971                strncat
-                0x00000000001099c5                strchr
-                0x00000000001099ee                strcmp
-                0x0000000000109a40                strncmp
-                0x0000000000109a9a                strcpy
-                0x0000000000109ac8                strncpy
-                0x0000000000109afd                strlen
-                0x0000000000109b30                memset
-                0x0000000000109b5e                memcmp
-                0x0000000000109bac                memcpy
- .text          0x0000000000109beb       0x92 lib/libstd.a(math.o)
-                0x0000000000109beb                div
-                0x0000000000109c1c                ldiv
-                0x0000000000109c4d                pow
+ .text          0x0000000000102bf0        0xc obj/boot.o
+                0x0000000000102bf0                start
+ .text          0x0000000000102bfc      0x1ba obj/dma.o
+                0x0000000000102bfc                dma_xfer
+ .text          0x0000000000102db6       0xad obj/errors.o
+                0x0000000000102e28                throw
+ .text          0x0000000000102e63      0x455 obj/ext2.o
+                0x0000000000102e63                ext2_read_superblock
+                0x0000000000102ee7                ext2_read_cache
+                0x000000000010318d                ext2_block_groups
+                0x0000000000103237                ext2_read_block
+ .text          0x00000000001032b8      0x3d4 obj/filesystem.o
+                0x00000000001032b8                dev_to_str
+                0x00000000001032c7                fs_to_str
+                0x00000000001032d6                str_to_dev
+                0x0000000000103317                str_to_fs
+                0x0000000000103358                read_fs
+                0x0000000000103467                format_device
+                0x0000000000103497                mount
+                0x00000000001034fa                open
+                0x000000000010356b                read
+                0x0000000000103599                write
+                0x00000000001035ca                close
+                0x00000000001035dd                unmount
+                0x000000000010361c                ext2_read_sector
+                0x0000000000103654                ext2_write_sector
+ .text          0x000000000010368c      0xdc4 obj/floppy.o
+                0x000000000010368c                floppy_clear_cache
+                0x000000000010370d                floppy_sync_cache
+                0x00000000001037b5                floppy_write_block
+                0x0000000000103891                floppy_read_block
+                0x000000000010395d                floppy_handler
+                0x0000000000103978                floppy_init
+ .text          0x0000000000104450       0x16 obj/interrupts.o
+                0x0000000000104450                load_idt
+                0x000000000010445a                keyboard_irq
+                0x0000000000104460                floppy_irq
+ .text          0x0000000000104466      0x14e obj/keyboard.o
+                0x0000000000104466                kb_init
+                0x00000000001044c8                keyboard_handler
+ .text          0x00000000001045b4      0x115 obj/main.o
+                0x00000000001045b4                init
+                0x00000000001045f7                main
+                0x0000000000104609                avian_main
+                0x0000000000104655                bootscreen
+ .text          0x00000000001046c9      0x3e4 obj/mman.o
+                0x00000000001046c9                ptrsize
+                0x0000000000104717                free
+                0x0000000000104747                _calloc
+                0x000000000010478e                _malloc
+                0x0000000000104851                _realloc
+                0x00000000001048a8                mem_blocks
+                0x00000000001048b4                mem_used
+                0x00000000001048f1                mem_free
+                0x0000000000104904                mem_block_info
+ *fill*         0x0000000000104aad        0x3 
+ .text          0x0000000000104ab0       0x10 obj/portio.o
+                0x0000000000104ab0                inportb
+                0x0000000000104ab6                outportb
+ .text          0x0000000000104ac0       0x5b obj/random.o
+                0x0000000000104ac0                rand
+                0x0000000000104b0e                srand
+ .text          0x0000000000104b1b      0x1a3 obj/stack.o
+                0x0000000000104b1b                stack_str
+                0x0000000000104b26                push_str
+                0x0000000000104b64                new_stack
+                0x0000000000104bb3                delete_stack
+                0x0000000000104bd4                push
+                0x0000000000104c20                pop
+                0x0000000000104c6c                peek
+                0x0000000000104c9a                empty
+                0x0000000000104ca9                full
+ *fill*         0x0000000000104cbe        0x2 
+ .text          0x0000000000104cc0       0xfe obj/throw.o
+                0x0000000000104cc0                throw_exception
+                0x0000000000104cce                throw_zero_divide
+                0x0000000000104cd9                throw_irq_0
+                0x0000000000104ce5                throw_irq_1
+                0x0000000000104cf1                throw_irq_2
+                0x0000000000104cfd                throw_irq_3
+                0x0000000000104d09                throw_irq_4
+                0x0000000000104d15                throw_irq_5
+                0x0000000000104d21                throw_irq_6
+                0x0000000000104d2d                throw_irq_7
+                0x0000000000104d39                throw_irq_8
+                0x0000000000104d46                throw_irq_9
+                0x0000000000104d52                throw_irq_10
+                0x0000000000104d5e                throw_irq_11
+                0x0000000000104d6a                throw_irq_12
+                0x0000000000104d76                throw_irq_13
+                0x0000000000104d82                throw_irq_14
+                0x0000000000104d8e                throw_irq_15
+                0x0000000000104d9a                throw_irq_16
+                0x0000000000104da6                throw_irq_17
+                0x0000000000104db2                throw_irq_18
+ .text          0x0000000000104dbe       0x78 obj/time.o
+                0x0000000000104dbe                get_bios_ticks
+                0x0000000000104dcb                usleep
+                0x0000000000104e07                sleep
+ .text          0x0000000000104e36      0x40d obj/util.o
+                0x0000000000104e36                types_test
+                0x00000000001051d2                colors_test
+                0x00000000001051d7                trace_function
+                0x0000000000105202                notify_progress
+ .text          0x0000000000105243      0x535 obj/vga.o
+                0x0000000000105243                move_cursor
+                0x00000000001052cb                hide_cursor
+                0x00000000001052e7                vga_tabsize
+                0x0000000000105309                vga_increment
+                0x0000000000105320                vga_decrement
+                0x0000000000105337                vga_getcol
+                0x0000000000105355                vga_getrow
+                0x0000000000105371                vga_getloc
+                0x0000000000105381                vga_setcolor
+                0x000000000010539d                vga_newline
+                0x00000000001053be                vga_creturn
+                0x00000000001053de                vga_getcolor
+                0x00000000001053ee                vga_getchar
+                0x0000000000105408                vga_tabchar
+                0x000000000010546d                vga_movexy
+                0x00000000001054b0                vga_moveptr
+                0x00000000001054dd                vga_char_at
+                0x0000000000105511                vga_clear
+                0x0000000000105573                vga_clear_row
+                0x00000000001055c7                vga_write
+                0x0000000000105603                addch
+                0x000000000010564d                vga_color
+                0x0000000000105676                printxy
+                0x00000000001056da                vga_scroll
+ .text          0x0000000000105778      0x232 lib/libanica.a(anica-sb.o)
+                0x0000000000105778                anica_read_superblock
+                0x0000000000105800                anica_write_superblock
+                0x000000000010589f                anica_format_sb
+                0x0000000000105931                anica_find_superblock
+ .text          0x00000000001059aa      0x2d0 lib/libanica.a(anica-table.o)
+                0x00000000001059aa                anica_read_itable
+                0x0000000000105a2b                anica_write_itable
+                0x0000000000105aac                anica_parent_index
+                0x0000000000105be6                anica_add_entry
+ .text          0x0000000000105c7a      0xb7f lib/libanica.a(anicafs.o)
+                0x0000000000105c7a                anica_format_device
+                0x0000000000105e04                anica_list_contents
+                0x000000000010604f                anica_open_file
+                0x0000000000106112                anica_read_file
+                0x00000000001061d0                anica_write_file
+                0x00000000001062f8                anica_read_path
+                0x000000000010648a                anica_write_data
+                0x000000000010653a                anica_read_data
+                0x00000000001065cd                anica_write_dir
+                0x00000000001066a2                anica_is_addr_free
+                0x0000000000106729                anica_block_fits
+                0x0000000000106780                anica_find_block
+ .text          0x00000000001067f9      0x1d0 lib/libanica.a(anica-node.o)
+                0x00000000001067f9                anica_make_file
+                0x0000000000106908                anica_mkdir
+                0x0000000000106971                anica_read_node
+                0x000000000010699d                anica_write_node
+ .text          0x00000000001069c9      0x322 lib/libirq.a(exceptions.o)
+                0x00000000001069c9                exceptions_init
+                0x0000000000106c86                catch_exception
+                0x0000000000106cd0                catch_zero_divide
+ .text          0x0000000000106ceb       0xd4 lib/libirq.a(idt.o)
+                0x0000000000106ceb                idt_write_table
+                0x0000000000106d19                idt_add_handler
+                0x0000000000106d43                idt_add_exception
+ .text          0x0000000000106dbf      0x1ff lib/libirq.a(pic.o)
+                0x0000000000106dbf                pic_init
+                0x0000000000106e23                pic_send_eoi
+                0x0000000000106e59                pic_enable_irq
+                0x0000000000106eb5                pic_disable_irq
+                0x0000000000106f7f                pic_remap
+ .text          0x0000000000106fbe      0xa71 lib/liblex.a(lex.o)
+                0x0000000000106fbe                lex_init
+                0x000000000010722f                system
+                0x000000000010728a                shell
+                0x0000000000107438                lex_full_path
+                0x00000000001074e1                lex_add_command
+                0x0000000000107548                lex_read_mountpath
+ .text          0x0000000000107a2f      0x360 lib/liblex.a(lex-ls.o)
+                0x0000000000107a2f                lex_ls
+ .text          0x0000000000107d8f      0x22d lib/liblex.a(lex-enter.o)
+                0x0000000000107d8f                lex_enter
+ .text          0x0000000000107fbc      0x1fb lib/liblex.a(lex-list.o)
+                0x0000000000107fbc                lex_memstat
+                0x0000000000108162                lex_varstat
+                0x000000000010816f                lex_devstat
+ .text          0x00000000001081b7      0x173 lib/liblex.a(lex-make.o)
+                0x00000000001081b7                lex_make
+ .text          0x000000000010832a      0x95e lib/liblex.a(lex-manfs.o)
+                0x000000000010832a                lex_format
+                0x000000000010841d                lex_devlist
+                0x00000000001084e1                lex_mount
+                0x00000000001086c8                lex_umount
+                0x00000000001087b6                lex_fsdump
+                0x00000000001089bb                lex_fscache
+ .text          0x0000000000108c88       0x1c lib/liblex.a(lex-term.o)
+                0x0000000000108c88                lex_term_tabs
+                0x0000000000108c8d                lex_term_history
+                0x0000000000108c92                lex_clear
+                0x0000000000108c9f                lex_term_color
+ .text          0x0000000000108ca4      0x3c8 lib/libstd.a(stdio.o)
+                0x0000000000108ca4                getch
+                0x0000000000108cdb                register_scan_event
+                0x0000000000108d6a                deregister_scan_event
+                0x0000000000108e03                scan
+ .text          0x000000000010906c      0x8d2 lib/libstd.a(string.o)
+                0x000000000010906c                split
+                0x0000000000109194                chomp
+                0x00000000001091d3                new_str
+                0x000000000010920f                strlongest
+                0x000000000010925f                strmerge
+                0x0000000000109400                reverse
+                0x000000000010946e                itoa
+                0x0000000000109605                atoi
+                0x0000000000109688                strcat
+                0x00000000001096c4                strncat
+                0x0000000000109718                strchr
+                0x0000000000109741                strcmp
+                0x0000000000109793                strncmp
+                0x00000000001097ed                strcpy
+                0x000000000010981b                strncpy
+                0x0000000000109850                strlen
+                0x0000000000109883                memset
+                0x00000000001098b1                memcmp
+                0x00000000001098ff                memcpy
+ .text          0x000000000010993e      0x4ab lib/libstd.a(printf.o)
+                0x000000000010993e                vsprintf
+                0x0000000000109b15                sprintf
+                0x0000000000109b3c                printf
+ .text          0x0000000000109de9       0x92 lib/libstd.a(math.o)
+                0x0000000000109de9                div
+                0x0000000000109e1a                ldiv
+                0x0000000000109e4b                pow
 
-.iplt           0x0000000000109c80        0x0
+.iplt           0x0000000000109e80        0x0
  .iplt          0x0000000000000000        0x0 obj/boot.o
 
-.rel.dyn        0x0000000000109c80        0x0
+.rel.dyn        0x0000000000109e7c        0x0
  .rel.iplt      0x0000000000000000        0x0 obj/boot.o
  .rel.text      0x0000000000000000        0x0 obj/boot.o
 
-.data           0x0000000000109c80      0x4b9
+.data           0x0000000000109e80      0x4b9
  *(.data)
- .data          0x0000000000109c80        0x0 obj/dma.o
- .data          0x0000000000109c80        0x0 obj/errors.o
- .data          0x0000000000109c80        0x0 obj/ext2.o
- .data          0x0000000000109c80       0x44 obj/filesystem.o
- .data          0x0000000000109cc4        0x8 obj/floppy.o
-                0x0000000000109cc4                floppy_cache_state
-                0x0000000000109cc5                floppy_cache_value
- *fill*         0x0000000000109ccc       0x14 
- .data          0x0000000000109ce0      0x174 obj/keyboard.o
-                0x0000000000109ce0                KEYMAP
- .data          0x0000000000109e54        0x0 obj/main.o
- .data          0x0000000000109e54        0x0 obj/mman.o
- .data          0x0000000000109e54        0x4 obj/random.o
- .data          0x0000000000109e58        0x0 obj/stack.o
- .data          0x0000000000109e58        0x0 obj/time.o
- .data          0x0000000000109e58        0x0 obj/util.o
- .data          0x0000000000109e58        0x1 obj/vga.o
- .data          0x0000000000109e59        0x0 lib/libanica.a(anica-sb.o)
- .data          0x0000000000109e59        0x0 lib/libanica.a(anica-table.o)
- .data          0x0000000000109e59        0x0 lib/libanica.a(anicafs.o)
- .data          0x0000000000109e59        0x0 lib/libanica.a(anica-node.o)
- .data          0x0000000000109e59        0x0 lib/libirq.a(exceptions.o)
- .data          0x0000000000109e59        0x0 lib/libirq.a(idt.o)
- .data          0x0000000000109e59        0x0 lib/libirq.a(pic.o)
- *fill*         0x0000000000109e59        0x7 
- .data          0x0000000000109e60       0x4c lib/liblex.a(lex.o)
-                0x0000000000109e60                command_lex_help
-                0x0000000000109e80                helpdoc_lex_help
-                0x0000000000109ea2                argsdoc_lex_help
- .data          0x0000000000109eac       0x20 lib/liblex.a(lex-ls.o)
-                0x0000000000109eac                command_lex_ls
-                0x0000000000109eaf                helpdoc_lex_ls
-                0x0000000000109ec5                argsdoc_lex_ls
- .data          0x0000000000109ecc       0x22 lib/liblex.a(lex-enter.o)
-                0x0000000000109ecc                command_lex_enter
-                0x0000000000109ed2                helpdoc_lex_enter
-                0x0000000000109ee7                argsdoc_lex_enter
- .data          0x0000000000109eee       0x7a lib/liblex.a(lex-list.o)
-                0x0000000000109eee                command_lex_memstat
-                0x0000000000109ef6                helpdoc_lex_memstat
-                0x0000000000109f0f                argsdoc_lex_memstat
-                0x0000000000109f15                command_lex_varstat
-                0x0000000000109f1d                helpdoc_lex_varstat
-                0x0000000000109f39                argsdoc_lex_varstat
-                0x0000000000109f40                command_lex_devstat
-                0x0000000000109f48                helpdoc_lex_devstat
-                0x0000000000109f61                argsdoc_lex_devstat
- .data          0x0000000000109f68       0x23 lib/liblex.a(lex-make.o)
-                0x0000000000109f68                command_lex_make
-                0x0000000000109f6d                helpdoc_lex_make
-                0x0000000000109f7e                argsdoc_lex_make
- .data          0x0000000000109f8b       0xed lib/liblex.a(lex-manfs.o)
-                0x0000000000109f8b                command_lex_format
-                0x0000000000109f92                helpdoc_lex_format
-                0x0000000000109fa6                argsdoc_lex_format
-                0x0000000000109fb5                command_lex_devlist
-                0x0000000000109fbd                helpdoc_lex_devlist
-                0x0000000000109fd2                argsdoc_lex_devlist
-                0x0000000000109fd8                command_lex_mount
-                0x0000000000109fde                helpdoc_lex_mount
-                0x0000000000109fed                argsdoc_lex_mount
-                0x0000000000109ffb                command_lex_umount
-                0x000000000010a002                helpdoc_lex_umount
-                0x000000000010a013                argsdoc_lex_umount
-                0x000000000010a01b                command_lex_fsdump
-                0x000000000010a022                helpdoc_lex_fsdump
-                0x000000000010a03e                argsdoc_lex_fsdump
-                0x000000000010a050                command_lex_fscache
-                0x000000000010a058                helpdoc_lex_fscache
-                0x000000000010a06c                argsdoc_lex_fscache
- *fill*         0x000000000010a078        0x8 
- .data          0x000000000010a080       0xb3 lib/liblex.a(lex-term.o)
-                0x000000000010a080                lex_file_color
-                0x000000000010a081                lex_dir_color
-                0x000000000010a082                lex_sys_color
-                0x000000000010a083                lex_text_color
-                0x000000000010a084                command_lex_term_tabs
-                0x000000000010a08e                helpdoc_lex_term_tabs
-                0x000000000010a0a0                argsdoc_lex_term_tabs
-                0x000000000010a0a8                command_lex_term_history
-                0x000000000010a0c0                helpdoc_lex_term_history
-                0x000000000010a0e0                argsdoc_lex_term_history
-                0x000000000010a0e6                command_lex_clear
-                0x000000000010a0ec                helpdoc_lex_clear
-                0x000000000010a0fd                argsdoc_lex_clear
-                0x000000000010a104                command_lex_term_color
-                0x000000000010a10f                helpdoc_lex_term_color
-                0x000000000010a127                argsdoc_lex_term_color
- *fill*         0x000000000010a133        0x1 
- .data          0x000000000010a134        0x4 lib/libstd.a(stdio.o)
- .data          0x000000000010a138        0x1 lib/libstd.a(string.o)
-                0x000000000010a138                itoa_long
- .data          0x000000000010a139        0x0 lib/libstd.a(math.o)
+ .data          0x0000000000109e80        0x0 obj/dma.o
+ .data          0x0000000000109e80        0x0 obj/errors.o
+ .data          0x0000000000109e80        0x0 obj/ext2.o
+ .data          0x0000000000109e80       0x44 obj/filesystem.o
+ .data          0x0000000000109ec4        0x8 obj/floppy.o
+                0x0000000000109ec4                floppy_cache_state
+                0x0000000000109ec5                floppy_cache_value
+ *fill*         0x0000000000109ecc       0x14 
+ .data          0x0000000000109ee0      0x174 obj/keyboard.o
+                0x0000000000109ee0                KEYMAP
+ .data          0x000000000010a054        0x0 obj/main.o
+ .data          0x000000000010a054        0x0 obj/mman.o
+ .data          0x000000000010a054        0x4 obj/random.o
+ .data          0x000000000010a058        0x0 obj/stack.o
+ .data          0x000000000010a058        0x0 obj/time.o
+ .data          0x000000000010a058        0x0 obj/util.o
+ .data          0x000000000010a058        0x1 obj/vga.o
+ .data          0x000000000010a059        0x0 lib/libanica.a(anica-sb.o)
+ .data          0x000000000010a059        0x0 lib/libanica.a(anica-table.o)
+ .data          0x000000000010a059        0x0 lib/libanica.a(anicafs.o)
+ .data          0x000000000010a059        0x0 lib/libanica.a(anica-node.o)
+ .data          0x000000000010a059        0x0 lib/libirq.a(exceptions.o)
+ .data          0x000000000010a059        0x0 lib/libirq.a(idt.o)
+ .data          0x000000000010a059        0x0 lib/libirq.a(pic.o)
+ *fill*         0x000000000010a059        0x7 
+ .data          0x000000000010a060       0x4c lib/liblex.a(lex.o)
+                0x000000000010a060                command_lex_help
+                0x000000000010a080                helpdoc_lex_help
+                0x000000000010a0a2                argsdoc_lex_help
+ .data          0x000000000010a0ac       0x20 lib/liblex.a(lex-ls.o)
+                0x000000000010a0ac                command_lex_ls
+                0x000000000010a0af                helpdoc_lex_ls
+                0x000000000010a0c5                argsdoc_lex_ls
+ .data          0x000000000010a0cc       0x22 lib/liblex.a(lex-enter.o)
+                0x000000000010a0cc                command_lex_enter
+                0x000000000010a0d2                helpdoc_lex_enter
+                0x000000000010a0e7                argsdoc_lex_enter
+ .data          0x000000000010a0ee       0x7a lib/liblex.a(lex-list.o)
+                0x000000000010a0ee                command_lex_memstat
+                0x000000000010a0f6                helpdoc_lex_memstat
+                0x000000000010a10f                argsdoc_lex_memstat
+                0x000000000010a115                command_lex_varstat
+                0x000000000010a11d                helpdoc_lex_varstat
+                0x000000000010a139                argsdoc_lex_varstat
+                0x000000000010a140                command_lex_devstat
+                0x000000000010a148                helpdoc_lex_devstat
+                0x000000000010a161                argsdoc_lex_devstat
+ .data          0x000000000010a168       0x23 lib/liblex.a(lex-make.o)
+                0x000000000010a168                command_lex_make
+                0x000000000010a16d                helpdoc_lex_make
+                0x000000000010a17e                argsdoc_lex_make
+ .data          0x000000000010a18b       0xed lib/liblex.a(lex-manfs.o)
+                0x000000000010a18b                command_lex_format
+                0x000000000010a192                helpdoc_lex_format
+                0x000000000010a1a6                argsdoc_lex_format
+                0x000000000010a1b5                command_lex_devlist
+                0x000000000010a1bd                helpdoc_lex_devlist
+                0x000000000010a1d2                argsdoc_lex_devlist
+                0x000000000010a1d8                command_lex_mount
+                0x000000000010a1de                helpdoc_lex_mount
+                0x000000000010a1ed                argsdoc_lex_mount
+                0x000000000010a1fb                command_lex_umount
+                0x000000000010a202                helpdoc_lex_umount
+                0x000000000010a213                argsdoc_lex_umount
+                0x000000000010a21b                command_lex_fsdump
+                0x000000000010a222                helpdoc_lex_fsdump
+                0x000000000010a23e                argsdoc_lex_fsdump
+                0x000000000010a250                command_lex_fscache
+                0x000000000010a258                helpdoc_lex_fscache
+                0x000000000010a26c                argsdoc_lex_fscache
+ *fill*         0x000000000010a278        0x8 
+ .data          0x000000000010a280       0xb3 lib/liblex.a(lex-term.o)
+                0x000000000010a280                lex_file_color
+                0x000000000010a281                lex_dir_color
+                0x000000000010a282                lex_sys_color
+                0x000000000010a283                lex_text_color
+                0x000000000010a284                command_lex_term_tabs
+                0x000000000010a28e                helpdoc_lex_term_tabs
+                0x000000000010a2a0                argsdoc_lex_term_tabs
+                0x000000000010a2a8                command_lex_term_history
+                0x000000000010a2c0                helpdoc_lex_term_history
+                0x000000000010a2e0                argsdoc_lex_term_history
+                0x000000000010a2e6                command_lex_clear
+                0x000000000010a2ec                helpdoc_lex_clear
+                0x000000000010a2fd                argsdoc_lex_clear
+                0x000000000010a304                command_lex_term_color
+                0x000000000010a30f                helpdoc_lex_term_color
+                0x000000000010a327                argsdoc_lex_term_color
+ *fill*         0x000000000010a333        0x1 
+ .data          0x000000000010a334        0x4 lib/libstd.a(stdio.o)
+ .data          0x000000000010a338        0x1 lib/libstd.a(string.o)
+                0x000000000010a338                itoa_long
+ .data          0x000000000010a339        0x0 lib/libstd.a(printf.o)
+ .data          0x000000000010a339        0x0 lib/libstd.a(math.o)
 
-.igot.plt       0x000000000010a13c        0x0
+.igot.plt       0x000000000010a33c        0x0
  .igot.plt      0x0000000000000000        0x0 obj/boot.o
 
-.bss            0x000000000010a140     0x1940
+.bss            0x000000000010a340     0x1940
  *(.bss)
- .bss           0x000000000010a140     0x1000 obj/boot.o
- .bss           0x000000000010b140        0x0 obj/dma.o
- .bss           0x000000000010b140        0x0 obj/errors.o
- .bss           0x000000000010b140        0x0 obj/ext2.o
- .bss           0x000000000010b140        0x0 obj/filesystem.o
- .bss           0x000000000010b140       0x18 obj/floppy.o
- .bss           0x000000000010b158        0x2 obj/keyboard.o
- .bss           0x000000000010b15a        0x0 obj/main.o
- .bss           0x000000000010b15a        0x0 obj/mman.o
- .bss           0x000000000010b15a        0x0 obj/random.o
- .bss           0x000000000010b15a        0x0 obj/stack.o
- .bss           0x000000000010b15a        0x0 obj/time.o
- .bss           0x000000000010b15a        0x0 obj/util.o
- .bss           0x000000000010b15a        0x0 obj/vga.o
- .bss           0x000000000010b15a        0x0 lib/libanica.a(anica-sb.o)
- .bss           0x000000000010b15a        0x0 lib/libanica.a(anica-table.o)
- .bss           0x000000000010b15a        0x0 lib/libanica.a(anicafs.o)
- .bss           0x000000000010b15a        0x0 lib/libanica.a(anica-node.o)
- .bss           0x000000000010b15a        0x0 lib/libirq.a(exceptions.o)
- *fill*         0x000000000010b15a        0x6 
- .bss           0x000000000010b160      0x800 lib/libirq.a(idt.o)
- .bss           0x000000000010b960        0x0 lib/libirq.a(pic.o)
- .bss           0x000000000010b960       0x10 lib/liblex.a(lex.o)
-                0x000000000010b960                mounted_volumes
- .bss           0x000000000010b970        0x0 lib/liblex.a(lex-ls.o)
- .bss           0x000000000010b970        0x0 lib/liblex.a(lex-enter.o)
- .bss           0x000000000010b970        0x0 lib/liblex.a(lex-list.o)
- .bss           0x000000000010b970        0x0 lib/liblex.a(lex-make.o)
- .bss           0x000000000010b970        0x0 lib/liblex.a(lex-manfs.o)
- .bss           0x000000000010b970        0x0 lib/liblex.a(lex-term.o)
- *fill*         0x000000000010b970       0x10 
- .bss           0x000000000010b980       0x74 lib/libstd.a(stdio.o)
- .bss           0x000000000010b9f4        0x4 lib/libstd.a(string.o)
-                0x000000000010b9f4                itoa_case
- .bss           0x000000000010b9f8        0x0 lib/libstd.a(math.o)
- COMMON         0x000000000010b9f8        0x5 obj/keyboard.o
-                0x000000000010b9f8                listen
-                0x000000000010b9fa                key
-                0x000000000010b9fc                keypress
- *fill*         0x000000000010b9fd        0x3 
- COMMON         0x000000000010ba00       0x80 lib/liblex.a(lex.o)
-                0x000000000010ba00                current_directory
-                0x000000000010ba04                history
-                0x000000000010ba20                mountpoints
+ .bss           0x000000000010a340     0x1000 obj/boot.o
+ .bss           0x000000000010b340        0x0 obj/dma.o
+ .bss           0x000000000010b340        0x0 obj/errors.o
+ .bss           0x000000000010b340        0x0 obj/ext2.o
+ .bss           0x000000000010b340        0x0 obj/filesystem.o
+ .bss           0x000000000010b340       0x18 obj/floppy.o
+ .bss           0x000000000010b358        0x2 obj/keyboard.o
+ .bss           0x000000000010b35a        0x0 obj/main.o
+ .bss           0x000000000010b35a        0x0 obj/mman.o
+ .bss           0x000000000010b35a        0x0 obj/random.o
+ .bss           0x000000000010b35a        0x0 obj/stack.o
+ .bss           0x000000000010b35a        0x0 obj/time.o
+ .bss           0x000000000010b35a        0x0 obj/util.o
+ .bss           0x000000000010b35a        0x0 obj/vga.o
+ .bss           0x000000000010b35a        0x0 lib/libanica.a(anica-sb.o)
+ .bss           0x000000000010b35a        0x0 lib/libanica.a(anica-table.o)
+ .bss           0x000000000010b35a        0x0 lib/libanica.a(anicafs.o)
+ .bss           0x000000000010b35a        0x0 lib/libanica.a(anica-node.o)
+ .bss           0x000000000010b35a        0x0 lib/libirq.a(exceptions.o)
+ *fill*         0x000000000010b35a        0x6 
+ .bss           0x000000000010b360      0x800 lib/libirq.a(idt.o)
+ .bss           0x000000000010bb60        0x0 lib/libirq.a(pic.o)
+ .bss           0x000000000010bb60       0x10 lib/liblex.a(lex.o)
+                0x000000000010bb60                mounted_volumes
+ .bss           0x000000000010bb70        0x0 lib/liblex.a(lex-ls.o)
+ .bss           0x000000000010bb70        0x0 lib/liblex.a(lex-enter.o)
+ .bss           0x000000000010bb70        0x0 lib/liblex.a(lex-list.o)
+ .bss           0x000000000010bb70        0x0 lib/liblex.a(lex-make.o)
+ .bss           0x000000000010bb70        0x0 lib/liblex.a(lex-manfs.o)
+ .bss           0x000000000010bb70        0x0 lib/liblex.a(lex-term.o)
+ *fill*         0x000000000010bb70       0x10 
+ .bss           0x000000000010bb80       0x74 lib/libstd.a(stdio.o)
+ .bss           0x000000000010bbf4        0x4 lib/libstd.a(string.o)
+                0x000000000010bbf4                itoa_case
+ .bss           0x000000000010bbf8        0x0 lib/libstd.a(printf.o)
+ .bss           0x000000000010bbf8        0x0 lib/libstd.a(math.o)
+ COMMON         0x000000000010bbf8        0x5 obj/keyboard.o
+                0x000000000010bbf8                listen
+                0x000000000010bbfa                key
+                0x000000000010bbfc                keypress
+ *fill*         0x000000000010bbfd        0x3 
+ COMMON         0x000000000010bc00       0x80 lib/liblex.a(lex.o)
+                0x000000000010bc00                current_directory
+                0x000000000010bc04                history
+                0x000000000010bc20                mountpoints
 LOAD lib/libanica.a
 LOAD lib/libirq.a
 LOAD lib/liblex.a
@@ -580,6 +588,7 @@ OUTPUT(bin/kernel-alpha elf32-i386)
  .comment       0x0000000000000000       0x2c lib/liblex.a(lex-term.o)
  .comment       0x0000000000000000       0x2c lib/libstd.a(stdio.o)
  .comment       0x0000000000000000       0x2c lib/libstd.a(string.o)
+ .comment       0x0000000000000000       0x2c lib/libstd.a(printf.o)
  .comment       0x0000000000000000       0x2c lib/libstd.a(math.o)
 
 .note.GNU-stack
@@ -642,5 +651,7 @@ OUTPUT(bin/kernel-alpha elf32-i386)
                 0x0000000000000000        0x0 lib/libstd.a(stdio.o)
  .note.GNU-stack
                 0x0000000000000000        0x0 lib/libstd.a(string.o)
+ .note.GNU-stack
+                0x0000000000000000        0x0 lib/libstd.a(printf.o)
  .note.GNU-stack
                 0x0000000000000000        0x0 lib/libstd.a(math.o)

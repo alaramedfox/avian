@@ -15,9 +15,9 @@
 //       Private variables and function prototypes                           //
 // ========================================================================= //
 
-volatile byte lex_file_color = GREEN;
-volatile byte lex_dir_color = CYAN;
-volatile byte lex_sys_color = BROWN;
+volatile byte lex_file_color = 0x02;
+volatile byte lex_dir_color = 0x06;
+volatile byte lex_sys_color = 0x03;
 volatile byte lex_text_color = 0x07;
 
 // ========================================================================= //

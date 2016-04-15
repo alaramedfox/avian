@@ -60,10 +60,7 @@ void lex_ls(int argc, char* argv[])
    /* Print the directory contents */
    int tabsize = vga_tabsize(0);
    vga_tabsize(strlongest(list, entries));
-   byte lfc = lex_file_color;
-   byte ldc = lex_dir_color;
-   byte lsc = lex_sys_color;
-   byte ltc = lex_text_color;
+   
    foreach(i, entries) {
       if(list[i] != NULL) {
          size_t len = strlen(list[i]);
@@ -73,15 +70,15 @@ void lex_ls(int argc, char* argv[])
          {
             case ANICA_FILE_ICON:
                item[len-1] = 0;
-               printf("%#%s%#%c\t", lfc, item, ltc, ANICA_FILE_ICON);
+               printf("%A%s%A%c\t", F_GRN, item, F_GRY, ANICA_FILE_ICON);
                break;
             case ANICA_DIR_ICON:
                item[len-1] = 0;
-               printf("%#%s%#%c\t", ldc, item, ltc, ANICA_DIR_ICON);
+               printf("%A%s%A%c\t", F_CYN, item, F_GRY, ANICA_DIR_ICON);
                break;
             case ANICA_SYS_ICON:
                item[len-1] = 0;
-               printf("%#%s%#%c\t", lsc, item, ltc, ANICA_SYS_ICON);
+               printf("%A%s%A%c\t", F_BRN, item, F_GRY, ANICA_SYS_ICON);
                break;
                
             default: printf("%s\t", item); break;

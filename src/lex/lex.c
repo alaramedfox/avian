@@ -112,7 +112,7 @@ int shell(void)
       char cdir[128];
       strcpy(cdir, current_directory);
       split(':',0,cdir, prompt);
-      printf("%#(lex)%s%# ",0x0F, prompt[1]==NULL?"root:":prompt[1], 0x07);
+      printf("%A(lex)%s%A ",BOLD, prompt[1]==NULL?"root:":prompt[1], TERM);
       
       
       /* Gather and chomp the input */

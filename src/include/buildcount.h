@@ -1,3 +1,3 @@
-#define BUILD "4554"
-#define TIMESTAMP "Alpha-0.8.24554 - Wed Apr 13 14:27:25 CDT 2016"
-#define VERSION "Alpha-0.8.2 (4554)"
+#define BUILD "4566"
+#define TIMESTAMP "Alpha-0.8.24566 - Fri Apr 15 11:47:09 CDT 2016"
+#define VERSION "Alpha-0.8.2 (4566)"
