@@ -6,8 +6,7 @@
 //    Purpose:       Filesystem IO abstraction                    
 // ======================================================================== */
 
-#include <filesystem.h>
-#include <anicafs.h>
+#include <device.h>
 #include <stdlib.h>
 #include <stdio.h>
 

@@ -1,9 +1,9 @@
 #ifndef FLOPPY_H_INCLUDED
 #define FLOPPY_H_INCLUDED
 // ======================================================================== */
-//      Avian Kernel   Bryan Webb (C) 2016
-//      File:            avian/drivers/floppy.h
-//      Purpose:         Header for the floppy controller
+//      Avian Kernel    Bryan Webb (C) 2016
+//      File:           avian/include/floppy.h
+//      Purpose:        Header for the floppy controller
 // ======================================================================== */
 
 #include <stdlib.h>
@@ -37,11 +37,9 @@ enum __FLOPPY_CACHE_BEHAVIOR
 void floppy_handler(void);
  
 /* Public API */
-void floppy_sync_cache(void);
-void floppy_clear_cache(void);
 void floppy_init(void);
-int floppy_read_block(word, byte*, size_t);
-int floppy_write_block(word, byte*, size_t);
+int floppy_read_block(dword, byte*);
+int floppy_write_block(dword, byte*);
 
 
 

@@ -63,7 +63,7 @@ int anica_write_itable(filesystem_t* fs)
    return ANICA_OK;
 }
 
-int anica_parent_index(filesystem_t* fs, char* path, char* filename)
+int anica_parent_index(filesystem_t* fs, const char path[], char* filename)
 {
    char** tree = (char**) malloc(64);
    size_t depth = split('/',0,path,tree);

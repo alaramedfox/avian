@@ -6,6 +6,7 @@
 // ======================================================================== */
 
 #include <filesystem.h>
+#include <anicafs.h>
 
 // ========================================================================= //
 //       Private variables and function prototypes                           //
@@ -48,7 +49,7 @@ int fs_close(filesystem_t* fs)
 
 int fs_list_dir(filesystem_t* fs, const char path[], char* list[])
 {
-   switch(fs->devid)
+   switch(fs->fsid)
    {
       case FS_ANICA: return anica_list_contents(fs, path, list); break;
    }
@@ -62,10 +63,9 @@ int fs_list_dir(filesystem_t* fs, const char path[], char* list[])
 static int fs_open_anica(device_t* device, filesystem_t* fs)
 {
    volume_t* vol = new(volume_t);
-   anica_read_device(device, vol);
-   fs->device = device;
-   fs->fsid = FS_ANICA;
    fs->master = (void*) vol;
+   fs->device = device;
+   anica_read_device(fs);
    
    return FS_OK;
 }

@@ -139,19 +139,19 @@ int      anica_read_device(filesystem_t* fs);
 bool     anica_write_dir(filesystem_t* fs, char* name, index_t parent);
 addr_t   anica_read_data(filesystem_t* fs, addr_t addr, byte* data, size_t bytes);
 addr_t   anica_write_data(filesystem_t* fs, addr_t addr, byte* data, size_t bytes);
-int      anica_read_path(filesystem_t* fs, char* path, anode_t* node);
+int      anica_read_path(filesystem_t* fs, const char path[], anode_t* node);
 int      anica_write_file(filesystem_t* fs, byte* data, anode_t* node);
 int      anica_read_file(filesystem_t* fs, byte* data, anode_t* node);
-int      anica_open_file(filesystem_t* fs, char* path, byte mode, anode_t* file);
-int      anica_list_contents(filesystem_t* fs, char* path, char** list);
+int      anica_open_file(filesystem_t* fs, const char path[], byte mode, anode_t* file);
+int      anica_list_contents(filesystem_t* fs, const char path[], char** list);
 bool     anica_format_device(filesystem_t* fs, size_t sec, size_t bps, size_t res);
 bool     anica_is_addr_free(filesystem_t* fs, addr_t addr);
 bool     anica_block_fits(filesystem_t* fs, addr_t addr, size_t size);
 addr_t   anica_find_block(filesystem_t* fs, size_t size);
 
 /* Functions defined in anica/anica-node.c */
-anode_t  anica_make_file(filesystem_t* fs, char* path, size_t size);
-bool     anica_mkdir(filesystem_t* fs, char* path);
+anode_t  anica_make_file(filesystem_t* fs, const char path[], size_t size);
+bool     anica_mkdir(filesystem_t* fs, const char path[]);
 addr_t   anica_read_node(filesystem_t* fs, aentry_t* entry, anode_t* node);
 addr_t   anica_write_node(filesystem_t* fs, aentry_t* entry, anode_t* node);
 
@@ -164,7 +164,7 @@ word     anica_find_superblock(void);
 /* Functions defined in anica/anica-table.c */
 int      anica_read_itable(filesystem_t* fs);
 int      anica_write_itable(filesystem_t* fs);
-int      anica_parent_index(filesystem_t* fs, char* path, char* filename);
+int      anica_parent_index(filesystem_t* fs, const char path[], char* filename);
 aentry_t anica_add_entry(filesystem_t* fs, byte type, index_t parent, size_t size);
 
 

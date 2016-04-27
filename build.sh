@@ -99,7 +99,7 @@ function main {
 }
 
 function make_all {
-   rm obj/*.o
+   rm obj/*.o || printf "$INFO No object files to delete\n"
 	increment_build "1"
 	TARGET+=$(ls -R | grep "\.c\|\.asm")
 	assemble

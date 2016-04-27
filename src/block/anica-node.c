@@ -13,7 +13,7 @@
 //       Public API Implementation                                           //
 // ========================================================================= //
 
-anode_t anica_make_file(filesystem_t* fs, char* path, size_t size)
+anode_t anica_make_file(filesystem_t* fs, const char path[], size_t size)
 {
    volume_t* vol = (volume_t*) fs->master;
    
@@ -39,7 +39,7 @@ anode_t anica_make_file(filesystem_t* fs, char* path, size_t size)
    return node;
 }
 
-bool anica_mkdir(filesystem_t* fs, char* path)
+bool anica_mkdir(filesystem_t* fs, const char path[])
 {
    volume_t* vol = (volume_t*) fs->master;
    

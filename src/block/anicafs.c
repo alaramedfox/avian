@@ -84,7 +84,7 @@ bool anica_format_device(filesystem_t* fs, size_t sec, size_t bps, size_t res)
  *    allocated with a size large enough to hold all the contents.
  *    (Note: list[N] will be allocated in this function) 
  */
-int anica_list_contents(filesystem_t* fs, char* path, char** list)
+int anica_list_contents(filesystem_t* fs, const char path[], char** list)
 {
    if(fs == NULL) return -1;
    volume_t* vol = (volume_t*) fs->master;
@@ -135,7 +135,7 @@ int anica_list_contents(filesystem_t* fs, char* path, char** list)
  *    permissions, or something else. 
  */
 
-int anica_open_file(filesystem_t* fs, char* path, byte mode, anode_t* file)
+int anica_open_file(filesystem_t* fs, const char path[], byte mode, anode_t* file)
 {  
    int status;
    anode_t node;
@@ -207,7 +207,7 @@ int anica_write_file(filesystem_t* fs, byte* data, anode_t* node)
  *    is copied to the provided empty node structure.
  *    If not, a negative value is returned indicating the specific error.
  */
-int anica_read_path(filesystem_t* fs, char* path, anode_t* node)
+int anica_read_path(filesystem_t* fs, const char path[], anode_t* node)
 {
    volume_t* vol = (volume_t*) fs->master;
    

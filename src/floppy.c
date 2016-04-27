@@ -78,10 +78,6 @@ enum __MSR
    ACTD=3, ACTC=2, ACTB=1, ACTA=0,
 };
 
-/* Flags that specify how the floppy driver uses the caching system */
-volatile byte floppy_cache_state = FDC_CACHE_EXPAND;
-volatile byte floppy_cache_value = 8;
-
 // ========================================================================= //
 //           Private Variables and Subroutines                               //
 // ========================================================================= //
@@ -109,92 +105,20 @@ static void  floppy_stop_motor(int);
 static int   floppy_send_byte(byte);
 static int   floppy_read_byte(byte*);
 static chs_t lba_convert(int);
-static bool  floppy_is_cached(addr_t);
-static int   floppy_cache_index(addr_t);
-static void  floppy_add_cache(addr_t, byte*);
 
 // ========================================================================= //
 //           Public API Definitions                                          //
 // ========================================================================= //
 
-/**
- *    The floppy driver caches sectors on disk so that multiple reads do not
- *    take quite as long. Each cache entry contains the sector
- *    number of the cached data, a flag if the sector has changed,
- *    and a pointer to the sector-sized data block.
- */
- 
-typedef struct __FDC_CACHE
+
+int floppy_write_block(dword lba, byte *block)
 {
-   addr_t sector;
-   bool changed;
-   byte* data;
-
-} packed fdc_cache_t;
-
-static fdc_cache_t* cache;
-static size_t cache_size=0;
-static size_t cache_max=8;
-
-void floppy_clear_cache(void)
-{
-   foreach(i, cache_size) {
-      free(cache[i].data);
-   }
-   free(cache);
-   cache_size = 0;
-   cache_max = floppy_cache_value;
-   cache = (fdc_cache_t*) malloc(cache_max * sizeof(fdc_cache_t));
+   return floppy_data_transfer(lba,block,512,false);
 }
 
-void floppy_sync_cache(void)
+int floppy_read_block(dword lba, byte *block)
 {
-   if(floppy_cache_state) {
-      foreach(i, cache_size) {
-         if(cache[i].changed) {
-            floppy_data_transfer(cache[i].sector, cache[i].data, 512, false);
-            cache[i].changed = false;
-         }
-      }
-   }
-}
-
-int floppy_write_block(word lba, byte *block, size_t bytes)
-{
-   if(floppy_cache_state) {
-      if(floppy_is_cached(lba)) {
-         size_t index = floppy_cache_index(lba);
-         memcpy(cache[index].data, block, bytes);
-         cache[index].changed = true;
-         return 0;
-      }
-      else {
-         floppy_add_cache(lba, block);
-         return floppy_data_transfer(lba, block, bytes, false);
-      }
-   }
-   else {
-      return floppy_data_transfer(lba,block,bytes,false);
-   }
-}
-
-int floppy_read_block(word lba, byte *block, size_t bytes)
-{
-   if(floppy_cache_state) {
-      if(floppy_is_cached(lba)) {
-         size_t index = floppy_cache_index(lba);
-         memcpy(block, cache[index].data, bytes);
-         return 0;
-      }
-      else {
-         int status = floppy_data_transfer(lba, block, bytes, true);
-         floppy_add_cache(lba, block);
-         return status;
-      }
-   }
-   else {
-      return floppy_data_transfer(lba,block,bytes,true);
-   }
+   return floppy_data_transfer(lba,block,512,true);
 }
 
 /* Called when IRQ6 is generated */
@@ -206,7 +130,6 @@ void floppy_handler(void)
 
 void floppy_init(void)
 {  
-   cache = (fdc_cache_t*) malloc(cache_max * sizeof(fdc_cache_t));
    /* Enable FDC irq signal */
    idt_add_handler((addr_t)floppy_irq, IRQ_FLOPPY);
    pic_enable_irq( IRQ_FLOPPY );
@@ -256,43 +179,6 @@ static void floppy_reset(void)
    /* Handle reset interrupt */
    floppy_command_wait(500);
    floppy_specify(8,5,0);
-}
-
-static int floppy_cache_index(addr_t sector)
-{
-   foreach(i, cache_size) {
-      if(cache[i].sector == sector) return i;
-   }
-   return -1;
-}
-
-static bool floppy_is_cached(addr_t sector)
-{
-   foreach(i, cache_size) {
-      if(cache[i].sector == sector) return true;
-   }
-   return false;
-}
-
-static void floppy_add_cache(addr_t sector, byte* data)
-{
-   //printf("Adding sector %i to cache\n",sector);
-   if(cache_size == cache_max-1) {
-      if(floppy_cache_state == FDC_CACHE_EXPAND) {
-         cache_max += floppy_cache_value;
-         cache = (fdc_cache_t*) realloc(cache, cache_max*sizeof(fdc_cache_t));
-      }
-      else if(floppy_cache_state == FDC_CACHE_CAP) {
-         floppy_sync_cache();
-         floppy_clear_cache();
-      }
-   }
-   
-   cache[cache_size].data = (byte*) malloc(512);
-   memcpy(cache[cache_size].data, data, 512);
-   cache[cache_size].sector = sector;
-   cache[cache_size].changed = false;
-   cache_size++;
 }
 
 static void floppy_configure(void)
