@@ -1,55 +1,45 @@
-#ifndef FAT_H_INCLUDED
-#define FAT_H_INCLUDED
+#ifndef FILESYSTEM_H_INCLUDED
+#define FILESYSTEM_H_INCLUDED
 // ======================================================================== */
-//      Avian Kernel   Bryan Webb (C) 2016
-//      File:            avian/include/filesystem.h
-//      Purpose:         Open, close, edit files on a given volume
+//    Avian Kernel   Bryan Webb (C) 2016                              
+//    File:          avian/include/filesystem.h                                    
+//    Purpose:       Filesystem IO abstraction                    
 // ======================================================================== */
 
-#include <stdlib.h>
+#include <filesystem.h>
 #include <anicafs.h>
+#include <stdlib.h>
+#include <stdio.h>
 
-typedef enum __DEVICES
+// ========================================================================= //
+//       Public API Prototypes                                               //
+// ========================================================================= //
+
+enum __FS_STATUS
 {
-   fda=0, fdb, hda, hdb, hdc, hdd,
-   sda, sdb, sdc, sdd,
+   FS_OK = 0, FS_INVALID = 1, 
    
-   NO_DEV,
-   
-} device_t;
+   FS_MISC,
+};
 
-typedef enum __FILESYSTEM
+enum __FS_ID
 {
-   AnicaFS, Ext2, FAT12, FAT16,
+   FS_ANICA, FS_EXT2, FS_FAT,
    
-   NO_FS,
+   FS_ERROR
+};
 
-} format_t;
-
-typedef struct __FILE
+typedef struct __FILESYSTEM
 {
-   anode_t* node;     // Linda file node
-   volume_t* vol;     // Linda filesystem
-   byte* data;       // All the data contents
+   byte fsid;           // ID value of filesystem
+   device_t* device;    // Device used for IO
+   void* master;        // Pointer to the filesystem's superstructure
 
-} packed file_t;
+} packed filesystem_t;
 
-char*      read_fs(device_t);
+int fs_open(byte fsid, device_t* device, filesystem_t* fs);
+int fs_close(filesystem_t* fs);
 
-device_t   str_to_dev(char*);
-char*      dev_to_str(device_t);
-
-format_t   str_to_fs(char*);
-char*      fs_to_str(format_t);
-void       format_device(device_t, format_t);
-volume_t*  mount(device_t);
-void       unmount(volume_t*);
-file_t*    open(volume_t*, char*, byte);
-size_t     read(file_t*);
-size_t     write(file_t*, void*);
-void       close(file_t*);
-char*      fserr(int);
-
-
+int fs_list_dir(filesystem_t* fs, const char path[], char* list[]);
 
 #endif

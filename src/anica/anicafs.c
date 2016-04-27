@@ -8,7 +8,6 @@
 #include <anicafs.h>
 
 #include <string.h>
-#include <floppy.h>
 #include <errors.h>
 #include <stdio.h>
 
@@ -16,10 +15,30 @@
 //           Public API functions                                           //
 // ======================================================================== //
 
-bool anica_format_device(size_t sec, size_t bps, size_t res)
+/**
+ *    Avian_Documentation:
+ *    Reads an AnicaFS filesystem off the provided device into the
+ *    provided empty volume structure. It reads the superblock and
+ *    index table and everything else needed to use all the AnicaFS
+ *    functions. If the volume is read successfully, the function
+ *    returns 0. If not, a nonzero value indicating the error is
+ *    returned.
+ */
+int anica_read_device(device_t* device, volume_t* vol)
+{
+   asuper_t superblock;
+   anica_read_superblock(device, &superblock);
+   
+   vol->sb = superblock;
+   anica_read_itable(device, vol);
+   
+   return 0;
+}
+
+bool anica_format_device(filesystem_t* fs, size_t sec, size_t bps, size_t res)
 {  
    /* Format the superblock */
-   volume_t* vol = new(volume_t);
+   volume_t* vol = (volume_t*) fs->master;
    anica_format_sb(&vol->sb, sec, bps, res);
    vol->itable = (aentry_t*) malloc(vol->sb.table_size * sizeof(aentry_t));
    
@@ -52,8 +71,7 @@ bool anica_format_device(size_t sec, size_t bps, size_t res)
    
    
    anica_write_superblock(0, &vol->sb);
-   anica_write_itable(vol);
-   floppy_sync_cache();
+   anica_write_itable(device, vol);
    free(vol->itable);
    free(vol);
    return true;
@@ -69,12 +87,13 @@ bool anica_format_device(size_t sec, size_t bps, size_t res)
  *    allocated with a size large enough to hold all the contents.
  *    (Note: list[N] will be allocated in this function) 
  */
-int anica_list_contents(volume_t* vol, char* path, char** list)
+int anica_list_contents(filesystem_t* fs, char* path, char** list)
 {
-   if(vol == NULL) return -1;
+   if(fs == NULL) return -1;
+   volume_t* vol = (volume_t*) fs->master;
    
    anode_t node;
-   int index = anica_read_path(vol, path, &node);
+   int index = anica_read_path(fs, path, &node);
    if(index < 0) return index;
    
    size_t entries = 0;
@@ -84,7 +103,7 @@ int anica_list_contents(volume_t* vol, char* path, char** list)
    strcpy(list[entries++], "^/");
    foreach(i, vol->sb.entries) {
       if(vol->itable[i].type != ANICA_DATA && vol->itable[i].parent == index) {
-         anica_read_node(vol, &vol->itable[i], &node);
+         anica_read_node(fs, &vol->itable[i], &node);
          size_t len = strlen(node.name);
          /* TODO: Fix bug where empty contents are 'discovered' */
          if(len) {
@@ -119,18 +138,18 @@ int anica_list_contents(volume_t* vol, char* path, char** list)
  *    permissions, or something else. 
  */
 
-int anica_open_file(volume_t* vol, char* path, byte mode, anode_t* file)
+int anica_open_file(filesystem_t* fs, char* path, byte mode, anode_t* file)
 {  
    int status;
    anode_t node;
-   int index = anica_read_path(vol, path, &node);
+   int index = anica_read_path(fs, path, &node);
    
    if(index >= 0) {
       *(file) = node;
       status = ANICA_OK;
    }
    else if(mode == ANICA_WRITE) {
-      node = anica_make_file(vol, path, ANICA_MIN_SIZE);
+      node = anica_make_file(fs, path, ANICA_MIN_SIZE);
       *(file) = node;
       status = ANICA_OK;
    }
@@ -142,12 +161,14 @@ int anica_open_file(volume_t* vol, char* path, byte mode, anode_t* file)
    return status;
 }
 
-int anica_read_file(volume_t* vol, byte* data, anode_t* node)
+int anica_read_file(filesystem_t* fs, byte* data, anode_t* node)
 {  
+   volume_t* vol = (volume_t*) fs->master;
+   
    size_t bytes = vol->itable[node->data].size;
    dword address = vol->itable[node->data].addr;
    byte* buffer = (byte*) malloc(bytes);
-   anica_read_data(vol, address, buffer, bytes);
+   anica_read_data(fs, address, buffer, bytes);
    
    for(int i=0; buffer[i] != EOF; i++) {
       data[i] = buffer[i];
@@ -157,22 +178,24 @@ int anica_read_file(volume_t* vol, byte* data, anode_t* node)
    return 0;
 }
 
-int anica_write_file(volume_t* vol, byte* data, anode_t* node)
+int anica_write_file(filesystem_t* fs, byte* data, anode_t* node)
 {  
+   volume_t* vol = (volume_t*) fs->master;
+   
    size_t bytes = vol->itable[node->data].size;
    addr_t address = vol->itable[node->data].addr;
    
    size_t datasize = ptrsize(data);
    /* If the file will be larger, re-allocate the file */
    if(datasize > bytes) {
-      address = anica_find_block(vol, datasize);
+      address = anica_find_block(fs, datasize);
       bytes = datasize;
       vol->itable[node->data].size = bytes;
       vol->itable[node->data].addr = address;
-      anica_write_node(vol, &vol->itable[node->data], node);
+      anica_write_node(fs, &vol->itable[node->data], node);
    }
    data[bytes-1] = EOF;
-   anica_write_data(vol, address, data, bytes);
+   anica_write_data(fs, address, data, bytes);
    return 0;
 }
 
@@ -187,8 +210,10 @@ int anica_write_file(volume_t* vol, byte* data, anode_t* node)
  *    is copied to the provided empty node structure.
  *    If not, a negative value is returned indicating the specific error.
  */
-int anica_read_path(volume_t* vol, char* path, anode_t* node)
+int anica_read_path(filesystem_t* fs, char* path, anode_t* node)
 {
+   volume_t* vol = (volume_t*) fs->master;
+   
    int index = vol->sb.root;
    bool found = false;
    
@@ -204,7 +229,7 @@ int anica_read_path(volume_t* vol, char* path, anode_t* node)
       foreach(i, vol->sb.entries) {
          aentry_t entry = vol->itable[i]; // Make a copy of the entry
          if(entry.type != ANICA_DATA && entry.parent == index) {
-            anica_read_node(vol, &entry, node);
+            anica_read_node(fs, &entry, node);
             if(strcmp(tree[level], node->name) == 0) {
                index = node->self;
                found = true;
@@ -233,34 +258,34 @@ int anica_read_path(volume_t* vol, char* path, anode_t* node)
  *    If the path was not found, a negative value is returned.
  */
 
-addr_t anica_write_data(volume_t* vol, addr_t addr, byte* data, size_t bytes)
+addr_t anica_write_data(filesystem_t* fs, addr_t addr, byte* data, size_t bytes)
 {  
    dword sector = addr / vol->sb.sector_size;
    dword offset = addr % vol->sb.sector_size;
    
    byte* block = (byte*) malloc(512);
-   floppy_read_block(sector, block, 512);
+   read(fs->device, sector, block);
    memcpy(block+offset, data, bytes);
-   floppy_write_block(sector, block, 512);
+   write(fs->device, sector, block);
    free(block);
    
    return addr;
 }
 
-addr_t anica_read_data(volume_t* vol, addr_t addr, byte* data, size_t bytes)
+addr_t anica_read_data(filesystem_t* fs, addr_t addr, byte* data, size_t bytes)
 {  
    dword sector = addr / vol->sb.sector_size;
    dword offset = addr % vol->sb.sector_size;
    
    byte* block = (byte*) malloc(512);
-   floppy_read_block(sector, block, 512);
+   read(fs->device, sector, block);
    memcpy(data, block+offset, bytes);
    free(block);
    
    return addr;
 }
 
-bool anica_write_dir(volume_t* vol, char* name, index_t parent)
+bool anica_write_dir(filesystem_t* fs, char* name, index_t parent)
 {  
    bool status = true;
    
@@ -274,8 +299,8 @@ bool anica_write_dir(volume_t* vol, char* name, index_t parent)
    memset(dir.zero, 'D', 10); 
 
    /* Create table entry for the directory */
-   aentry_t entry = anica_add_entry(vol, ANICA_DIR, parent, sizeof(anode_t));
-   anica_write_node(vol, &entry, &dir);
+   aentry_t entry = anica_add_entry(fs, ANICA_DIR, parent, sizeof(anode_t));
+   anica_write_node(fs, &entry, &dir);
    
    return status;
    
@@ -291,9 +316,9 @@ bool anica_write_dir(volume_t* vol, char* name, index_t parent)
  *
  */
  
-bool anica_is_addr_free(volume_t* vol, addr_t addr)
+bool anica_is_addr_free(filesystem_t* fs, addr_t addr)
 {  
-
+   volume_t* vol = (volume_t*) fs->master;
    addr_t start, end;
    foreach(i, vol->sb.entries)
    {
@@ -308,13 +333,13 @@ bool anica_is_addr_free(volume_t* vol, addr_t addr)
    return true;
 }
  
-bool anica_block_fits(volume_t* vol, addr_t addr, size_t size)
+bool anica_block_fits(filesystem_t* fs, addr_t addr, size_t size)
 {  
-   
+   volume_t* vol = (volume_t*) fs->master;
    size_t bs = 0;
    addr_t max = vol->sb.volume_size * vol->sb.sector_size;
    
-   while(anica_is_addr_free(vol, addr+bs) && (addr < max))
+   while(anica_is_addr_free(fs, addr+bs) && (addr < max))
    {
       ++bs;
       if(bs >= size) return true;
@@ -322,15 +347,16 @@ bool anica_block_fits(volume_t* vol, addr_t addr, size_t size)
    return false;
 }
 
-addr_t anica_find_block(volume_t* vol, size_t size)
+addr_t anica_find_block(filesystem_t* fs, size_t size)
 {  
-
+   volume_t* vol = (volume_t*) fs->master;
+   
    addr_t search_start = (512*vol->sb.table_addr + vol->sb.table_size*sizeof(aentry_t));
    addr_t max = vol->sb.volume_size * vol->sb.sector_size - vol->sb.sector_size;
    
    for(addr_t address = search_start; address < max; address+=size)
    {
-      if(anica_block_fits(vol, address, size)) {
+      if(anica_block_fits(fs, address, size)) {
          return address;
       }
       else continue;

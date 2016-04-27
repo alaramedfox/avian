@@ -23,27 +23,38 @@
  *    returned. 
  */
 
-int anica_read_itable(volume_t* vol)
+int anica_read_itable(device_t* device, volume_t* vol)
 {  
    int sector = vol->sb.table_addr;
    size_t tsize = vol->sb.table_size * sizeof(aentry_t);
    
+   size_t sectors = tsize / vol->sb.sector_size;
+   if(tsize % vol->sb.sector_size > 0) sectors++;
+   
    byte* block = (byte*) malloc(tsize);
-   floppy_read_block(sector, block, tsize);
+   
+   foreach(i, sectors) {
+      read(device, sector+i, block+(i*vol->sb.sector_size));
+   }
    memcpy(vol->itable, block, tsize);
    free(block);
    return ANICA_OK;
 }
 
-int anica_write_itable(volume_t* vol)
+int anica_write_itable(device_t* device, volume_t* vol)
 {  
    int sector = vol->sb.table_addr;
    size_t tsize = vol->sb.table_size * sizeof(aentry_t);
    
+   size_t sectors = tsize / vol->sb.sector_size;
+   if(tsize % vol->sb.sector_size > 0) sectors++;
+   
    byte* block = (byte*) malloc(tsize);
    memcpy(block, vol->itable, tsize);
    
-   floppy_write_block(sector, block, tsize);
+   foreach(i, sectors) {
+      write(device, sector+i, block+(i*vol->sb.sector_size));
+   }
    free(block);
    return ANICA_OK;
 }

@@ -8,7 +8,6 @@
 #include <anicafs.h>
 #include <stdlib.h>
 #include <string.h>
-#include <floppy.h>
 
 // ========================================================================= //
 //       Public API Implementation                                           //

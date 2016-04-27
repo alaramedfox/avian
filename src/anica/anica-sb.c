@@ -8,18 +8,18 @@
 #include <anicafs.h>
 #include <stdlib.h>
 #include <string.h>
-#include <floppy.h>
+#include <device.h>
 
 // ========================================================================= //
 //       Public API Implementation                                           //
 // ========================================================================= //
 
-bool anica_read_superblock(byte device, asuper_t* superblock)
+bool anica_read_superblock(device_t* device, asuper_t* superblock)
 {  
    word sb_sector = anica_find_superblock();
 
    byte* block = (byte*) calloc(512, 1);
-   if(device == 0) floppy_read_block(sb_sector, block, 512);
+   read(device, sb_sector, block);
    memcpy(superblock, block, sizeof(asuper_t));
    superblock->hidden = sb_sector;
    
@@ -27,15 +27,13 @@ bool anica_read_superblock(byte device, asuper_t* superblock)
    return true;
 }
 
-bool anica_write_superblock(byte device, asuper_t* superblock)
+bool anica_write_superblock(device_t* device, asuper_t* superblock)
 {  
    byte* block = (byte*) calloc(512, 1);
    word sb_sector = anica_find_superblock();
-   //if(device == 0) floppy_read_block(superblock->hidden, block, 512);
-   if(device == 0) floppy_read_block(sb_sector, block, 512);
+   read(device, sb_sector, block);
    memcpy(block, superblock, sizeof(asuper_t));
-   //if(device == 0) floppy_write_block(superblock->hidden, block, 512);
-   if(device == 0) floppy_write_block(sb_sector, block, 512);
+   write(device, sb_sector, block);
    free(block);
    return true;
 }
@@ -58,16 +56,7 @@ void anica_format_sb(asuper_t* superblock, size_t sec, size_t bps, size_t res)
 
 word anica_find_superblock(void)
 {  
-   byte* mbr = (byte*) malloc(512);
-   floppy_read_block(0, mbr, 512);
-   word offset=0;
-   if(mbr[3] != 'A') {
-      /* Found a FAT filesystem */
-      memcpy(&offset, mbr+0x13, 2);
-   }
-   free(mbr);
-   //return offset;
-   return 200;
+   return 0;
 }
 
 // ========================================================================= //
