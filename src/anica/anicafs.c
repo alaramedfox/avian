@@ -24,13 +24,10 @@
  *    returns 0. If not, a nonzero value indicating the error is
  *    returned.
  */
-int anica_read_device(device_t* device, volume_t* vol)
+int anica_read_device(filesystem_t* fs)
 {
-   asuper_t superblock;
-   anica_read_superblock(device, &superblock);
-   
-   vol->sb = superblock;
-   anica_read_itable(device, vol);
+   anica_read_superblock(fs);
+   anica_read_itable(fs);
    
    return 0;
 }
@@ -43,12 +40,12 @@ bool anica_format_device(filesystem_t* fs, size_t sec, size_t bps, size_t res)
    vol->itable = (aentry_t*) malloc(vol->sb.table_size * sizeof(aentry_t));
    
    /* Create directory structure */
-   anica_write_dir(vol, "$", 0); // Root
-   anica_mkdir(vol,"$/sys");
+   anica_write_dir(fs, "$", 0); // Root
+   anica_mkdir(fs,"$/sys");
    
-   anica_mkdir(vol,"$/lib");
-   anica_mkdir(vol,"$/app");
-   anica_mkdir(vol,"$/usr");
+   anica_mkdir(fs,"$/lib");
+   anica_mkdir(fs,"$/app");
+   anica_mkdir(fs,"$/usr");
    
    char grub_config[] = "title Avian Kernel\nkernel 2680+160\nboot";
    
@@ -57,7 +54,7 @@ bool anica_format_device(filesystem_t* fs, size_t sec, size_t bps, size_t res)
    size_t stage2_size = 102 * 1024; // 102 KiB
    size_t config_size = strlen(grub_config)+5;
    
-   anode_t kernel = anica_make_file(vol, "$/sys/avian.bin", kernel_size);
+   anode_t kernel = anica_make_file(fs, "$/sys/avian.bin", kernel_size);
    //anode_t stage2 = anica_make_file(vol, "$/sys/grub/stage2", stage2_size);
    //anode_t grubcf = anica_make_file(vol, "$/sys/grub/menu.lst", config_size);
    
@@ -70,10 +67,10 @@ bool anica_format_device(filesystem_t* fs, size_t sec, size_t bps, size_t res)
    //vol->itable[stage2.data].addr = 0x200;    // Sector 1
    
    
-   anica_write_superblock(0, &vol->sb);
-   anica_write_itable(device, vol);
-   free(vol->itable);
-   free(vol);
+   anica_write_superblock(fs);
+   anica_write_itable(fs);
+   //free(vol->itable);
+   //free(vol);
    return true;
 }
 
@@ -260,6 +257,8 @@ int anica_read_path(filesystem_t* fs, char* path, anode_t* node)
 
 addr_t anica_write_data(filesystem_t* fs, addr_t addr, byte* data, size_t bytes)
 {  
+   volume_t* vol = (volume_t*) fs->master;
+   
    dword sector = addr / vol->sb.sector_size;
    dword offset = addr % vol->sb.sector_size;
    
@@ -274,6 +273,8 @@ addr_t anica_write_data(filesystem_t* fs, addr_t addr, byte* data, size_t bytes)
 
 addr_t anica_read_data(filesystem_t* fs, addr_t addr, byte* data, size_t bytes)
 {  
+   volume_t* vol = (volume_t*) fs->master;
+   
    dword sector = addr / vol->sb.sector_size;
    dword offset = addr % vol->sb.sector_size;
    
@@ -287,6 +288,7 @@ addr_t anica_read_data(filesystem_t* fs, addr_t addr, byte* data, size_t bytes)
 
 bool anica_write_dir(filesystem_t* fs, char* name, index_t parent)
 {  
+   volume_t* vol = (volume_t*) fs->master;
    bool status = true;
    
    /* Create the directory node */

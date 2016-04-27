@@ -14,26 +14,32 @@
 //       Public API Implementation                                           //
 // ========================================================================= //
 
-bool anica_read_superblock(device_t* device, asuper_t* superblock)
+bool anica_read_superblock(filesystem_t* fs)
 {  
+   volume_t* vol = (volume_t*) fs->master;
+   
    word sb_sector = anica_find_superblock();
 
    byte* block = (byte*) calloc(512, 1);
-   read(device, sb_sector, block);
-   memcpy(superblock, block, sizeof(asuper_t));
-   superblock->hidden = sb_sector;
+   read(fs->device, sb_sector, block);
+   memcpy(&vol->sb, block, sizeof(asuper_t));
+   vol->sb.hidden = sb_sector;
    
    free(block);
    return true;
 }
 
-bool anica_write_superblock(device_t* device, asuper_t* superblock)
+bool anica_write_superblock(filesystem_t* fs)
 {  
-   byte* block = (byte*) calloc(512, 1);
+   volume_t* vol = (volume_t*) fs->master;
+   
    word sb_sector = anica_find_superblock();
-   read(device, sb_sector, block);
-   memcpy(block, superblock, sizeof(asuper_t));
-   write(device, sb_sector, block);
+
+   byte* block = (byte*) calloc(512, 1);
+  
+   memcpy(block, &vol->sb, sizeof(asuper_t));
+   write(fs->device, sb_sector, block);
+   
    free(block);
    return true;
 }
